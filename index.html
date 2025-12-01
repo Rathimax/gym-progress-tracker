@@ -13,7 +13,10 @@
 </head>
 <body>
 
+  <!-- Loading Spinner -->
   <div class="loader-wrapper" id="loader"><div class="loader-icon"></div></div>
+  
+  <!-- Notification Toast -->
   <div id="notification" class="notification" role="alert" aria-live="polite"></div>
   
   <header>
@@ -22,34 +25,148 @@
   </header>
   
   <div class="container">
+    
+    <!-- 1. Log Workout Card -->
     <div class="card card-log-workout">
       <h2><span class="icon" aria-label="Log Workout Icon">📝</span> Log Workout</h2>
       <form id="workout-form">
-        <label for="exercise">Exercise:</label>
-        <select id="exercise" required><option value="">Select an exercise</option><optgroup label="Chest"><option>Push Up</option><option>Chest Press</option><option>Incline Dumbbell Press</option><option>Chest Fly</option></optgroup><optgroup label="Shoulder"><option>Shoulder Press</option><option>Lateral Raise</option><option>Front Raise</option><option>Rear Delt Fly</option><option>Arnold Press</option></optgroup><optgroup label="Back"><option>Pull Up</option><option>Barbell Row</option><option>Seated Row</option><option>Lat Pulldown</option><option>Face Pull</option></optgroup><optgroup label="Legs"><option>Squat</option><option>Leg Press</option><option>Lunges</option><option>Leg Curl</option><option>Calf Raise</option></optgroup><optgroup label="Bicep"><option>Bicep Curl</option><option>Hammer Curl</option><option>Concentration Curl</option><option>Preacher Curl</option><option>Reverse Curl</option></optgroup><optgroup label="Tricep"><option>Tricep Pushdown</option><option>Skull Crushers</option><option>Overhead Tricep Extension</option><option>Dumbbell Tricep Kickback</option><option>Close Grip Bench Press</option></optgroup><optgroup label="Other"><option>Plank</option><option>Burpees</option><option>Mountain Climbers</option></optgroup></select>
+        
+        <label for="exercise-select">Exercise:</label>
+        <div class="exercise-input-wrapper">
+          <!-- The Standard Dropdown -->
+          <select id="exercise-select" required>
+            <option value="">Select an exercise</option>
+            <optgroup label="Chest">
+              <option>Push Up</option><option>Chest Press</option><option>Incline Dumbbell Press</option><option>Chest Fly</option>
+            </optgroup>
+            <optgroup label="Shoulder">
+              <option>Shoulder Press</option><option>Lateral Raise</option><option>Front Raise</option><option>Rear Delt Fly</option><option>Arnold Press</option>
+            </optgroup>
+            <optgroup label="Back">
+              <option>Pull Up</option><option>Barbell Row</option><option>Seated Row</option><option>Lat Pulldown</option><option>Face Pull</option>
+            </optgroup>
+            <optgroup label="Legs">
+              <option>Squat</option><option>Leg Press</option><option>Lunges</option><option>Leg Curl</option><option>Calf Raise</option>
+            </optgroup>
+            <optgroup label="Bicep">
+              <option>Bicep Curl</option><option>Hammer Curl</option><option>Concentration Curl</option><option>Preacher Curl</option><option>Reverse Curl</option>
+            </optgroup>
+            <optgroup label="Tricep">
+              <option>Tricep Pushdown</option><option>Skull Crushers</option><option>Overhead Tricep Extension</option><option>Dumbbell Tricep Kickback</option><option>Close Grip Bench Press</option>
+            </optgroup>
+            <optgroup label="Fullbody">
+              <option>Deadlift</option><option>Clean and Jerk</option><option>Snatch</option><option>Kettlebell Swing</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option>Plank</option><option>Burpees</option><option>Mountain Climbers</option>
+            </optgroup>
+          </select>
+          
+          <!-- Custom Text Input (Hidden by default) -->
+          <input type="text" id="exercise-text" class="hidden" placeholder="Type custom exercise..." />
+          
+          <!-- Toggle Button -->
+          <button type="button" id="toggle-input-btn" title="Type custom exercise">➕</button>
+        </div>
+
         <label for="reps">Reps:</label><input type="number" id="reps" step="1" required placeholder="e.g., 10" />
+        
         <label for="sets">Sets:</label><input type="number" id="sets" step="1" required placeholder="e.g., 3" />
+        
         <label for="weight">Weight (kg):</label><input type="number" id="weight" step="0.1" required placeholder="e.g., 20.5" />
+        
+        <!-- NEW: Real-time 1RM Display -->
+        <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
+
         <label for="duration">Estimated Duration:</label>
         <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59" placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59" placeholder="Secs" /></div>
+        
         <button type="submit">Add Workout</button>
       </form>
     </div>
+
+    <!-- 2. Body Weight Tracker Card -->
+    <div class="card card-compact">
+      <h2><span class="icon">⚖️</span> Body Weight Tracker</h2>
+      <form id="bw-form" class="inline-form">
+        <input type="number" id="bw-input" step="0.1" placeholder="Current Weight (kg)" required />
+        <input type="date" id="bw-date" required />
+        <button type="submit">Log Weight</button>
+      </form>
+      <div class="bw-stats">
+        <span>Latest: <strong id="bw-current">--</strong></span>
+        <span>Start: <strong id="bw-start">--</strong></span>
+        <span>Change: <strong id="bw-change">--</strong></span>
+      </div>
+    </div>
+
+    <!-- 3. Dedicated 1RM Calculator Card -->
+    <div class="card">
+      <h2><span class="icon">🧮</span> 1RM Calculator</h2>
+      <div class="calculator-grid">
+        <input type="text" id="calc-exercise" placeholder="Exercise Name (Optional)" />
+        <div class="calc-inputs">
+          <input type="number" id="calc-weight" placeholder="Weight (kg)" />
+          <input type="number" id="calc-reps" placeholder="Reps" />
+        </div>
+        <button id="btn-calculate-1rm">Calculate Max</button>
+      </div>
+      
+      <!-- Result Display -->
+      <div id="calc-results-area" class="hidden">
+        <div class="main-result">
+          <span>Estimated 1-Rep Max:</span>
+          <strong id="calc-max-display">0 kg</strong>
+        </div>
+        
+        <!-- Percentage Table for Training -->
+        <table class="percentage-table">
+          <thead>
+            <tr><th>% of Max</th><th>Weight</th><th>Reps (Est.)</th></tr>
+          </thead>
+          <tbody id="percentage-list">
+            <!-- JS will fill this -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. Analytics Card -->
     <div class="card">
       <h2><span class="icon">📊</span> Analytics</h2>
       <div class="dropdown-wrapper"><label for="analytics-exercise-select">Filter by Exercise:</label><select id="analytics-exercise-select"><option value="All">All Exercises</option></select></div>
-      <div class="stats-grid"><div class="stat-card"><div class="stat-number" id="total-workouts">0</div><div class="stat-label">Total Workouts</div></div><div class="stat-card"><div class="stat-number" id="total-volume">0</div><div class="stat-label">Total Volume (kg)</div></div><div class="stat-card"><div class="stat-number" id="total-time">0m</div><div class="stat-label">Total Time</div></div><div class="stat-card"><div class="stat-number" id="avg-session">0m</div><div class="stat-label">Avg Session</div></div><div class="stat-card stat-card-full"><div class="stat-number" id="calories-burned">0</div><div class="stat-label">🔥 Est. Calories Burned</div></div></div>
-      <div class="chart-tabs"><button class="chart-tab active" data-chart="weight">Weight Progress</button><button class="chart-tab" data-chart="volume">Volume</button><button class="chart-tab" data-chart="duration">Duration</button><button class="chart-tab" data-chart="exercises">Distribution</button></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="total-workouts">0</div><div class="stat-label">Total Workouts</div></div>
+        <div class="stat-card"><div class="stat-number" id="total-volume">0</div><div class="stat-label">Total Volume (kg)</div></div>
+        <div class="stat-card"><div class="stat-number" id="total-time">0m</div><div class="stat-label">Total Time</div></div>
+        <div class="stat-card"><div class="stat-number" id="avg-session">0m</div><div class="stat-label">Avg Session</div></div>
+        <div class="stat-card stat-card-full"><div class="stat-number" id="calories-burned">0</div><div class="stat-label">🔥 Est. Calories Burned</div></div>
+      </div>
+      
+      <div class="chart-tabs">
+        <button class="chart-tab active" data-chart="weight">Weight Progress</button>
+        <button class="chart-tab" data-chart="volume">Volume</button>
+        <button class="chart-tab" data-chart="duration">Duration</button>
+        <button class="chart-tab" data-chart="exercises">Distribution</button>
+        <button class="chart-tab" data-chart="bodyweight">Body Weight</button>
+      </div>
+      
       <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
     </div>
+
+    <!-- 5. History Card -->
     <div class="card card-wide">
       <h2><span class="icon">📅</span> Workout History</h2>
       <div id="history-controls"></div><div id="history-list"></div>
     </div>
+
+    <!-- 5. PR Card -->
     <div class="card">
       <h2><span class="icon">🏆</span> Personal Records</h2>
       <div id="pr-section"><ul id="pr-list"></ul></div>
     </div>
+
+    <!-- 6. Data Management Card -->
     <div class="card">
       <h2><span class="icon">🧰</span> Data Management</h2>
       <div class="data-info"><strong>Data Status:</strong> <span id="data-status">Loading...</span></div>
@@ -59,7 +176,19 @@
     </div>
   </div>
 
-  <!-- Script tags should be at the end of the body -->
+  <!-- 7. Floating Rest Timer Widget -->
+  <div id="timer-widget" class="timer-widget">
+    <div id="timer-display" class="hidden">00:00</div>
+    <div id="timer-controls">
+      <button class="timer-btn" data-time="30">30s</button>
+      <button class="timer-btn" data-time="60">60s</button>
+      <button class="timer-btn" data-time="90">90s</button>
+      <button id="timer-cancel" class="timer-btn-cancel hidden">❌</button>
+    </div>
+    <button id="timer-toggle-icon">⏱️</button>
+  </div>
+
+  <!-- Script tags -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script type="module" src="script.js"></script>
