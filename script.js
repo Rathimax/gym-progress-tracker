@@ -26,12 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. DOM ELEMENTS & STATE
     // ==========================================
     const elements = {
+        // Navigation Elements
+        navOverlay: document.getElementById('nav-overlay'),
+        sidebar: document.getElementById('sidebar'),
+        hamburgerBtn: document.getElementById('hamburger-btn'),
+        closeNavBtn: document.getElementById('close-nav-btn'),
+        navItems: document.querySelectorAll('.nav-item'),
+        views: document.querySelectorAll('.view-section'),
+
         // Main Form
         form: document.getElementById('workout-form'),
         exerciseSelect: document.getElementById('exercise-select'),
         exerciseText: document.getElementById('exercise-text'),
         toggleInputBtn: document.getElementById('toggle-input-btn'),
-        rmDisplay: document.getElementById('rm-display'), // Real-time 1RM
+        rmDisplay: document.getElementById('rm-display'),
         
         // Dedicated 1RM Calculator
         calcWeight: document.getElementById('calc-weight'),
@@ -114,20 +122,42 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const playBeep = () => {
-        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.type = 'sine'; oscillator.frequency.value = 800; gainNode.gain.value = 0.1;
-        oscillator.start(); setTimeout(() => oscillator.stop(), 200);
-        setTimeout(() => { 
-            const osc2 = audioContext.createOscillator(); 
-            const gain2 = audioContext.createGain(); 
-            osc2.connect(gain2); gain2.connect(audioContext.destination); 
-            osc2.type = 'sine'; osc2.frequency.value = 800; gain2.gain.value = 0.1; 
-            osc2.start(); setTimeout(() => osc2.stop(), 200); 
-        }, 300);
+        try {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = 'sine'; oscillator.frequency.value = 800; gainNode.gain.value = 0.1;
+            oscillator.start(); setTimeout(() => oscillator.stop(), 200);
+            setTimeout(() => { 
+                const osc2 = audioContext.createOscillator(); 
+                const gain2 = audioContext.createGain(); 
+                osc2.connect(gain2); gain2.connect(audioContext.destination); 
+                osc2.type = 'sine'; osc2.frequency.value = 800; gain2.gain.value = 0.1; 
+                osc2.start(); setTimeout(() => osc2.stop(), 200); 
+            }, 300);
+        } catch(e) { console.warn("Audio blocked"); }
+    };
+
+    const triggerConfetti = () => {
+        if (typeof confetti !== 'function') return;
+        const count = 200;
+        const defaults = { origin: { y: 0.7 } };
+        function fire(particleRatio, opts) {
+            confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) });
+        }
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+    };
+
+    const calculate1RM = (weight, reps) => {
+        if (!weight || !reps) return 0;
+        if (reps === 1) return weight;
+        return Math.round(weight * (1 + reps / 30));
     };
 
     // ==========================================
@@ -151,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = auth.currentUser;
         if (!user) return;
 
-        // 1. Load Workouts
         try {
             const q = query(collection(db, "workouts"), where("userId", "==", user.uid), orderBy("date"));
             const querySnapshot = await getDocs(q);
@@ -165,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 2. Load Body Weight
         try {
             const q2 = query(collection(db, "bodyweight"), where("userId", "==", user.uid), orderBy("date"));
             const snapshot2 = await getDocs(q2);
@@ -199,13 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let duration = (workout.durationMinutes || 0) + ((workout.durationSeconds || 0) / 60);
         if (duration === 0) duration = (workout.sets || 1) * 1.5;
         return duration * intensity;
-    };
-
-    // --- 1RM Calculation (Epley Formula) ---
-    const calculate1RM = (weight, reps) => {
-        if (!weight || !reps) return 0;
-        if (reps === 1) return weight;
-        return Math.round(weight * (1 + reps / 30));
     };
 
     const calculatePRs = () => {
@@ -263,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updatePRSection = () => {
         if (Object.keys(prMap).length === 0) {
-            elements.prList.innerHTML = '<li>Log a workout to see your Personal Records.</li>';
+            elements.prList.innerHTML = '<li style="text-align:center; opacity:0.7;">Log a workout to earn your first trophy! 🏆</li>';
             return;
         }
         elements.prList.innerHTML = Object.entries(prMap).sort(([exA], [exB]) => exA.localeCompare(exB)).map(([ex, wt]) => {
@@ -273,22 +294,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateHistory = () => {
-        if (data.length === 0) {
-            elements.historyControls.innerHTML = '';
-            elements.historyList.innerHTML = '<p style="text-align:center; opacity:0.7;">No workouts logged yet.</p>';
-            return;
-        }
-        const exercises = [...new Set(data.map(d => d.exercise))].sort();
-        elements.historyControls.innerHTML = ` <label for="history-filter-exercise">Filter by Exercise:</label> <select id="history-filter-exercise"> <option value="">All Exercises</option> ${exercises.map(ex => `<option value="${ex}">${ex}</option>`).join('')} </select>`;
-        document.getElementById('history-filter-exercise').addEventListener('change', updateFilteredHistory);
-        updateFilteredHistory();
-    };
-
-    const updateFilteredHistory = () => {
         const filter = document.getElementById('history-filter-exercise')?.value || '';
         const filtered = filter ? data.filter(d => d.exercise === filter) : data;
 
-        if (!filtered.length) { elements.historyList.innerHTML = '<p style="text-align:center; opacity:0.7;">No entries.</p>'; return; }
+        if (!filtered.length) { 
+            elements.historyList.innerHTML = '<p style="text-align:center; opacity:0.7; padding:2rem;">No workouts logged yet. Go lift! 💪</p>'; 
+            return; 
+        }
 
         const grouped = filtered.reduce((acc, d) => {
             const dateStr = d.date.split('T')[0];
@@ -298,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
 
-        // Updated HTML with 1RM Tag
         elements.historyList.innerHTML = sortedDates.map(date => ` 
             <div class="history-date"> 
                 <h3>${new Date(date).toLocaleDateString(undefined, { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}</h3> 
@@ -330,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const colors = { accent: getComputedStyle(document.documentElement).getPropertyValue('--accent-start').trim(), info: getComputedStyle(document.documentElement).getPropertyValue('--info').trim(), text: getComputedStyle(document.documentElement).getPropertyValue('--text').trim(), grid: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim(), doughnutBg: document.body.classList.contains('dark-mode') ? '#141518' : '#ffffff', palette: ['#1abc9c', '#3498db', '#9b59b6', '#f1c40f', '#e67e22', '#e74c3c', '#34495e'] };
         let config = {};
         
-        // --- CHART TYPE LOGIC ---
         if (currentChartType === 'bodyweight') {
              if (bwData.length === 0) { showNotification("No body weight data yet.", "info"); return; }
              config = {
@@ -378,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. CUSTOM COMPONENT LOGIC
     // ==========================================
 
-    // --- Searchable Dropdown ---
     const setupCustomDropdown = () => {
         const nativeSelect = elements.exerciseSelect;
         nativeSelect.classList.add('hidden-native');
@@ -468,7 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nativeSelect.parentNode.insertBefore(customSelectContainer, nativeSelect);
     };
 
-    // --- Auto Fill Logic ---
     const handleAutoFill = (exerciseName) => {
         if (!exerciseName) return;
         const history = data.filter(item => item.exercise.toLowerCase() === exerciseName.toLowerCase());
@@ -478,14 +486,13 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.form.sets.value = last.sets;
             elements.form.weight.value = last.weight;
             showNotification(`Values loaded from last ${exerciseName} session.`, "info");
-            update1RM(); // Update 1RM after auto-fill
+            update1RM();
         } else {
             elements.form.reps.value = ''; elements.form.sets.value = ''; elements.form.weight.value = '';
-            update1RM(); // Clear 1RM
+            update1RM();
         }
     };
 
-    // --- Real-Time 1RM Estimator (Form) ---
     const update1RM = () => {
         const w = parseFloat(elements.form.weight.value);
         const r = parseInt(elements.form.reps.value);
@@ -498,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Rest Timer ---
     const startTimer = (seconds) => {
         clearInterval(timerInterval);
         elements.timerDisplay.classList.remove('hidden');
@@ -530,6 +536,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // 7. EVENT LISTENERS
     // ==========================================
     const setupEventListeners = () => {
+        
+        // Navigation Logic
+        const toggleMenu = () => {
+            elements.sidebar.classList.toggle('active');
+            elements.navOverlay.classList.toggle('active');
+        };
+
+        const switchView = (targetId) => {
+            elements.views.forEach(view => view.classList.remove('active-view'));
+            const target = document.getElementById(targetId);
+            if(target) target.classList.add('active-view');
+            
+            elements.navItems.forEach(item => {
+                if(item.dataset.target === targetId) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            if(elements.sidebar.classList.contains('active')) toggleMenu();
+            if(targetId === 'view-analytics') setTimeout(() => updateChart(), 50);
+        };
+
+        elements.hamburgerBtn.addEventListener('click', toggleMenu);
+        elements.closeNavBtn.addEventListener('click', toggleMenu);
+        elements.navOverlay.addEventListener('click', toggleMenu);
+
+        elements.navItems.forEach(item => {
+            item.addEventListener('click', () => switchView(item.dataset.target));
+        });
+
         // Theme
         elements.themeToggle.addEventListener('change', () => { document.body.classList.toggle('dark-mode'); updateChart(); });
 
@@ -538,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.timerBtns.forEach(btn => btn.addEventListener('click', () => startTimer(parseInt(btn.dataset.time))));
         elements.timerCancel.addEventListener('click', resetTimer);
 
-        // Custom Toggle (Text vs List)
+        // Custom Toggle
         elements.toggleInputBtn.addEventListener('click', () => {
             isCustomInput = !isCustomInput;
             elements.toggleInputBtn.classList.toggle('active');
@@ -559,39 +594,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Form Listeners
         elements.exerciseSelect.addEventListener('change', () => handleAutoFill(elements.exerciseSelect.value));
         elements.exerciseText.addEventListener('blur', () => handleAutoFill(elements.exerciseText.value));
-        
-        // 1RM Real-Time Listeners
         elements.form.weight.addEventListener('input', update1RM);
         elements.form.reps.addEventListener('input', update1RM);
 
-        // --- NEW: Dedicated 1RM Calculator Logic ---
+        // Dedicated 1RM Calculator Logic
         elements.btnCalculate.addEventListener('click', () => {
             const w = parseFloat(elements.calcWeight.value);
             const r = parseInt(elements.calcReps.value);
             
             if (!w || !r) return showNotification("Please enter weight and reps.", "error");
             
-            // Calculate Max
             const max = calculate1RM(w, r);
-            
-            // Update Main Display
             elements.calcMaxDisplay.textContent = `${max} kg`;
             elements.calcResultsArea.classList.remove('hidden');
             
-            // Generate Percentage Table
             const percentages = [95, 90, 85, 80, 75, 70, 65, 60];
             elements.percentageList.innerHTML = percentages.map(pct => {
                 const liftedWeight = Math.round(max * (pct / 100));
                 let estReps = Math.round(30 * ((max / liftedWeight) - 1));
                 if (estReps < 1) estReps = 1;
-                
-                return `
-                    <tr>
-                        <td><strong>${pct}%</strong></td>
-                        <td>${liftedWeight} kg</td>
-                        <td>~${estReps} reps</td>
-                    </tr>
-                `;
+                return `<tr><td><strong>${pct}%</strong></td><td>${liftedWeight} kg</td><td>~${estReps} reps</td></tr>`;
             }).join('');
             
             showNotification("Calculated!", "success");
@@ -680,18 +702,29 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (isNaN(newWorkout.reps) || isNaN(newWorkout.sets) || isNaN(newWorkout.weight)) return showNotification("Check fields.", "error");
-            const isNewPR = newWorkout.weight > (prMap[newWorkout.exercise] || 0);
+            
+            // Check PR
+            const exerciseHistory = data.filter(d => d.exercise === exerciseName);
+            const currentMax = exerciseHistory.reduce((max, curr) => Math.max(max, curr.weight), 0);
+            const isNewPR = newWorkout.weight > currentMax;
 
             try {
                 const docId = await addWorkoutToServer(newWorkout);
                 data.push({ ...newWorkout, id: docId });
                 updateAllUI();
-                showNotification(isNewPR ? `🏆 New PR!` : "Workout added!");
+                
+                if (isNewPR) {
+                    triggerConfetti();
+                    playBeep();
+                    showNotification(`🏆 NEW PR: ${newWorkout.weight}kg!`, "success");
+                } else {
+                    showNotification("Workout added!", "info");
+                }
                 
                 elements.form.reps.value = ''; elements.form.sets.value = ''; elements.form.weight.value = ''; elements.form['duration-minutes'].value = ''; elements.form['duration-seconds'].value = '';
-                update1RM(); // Reset 1RM display
+                update1RM(); 
                 if (isCustomInput) elements.exerciseText.focus();
-                else if (customSelectTrigger) customSelectTrigger.textContent = 'Select an exercise';
+                else if (customSelectTrigger) customSelectTrigger.textContent = exerciseName;
             } catch (error) {}
         });
 

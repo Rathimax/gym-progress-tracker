@@ -44,7 +44,6 @@ img {
   display: block;
 }
 
-
 /* ------------------------- */
 /*          Layout           */
 /* ------------------------- */
@@ -206,13 +205,18 @@ button[type="submit"] {
 #clear-btn {
   background-color: var(--danger);
 }
-#clear-btn:hover { background-color: var(--danger-hover); }
+
+#clear-btn:hover {
+  background-color: var(--danger-hover);
+}
 
 #export-btn, #import-btn {
   background-color: var(--info);
 }
-#export-btn:hover, #import-btn:hover { background-color: var(--info-hover); }
 
+#export-btn:hover, #import-btn:hover {
+  background-color: var(--info-hover);
+}
 
 /* ------------------------- */
 /*      Icons & Toggles      */
@@ -222,9 +226,13 @@ h1 .icon, h2 .icon {
   opacity: 1;
 }
 
-.icon-btn { font-style: normal; }
+.icon-btn {
+  font-style: normal;
+}
 
-#theme-toggle { display: none; }
+#theme-toggle {
+  display: none;
+}
 
 .toggle-switch {
   display: flex;
@@ -272,9 +280,8 @@ h1 .icon, h2 .icon {
   text-align: center;
 }
 
-/* ***** NEW CSS FOR THE FULL-WIDTH CARD ***** */
 .stat-card-full {
-  grid-column: 1 / -1; /* Makes it span the full width */
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -296,13 +303,13 @@ h1 .icon, h2 .icon {
 }
 
 .stat-card-full .stat-number {
-  font-size: 2rem; /* Make the number slightly larger */
-}
-.stat-card-full .stat-label {
-  font-size: 1rem; /* Make the label slightly larger */
-  margin-top: 4px; /* Align it better with the number */
+  font-size: 2rem;
 }
 
+.stat-card-full .stat-label {
+  font-size: 1rem;
+  margin-top: 4px;
+}
 
 .chart-container {
   width: 100%;
@@ -352,11 +359,23 @@ th, td {
   text-align: center;
 }
 
-td { font-weight: 400; }
+td {
+  font-weight: 400;
+}
 
-th { font-weight: 600; opacity: 0.7; }
+th {
+  font-weight: 600;
+  opacity: 0.7;
+}
 
-th:first-child, td:first-child { text-align: left; }
+th:first-child, td:first-child {
+  text-align: left;
+}
+
+table th:last-child, table td:last-child {
+  width: 50px;
+  text-align: center;
+}
 
 #pr-list {
   list-style: none;
@@ -383,8 +402,13 @@ th:first-child, td:first-child { text-align: left; }
   opacity: 0.7;
 }
 
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
 
+.hidden-option {
+  display: none !important;
+}
 
 /* ------------------------- */
 /*     Loader & Notif        */
@@ -413,7 +437,9 @@ th:first-child, td:first-child { text-align: left; }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 #notification {
@@ -439,49 +465,20 @@ th:first-child, td:first-child { text-align: left; }
 }
 
 /* ------------------------- */
-/*      Responsive           */
+/*  Custom Exercise Toggle   */
 /* ------------------------- */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-    grid-template-columns: 1fr;
-  }
-  .card { padding: 1.5rem; }
-  header { padding: 0.75rem 1rem; }
-  h1 { font-size: 1.5rem; gap: 0.5rem; }
-  h2 { font-size: 1.2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; }
-  input, select, button { padding: 0.8rem 0.9rem; font-size: 0.95rem; }
-  .duration-input { flex-direction: column; gap: 0.5rem; }
-  .button-row { flex-direction: column; gap: 0.75rem; }
-  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
-  .stat-number { font-size: 1.5rem; }
-  .stat-label { font-size: 0.75rem; }
-  table { font-size: 0.9rem; }
-  th, td { padding: 0.6rem 0.3rem; }
-}
-
-@media (max-width: 480px) {
-  .container { padding: 0.75rem; }
-  .card { padding: 1rem; }
-  h1 { font-size: 1.3rem; }
-  .chart-tabs { flex-direction: column; align-items: stretch; }
-  .stat-card-full { flex-direction: column; gap: 0.25rem; padding: 1rem;}
-}
-/* Custom Exercise Toggle Styles */
 .exercise-input-wrapper {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-/* Make the select and text input take up full space */
 .exercise-input-wrapper select,
 .exercise-input-wrapper input {
   flex-grow: 1;
-  width: auto; /* Override 100% width from general styles */
+  width: auto;
 }
 
-/* Style the small toggle button */
 #toggle-input-btn {
   width: auto;
   padding: 0.9rem;
@@ -493,16 +490,18 @@ th:first-child, td:first-child { text-align: left; }
 
 #toggle-input-btn:hover {
   background-color: var(--card-border);
-  transform: none; /* Disable the lift effect for this small button */
+  transform: none;
 }
 
-/* When active (showing text input), turn the button blue */
 #toggle-input-btn.active {
   background-color: var(--info);
   color: white;
-  transform: rotate(45deg); /* Turn the plus into an X */
+  transform: rotate(45deg);
 }
-/* Delete Button in History Table */
+
+/* ------------------------- */
+/*     Delete Button         */
+/* ------------------------- */
 .delete-item-btn {
   background: none;
   border: none;
@@ -511,21 +510,17 @@ th:first-child, td:first-child { text-align: left; }
   padding: 0.4rem;
   border-radius: 8px;
   transition: background-color 0.2s;
-  width: auto; /* Override default button width */
+  width: auto;
 }
 
 .delete-item-btn:hover {
-  background-color: #fee2e2; /* Light red background */
+  background-color: #fee2e2;
   transform: scale(1.1);
 }
 
-/* Add a new column for Actions */
-table th:last-child, 
-table td:last-child {
-  width: 50px;
-  text-align: center;
-}
-/* --- Floating Rest Timer --- */
+/* ------------------------- */
+/*   Floating Rest Timer     */
+/* ------------------------- */
 .timer-widget {
   position: fixed;
   bottom: 20px;
@@ -559,7 +554,7 @@ table td:last-child {
 
 #timer-controls {
   display: flex;
-  flex-direction: column-reverse; /* Stack upwards */
+  flex-direction: column-reverse;
   gap: 8px;
   opacity: 0;
   visibility: hidden;
@@ -567,7 +562,6 @@ table td:last-child {
   transition: all 0.3s ease;
 }
 
-/* When we add the 'open' class via JS, show the buttons */
 .timer-widget.open #timer-controls {
   opacity: 1;
   visibility: visible;
@@ -596,7 +590,10 @@ table td:last-child {
   background: var(--danger);
   color: white;
 }
-.timer-btn-cancel:hover { background: var(--danger-hover); }
+
+.timer-btn-cancel:hover {
+  background: var(--danger-hover);
+}
 
 #timer-display {
   font-size: 2rem;
@@ -609,27 +606,32 @@ table td:last-child {
   margin-bottom: 5px;
 }
 
-/* Animation for active timer */
 @keyframes pulse-timer {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .timer-active #timer-display {
   color: var(--accent-start);
   animation: pulse-timer 1s infinite;
 }
-/* --- Custom Dropdown Styling --- */
 
-/* The container for the custom select */
+/* ------------------------- */
+/*   Custom Dropdown         */
+/* ------------------------- */
 .custom-select-container {
   position: relative;
   width: 100%;
   flex-grow: 1;
 }
 
-/* The box that shows the selected value (looks like an input) */
 .custom-select-trigger {
   position: relative;
   display: flex;
@@ -658,7 +660,6 @@ table td:last-child {
   opacity: 0.6;
 }
 
-/* Update arrow color for dark mode */
 body.dark-mode .custom-select-trigger:after {
   filter: invert(1);
 }
@@ -672,7 +673,6 @@ body.dark-mode .custom-select-trigger:after {
   transform: rotate(180deg);
 }
 
-/* The actual dropdown list */
 .custom-options {
   position: absolute;
   display: block;
@@ -688,7 +688,7 @@ body.dark-mode .custom-select-trigger:after {
   visibility: hidden;
   pointer-events: none;
   z-index: 1500;
-  max-height: 300px; /* Scrollable if too long */
+  max-height: 300px;
   overflow-y: auto;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
@@ -699,7 +699,6 @@ body.dark-mode .custom-select-trigger:after {
   pointer-events: all;
 }
 
-/* The individual options */
 .custom-option {
   position: relative;
   display: block;
@@ -726,8 +725,10 @@ body.dark-mode .custom-select-trigger:after {
   color: var(--accent-start);
 }
 
-/* Category Headers (Chest, Back, etc.) */
 .custom-optgroup-label {
+  position: sticky;
+  top: 45px;
+  z-index: 10;
   padding: 0.5rem 1rem;
   font-size: 0.8rem;
   font-weight: 700;
@@ -737,14 +738,16 @@ body.dark-mode .custom-select-trigger:after {
   background-color: var(--bg);
   pointer-events: none;
   letter-spacing: 1px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-/* Utility to hide the original select but keep it working */
 select.hidden-native {
   display: none !important;
-}/* --- Searchable Dropdown Styles --- */
+}
 
-/* The Search Input Container */
+/* ------------------------- */
+/*   Searchable Dropdown     */
+/* ------------------------- */
 .dropdown-search-container {
   position: sticky;
   top: 0;
@@ -754,7 +757,6 @@ select.hidden-native {
   border-bottom: 1px solid var(--card-border);
 }
 
-/* The Search Input Field */
 .dropdown-search-input {
   width: 100%;
   padding: 0.6rem 0.8rem;
@@ -770,31 +772,21 @@ select.hidden-native {
   border-color: var(--accent-start);
 }
 
-/* Helper to hide items during search */
-.hidden-option {
-  display: none !important;
-}
-
-/* Make category labels sticky too, so they stay visible while scrolling a section */
-.custom-optgroup-label {
-  position: sticky;
-  top: 45px; /* Height of search bar */
-  z-index: 10;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-/* --- Body Weight Tracker Styles --- */
+/* ------------------------- */
+/*   Body Weight Tracker     */
+/* ------------------------- */
 .inline-form {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
-  gap: 1rem;              /* Space between the boxes */
+  flex-direction: column;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .inline-form input,
 .inline-form button {
-  width: 100%;            /* Force full width */
-  margin: 0;              /* Remove default margins */
-  padding: 1rem;          /* Comfortable padding */
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
   box-sizing: border-box;
 }
 
@@ -802,7 +794,7 @@ select.hidden-native {
   background-image: linear-gradient(45deg, #3498db, #2980b9);
   font-weight: 600;
   cursor: pointer;
-  margin-top: 0.5rem;     /* Extra space before the button */
+  margin-top: 0.5rem;
 }
 
 .bw-stats {
@@ -820,7 +812,7 @@ select.hidden-native {
 
 .bw-stats span {
   display: flex;
-  flex-direction: column; /* Stack label and number for better readability */
+  flex-direction: column;
   align-items: center;
 }
 
@@ -829,18 +821,21 @@ select.hidden-native {
   font-size: 1.2rem;
   margin-top: 4px;
 }
-/* --- 1RM Calculator Card (Inputs) --- */
+
+/* ------------------------- */
+/*   1RM Calculator Card     */
+/* ------------------------- */
 .calculator-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Keeps Exercise separated from Weight/Reps */
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .calc-inputs {
   display: flex;
   flex-direction: row;
-  gap: 1rem; /* Keeps Weight separated from Reps */
+  gap: 1rem;
   width: 100%;
 }
 
@@ -848,7 +843,7 @@ select.hidden-native {
 .calc-inputs input {
   width: 100%;
   margin: 0;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 #btn-calculate-1rm {
@@ -857,7 +852,6 @@ select.hidden-native {
   background-image: linear-gradient(45deg, #3498db, #2980b9);
 }
 
-/* --- Result Display --- */
 .main-result {
   background: var(--accent-start);
   color: white;
@@ -868,15 +862,24 @@ select.hidden-native {
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-.main-result span { display: block; font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem; }
-.main-result strong { display: block; font-size: 2.5rem; line-height: 1; }
+.main-result span {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
 
-/* --- Table Alignment Fix --- */
+.main-result strong {
+  display: block;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
 .percentage-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
-  table-layout: fixed; 
+  table-layout: fixed;
 }
 
 .percentage-table th,
@@ -884,26 +887,23 @@ select.hidden-native {
   padding: 0.8rem 0;
   border-bottom: 1px solid var(--card-border);
   vertical-align: middle;
-  text-align: left; /* 1. Default to Left Align */
+  text-align: left;
 }
 
-/* Column 1 (%): Make it narrow to pull Weight left */
 .percentage-table th:nth-child(1),
 .percentage-table td:nth-child(1) {
-  width: 30%; 
+  width: 30%;
   padding-left: 0.7rem;
   font-weight: 700;
   color: var(--accent-start);
 }
 
-/* Column 2 (Weight): Shifts left because Col 1 is narrow */
 .percentage-table th:nth-child(2),
 .percentage-table td:nth-child(2) {
   padding-left: 2.5rem;
   width: 40%;
 }
 
-/* Column 3 (Reps): Align right for clean edge */
 .percentage-table th:nth-child(3),
 .percentage-table td:nth-child(3) {
   width: 40%;
@@ -911,7 +911,216 @@ select.hidden-native {
   padding-right: 0.7rem;
 }
 
-/* Mobile Fixes */
+/* ------------------------- */
+/*      Responsive           */
+/* ------------------------- */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 1.5rem;
+  }
+  header {
+    padding: 0.75rem 1rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+    gap: 0.5rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+  input, select, button {
+    padding: 0.8rem 0.9rem;
+    font-size: 0.95rem;
+  }
+  .duration-input {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .button-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  table {
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 0.6rem 0.3rem;
+  }
+}
+
 @media (max-width: 480px) {
-  .calc-inputs { flex-direction: column; }
+  .container {
+    padding: 0.75rem;
+  }
+  .card {
+    padding: 1rem;
+  }
+  h1 {
+    font-size: 1.3rem;
+  }
+  .chart-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .stat-card-full {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+  }
+  .calc-inputs {
+    flex-direction: column;
+  }
+}
+/* =========================================
+   SIDEBAR & NAVIGATION STYLES
+   ========================================= */
+
+/* Header Adjustment for Hamburger */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hamburger-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: 0;
+  width: auto;
+  box-shadow: none;
+}
+
+/* Sidebar Container */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px; /* Hidden by default */
+  width: 280px;
+  height: 100%;
+  background-color: var(--card-bg);
+  box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+  z-index: 5000;
+  transition: left 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.active {
+  left: 0; /* Slide in */
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  border: none;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+#close-nav-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text);
+  width: auto;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Navigation Links */
+.nav-links {
+  list-style: none;
+  padding: 1rem;
+}
+
+.nav-item {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: background 0.2s;
+}
+
+.nav-item:hover {
+  background-color: var(--input-bg);
+}
+
+.nav-item.active {
+  background-color: var(--accent-start);
+  color: white;
+  font-weight: 700;
+}
+
+/* Overlay (Darkens background when menu is open) */
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 4000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(2px);
+}
+
+.nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* =========================================
+   PAGE / VIEW SWITCHING LOGIC (STABILITY FIX)
+   ========================================= */
+
+/* Hide all views by default */
+.view-section {
+  display: none !important;
+}
+
+/* Only show the active view */
+.view-section.active-view {
+  display: grid !important;
+  gap: 1.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+/* Ensure wide cards inside views span full width */
+.view-section .card-wide,
+.view-section .card-log-workout {
+  grid-column: 1 / -1;
 }
