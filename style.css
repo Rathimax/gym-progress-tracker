@@ -872,22 +872,22 @@ header {
   background: transparent;
   border-radius: 0;
   position: relative;
-  /* Not sticky anymore, part of flow */
-  border-bottom: 1px solid transparent;
-  /* Hidden on desktop usually if we want sidebar title to be main, 
-     but keeping for Theme Toggle and Title if needed. 
-     Let's hide the Title on Desktop if Sidebar has it. */
+  border-bottom: none;
+  display: flex;
+  /* FLEX LAYOUT */
+  justify-content: flex-end;
+  /* Push content (toggle) to right */
+  align-items: center;
+  height: 80px;
 }
 
 .header-left {
   display: none;
-  /* Sidebar has title */
 }
 
 .switch {
-  position: absolute;
-  top: 1.5rem;
-  right: 2rem;
+  position: static;
+  margin-left: auto;
 }
 
 /* --- MOBILE RESPONSIVE NAVIGATION --- */
@@ -992,6 +992,13 @@ header {
   /* Hide Hamburger */
   .hamburger-btn {
     display: none !important;
+  }
+
+  /* Lift Timer above Bottom Bar */
+  .timer-widget {
+    bottom: 95px !important;
+    /* 70px nav + 25px margin */
+    right: 20px;
   }
 }
 
