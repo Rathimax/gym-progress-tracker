@@ -8,20 +8,20 @@
   /* Modern Purple Palette */
   --bg: #F5F6FA;
   --card-bg: #FFFFFF;
-  
+
   /* Text Colors */
   --text: #484b6a;
   --text-light: #9395b0;
-  
+
   /* Brand Gradient */
   --accent-start: #C084FC;
   --accent-end: #8B5CF6;
   --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
-  
+
   /* Inputs & Borders */
   --input-bg: #F3F4F9;
   --card-border: rgba(139, 92, 246, 0.08);
-  
+
   /* Status Colors */
   --danger: #FF6B6B;
   --danger-hover: #EE5253;
@@ -289,7 +289,7 @@ header {
   display: none;
 }
 
-#theme-toggle:checked + .toggle-switch::before {
+#theme-toggle:checked+.toggle-switch::before {
   transform: translateX(28px);
   content: "🌙";
   background-color: var(--accent-end);
@@ -344,7 +344,7 @@ td:first-child {
   #history-list thead {
     display: none;
   }
-  
+
   #history-list table,
   #history-list tbody,
   #history-list tr,
@@ -352,7 +352,7 @@ td:first-child {
     display: block;
     width: 100%;
   }
-  
+
   #history-list tr {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -364,7 +364,7 @@ td:first-child {
     position: relative;
     border: 1px solid var(--card-border);
   }
-  
+
   #history-list td:first-child {
     grid-column: 1 / -1;
     text-align: left;
@@ -376,7 +376,7 @@ td:first-child {
     margin-bottom: 0.5rem;
     padding-left: 0;
   }
-  
+
   #history-list td {
     text-align: left;
     padding: 0;
@@ -384,31 +384,31 @@ td:first-child {
     color: var(--text);
     border: none;
   }
-  
+
   #history-list td:nth-of-type(2)::before {
     content: "Reps: ";
     font-weight: 600;
     color: var(--text-light);
   }
-  
+
   #history-list td:nth-of-type(3)::before {
     content: "Sets: ";
     font-weight: 600;
     color: var(--text-light);
   }
-  
+
   #history-list td:nth-of-type(4)::before {
     content: "Kg: ";
     font-weight: 600;
     color: var(--text-light);
   }
-  
+
   #history-list td:nth-of-type(5)::before {
     content: "Time: ";
     font-weight: 600;
     color: var(--text-light);
   }
-  
+
   #history-list td:last-child {
     position: absolute;
     top: 1rem;
@@ -699,6 +699,7 @@ select.hidden-native,
   transform: translateY(-2px);
   box-shadow: 0 12px 25px rgba(139, 92, 246, 0.5);
 }
+
 /* ----------------------- */
 
 .main-result {
@@ -735,6 +736,7 @@ select.hidden-native,
   height: 0;
   margin: 0;
 }
+
 /* Percentage Table */
 .percentage-table {
   width: 100%;
@@ -773,74 +775,224 @@ select.hidden-native,
 }
 
 /* Navigation & Sidebar */
+/* --- NAVIGATION REDESIGN (Insta-Style) --- */
+
+/* 1. Global Reset for Body */
+body {
+  /* Default Desktop Padding */
+  padding-left: 250px;
+  padding-bottom: 0;
+}
+
+/* 2. Desktop Sidebar (Left) */
 .sidebar {
   position: fixed;
   top: 0;
-  left: -300px;
-  width: 300px;
-  height: 100%;
+  left: 0;
+  width: 250px;
+  height: 100vh;
   background: var(--card-bg);
-  z-index: 5000;
-  transition: left 0.3s;
+  border-right: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
-  box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar.active {
-  left: 0;
+  z-index: 5000;
+  padding: 1.5rem;
+  box-shadow: none;
+  /* Clean look */
 }
 
 .sidebar-header {
-  padding: 2rem;
+  padding: 1rem 0 2rem 0;
+  border-bottom: none;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--card-border);
+  justify-content: flex-start;
 }
 
-#close-nav-btn {
-  display: none !important;
+.sidebar-header h2 {
+  font-size: 1.8rem;
+  font-family: 'Outfit', sans-serif;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  border: none;
 }
 
+/* Desktop Nav Items */
 .nav-links {
-  padding: 1.5rem;
   list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .nav-item {
-  padding: 1.2rem;
-  margin-bottom: 0.8rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 600;
   display: flex;
+  align-items: center;
   gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  cursor: pointer;
   color: var(--text);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 0;
+}
+
+.nav-item .icon {
+  font-size: 1.5rem;
+  min-width: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-item .label {
+  font-size: 1rem;
+}
+
+/* Hover & Active States */
+.nav-item:hover {
+  background-color: var(--input-bg);
+  transform: translateX(5px);
 }
 
 .nav-item.active {
   background: var(--accent-gradient);
   color: white;
-  box-shadow: var(--shadow-btn);
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
-.nav-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 4000;
-  opacity: 0;
-  visibility: hidden;
-  transition: 0.3s;
+/* 3. Header Adjustment */
+header {
+  padding: 1rem 2rem;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+  position: relative;
+  /* Not sticky anymore, part of flow */
+  border-bottom: 1px solid transparent;
+  /* Hidden on desktop usually if we want sidebar title to be main, 
+     but keeping for Theme Toggle and Title if needed. 
+     Let's hide the Title on Desktop if Sidebar has it. */
 }
 
-.nav-overlay.active {
-  opacity: 1;
-  visibility: visible;
+.header-left {
+  display: none;
+  /* Sidebar has title */
+}
+
+.switch {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+}
+
+/* --- MOBILE RESPONSIVE NAVIGATION --- */
+@media (max-width: 768px) {
+
+  /* 1. Body Padding Shift */
+  body {
+    padding-left: 0;
+    padding-bottom: 80px;
+    /* Space for bottom bar */
+  }
+
+  /* 2. Mobile Bottom Bar */
+  .sidebar {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    border-right: none;
+    border-top: 1px solid var(--card-border);
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.95);
+    /* Glass-ish */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Dark mode support for sidebar bg */
+  body.dark-mode .sidebar {
+    background: rgba(36, 40, 59, 0.95);
+  }
+
+  .sidebar-header {
+    display: none;
+    /* No logo in bottom bar */
+  }
+
+  .nav-links {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 0;
+  }
+
+  .nav-item {
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 0;
+    background: transparent !important;
+    /* Remove active bg shape */
+    box-shadow: none !important;
+    color: var(--text-light);
+    /* Default color */
+    transform: none !important;
+  }
+
+  .nav-item .icon {
+    font-size: 1.4rem;
+  }
+
+  .nav-item .label {
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .nav-item:hover {
+    background: transparent;
+  }
+
+  /* Active State for Mobile (Icon Color change only) */
+  .nav-item.active {
+    color: var(--accent-end);
+    background: transparent;
+  }
+
+  /* 3. Header Returns for Mobile */
+  header {
+    display: flex;
+    justify-content: space-between;
+    background: var(--card-bg);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+  }
+
+  .header-left {
+    display: flex;
+    /* Show Logo */
+  }
+
+  .switch {
+    position: static;
+  }
+
+  /* Hide Hamburger */
+  .hamburger-btn {
+    display: none !important;
+  }
 }
 
 /* Page View Logic */
@@ -868,7 +1020,7 @@ select.hidden-native,
   pointer-events: none;
 }
 
-.timer-widget > * {
+.timer-widget>* {
   pointer-events: auto;
 }
 
@@ -907,6 +1059,7 @@ select.hidden-native,
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -920,6 +1073,8 @@ select.hidden-native,
   background: var(--card-bg);
   font-weight: 700;
   box-shadow: var(--shadow-sm);
+  color: var(--text) !important;
+  border: 2px solid var(--text-light) !important;
 }
 
 .timer-btn:hover {
@@ -1006,34 +1161,37 @@ select.hidden-native,
     padding: 1rem 1rem 8rem;
     grid-template-columns: 1fr;
   }
-  
+
   .card {
     padding: 1.5rem;
   }
-  
+
   h1 {
     font-size: 1.5rem;
   }
-  
+
   .chart-tabs {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .calc-inputs {
     flex-direction: column;
   }
 }
+
 /* --- UPGRADE 1: Ambient Background --- */
 body {
   /* Keeps your base color but adds very faint spotlights in the corners */
-  background-image: 
+  background-image:
     radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 100% 100%, rgba(52, 152, 219, 0.08) 0%, transparent 50%);
-  background-attachment: fixed; /* Background stays still while you scroll */
+  background-attachment: fixed;
+  /* Background stays still while you scroll */
 }
+
 /* --- UPGRADE 3: Tactile Buttons --- */
-button, 
+button,
 .timer-btn,
 .custom-select-trigger,
 #toggle-input-btn {
@@ -1041,7 +1199,7 @@ button,
 }
 
 /* When clicked/active, scale down slightly */
-button:active, 
+button:active,
 .timer-btn:active,
 #toggle-input-btn:active,
 .delete-item-btn:active {
@@ -1049,8 +1207,11 @@ button:active,
 }
 
 /* Smooth Focus Ring for Inputs */
-input:focus, select:focus {
-  transform: translateY(-2px); /* Subtle lift when typing */
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); /* Soft colored glow */
+input:focus,
+select:focus {
+  transform: translateY(-2px);
+  /* Subtle lift when typing */
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  /* Soft colored glow */
   border-color: var(--accent-start);
 }
