@@ -4,6 +4,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { initRoutines } from "./routines.js";
+import { initGamification } from "./gamification.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD0hdb9-NZ3Et3owriYW5d6iEl6JIdqvV4",
@@ -300,7 +302,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const setupEventListeners = () => {
         // REMOVED toggleMenu logic as per redesign (no hamburger)
-        elements.navItems.forEach(item => item.addEventListener('click', () => { elements.views.forEach(v => v.classList.remove('active-view')); document.getElementById(item.dataset.target).classList.add('active-view'); elements.navItems.forEach(n => n.classList.toggle('active', n === item)); if (elements.sidebar.classList.contains('active')) toggleMenu(); if (item.dataset.target === 'view-analytics') setTimeout(updateChart, 100); }));
+        elements.navItems.forEach(item => item.addEventListener('click', () => {
+            elements.views.forEach(v => v.classList.remove('active-view'));
+            document.getElementById(item.dataset.target).classList.add('active-view');
+
+            // Sync active state (Sidebar + Bottom Nav)
+            const target = item.dataset.target;
+            elements.navItems.forEach(n => n.classList.toggle('active', n.dataset.target === target));
+
+            if (item.dataset.target === 'view-analytics') setTimeout(updateChart, 100);
+        }));
         elements.themeToggle.addEventListener('change', () => { document.body.classList.toggle('dark-mode'); updateChart(); });
         elements.timerToggleIcon.addEventListener('click', () => elements.timerWidget.classList.toggle('open')); elements.timerBtns.forEach(btn => btn.addEventListener('click', () => startTimer(parseInt(btn.dataset.time)))); elements.timerCancel.addEventListener('click', () => { clearInterval(timerInterval); elements.timerDisplay.classList.add('hidden'); elements.timerCancel.classList.add('hidden'); elements.timerWidget.classList.remove('timer-active'); });
 
@@ -327,16 +338,68 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.importInput.addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async (ev) => { try { const i = JSON.parse(ev.target.result); if (i.workouts) for (const w of i.workouts) await addWorkoutToServer(w); if (i.bodyweight) for (const b of i.bodyweight) await addBodyWeightToServer(b); await loadDataFromServer(); updateAllUI(); showNotification("Imported!"); } catch (err) { showNotification("Import failed", "error"); } }; r.readAsText(f); }); elements.importBtn.addEventListener('click', () => elements.importInput.click()); elements.clearBtn.addEventListener('click', async () => { if (confirm("Delete ALL?")) { await clearAllDataOnServer(); data = []; bwData = []; updateAllUI(); } });
 
         // MAIN SUBMIT
-        elements.form.addEventListener('submit', async (e) => { e.preventDefault(); let ex = isCustomInput ? elements.exerciseText.value.trim() : elements.exerciseSelect.value; if (isCustomInput && ex) ex = ex.charAt(0).toUpperCase() + ex.slice(1); if (!ex) return showNotification("Select exercise.", "error"); const nw = { exercise: ex, reps: parseInt(elements.form.reps.value), sets: parseInt(elements.form.sets.value), weight: parseFloat(elements.form.weight.value), durationMinutes: parseInt(elements.form['duration-minutes'].value) || 0, durationSeconds: parseInt(elements.form['duration-seconds'].value) || 0, date: new Date().toISOString().split('T')[0] }; const curMax = data.filter(d => d.exercise === ex).reduce((m, c) => Math.max(m, c.weight), 0); const isPR = nw.weight > curMax; try { const id = await addWorkoutToServer(nw); data.push({ ...nw, id }); updateAllUI(); if (isPR) { triggerConfetti(); playBeep(); showNotification(`🏆 NEW PR: ${nw.weight}kg!`, "success"); } else showNotification("Added!", "info"); elements.form.reps.value = ''; elements.form.sets.value = ''; elements.form.weight.value = ''; update1RM(); if (!isCustomInput) { const trigger = document.querySelector('.custom-select-trigger'); if (trigger) trigger.textContent = 'Select an exercise'; } } catch (e) { } });
+        elements.form.addEventListener('submit', async (e) => {
+            e.preventDefault(); let ex = isCustomInput ? elements.exerciseText.value.trim() : elements.exerciseSelect.value; if (isCustomInput && ex) ex = ex.charAt(0).toUpperCase() + ex.slice(1); if (!ex) return showNotification("Select exercise.", "error"); const nw = { exercise: ex, reps: parseInt(elements.form.reps.value), sets: parseInt(elements.form.sets.value), weight: parseFloat(elements.form.weight.value), durationMinutes: parseInt(elements.form['duration-minutes'].value) || 0, durationSeconds: parseInt(elements.form['duration-seconds'].value) || 0, date: new Date().toISOString().split('T')[0] }; const curMax = data.filter(d => d.exercise === ex).reduce((m, c) => Math.max(m, c.weight), 0); const isPR = nw.weight > curMax; try {
+                const id = await addWorkoutToServer(nw); data.push({ ...nw, id }); updateAllUI();
 
-        elements.chartTabs.forEach(t => t.addEventListener('click', () => { document.querySelector('.chart-tab.active')?.classList.remove('active'); t.classList.add('active'); currentChartType = t.dataset.chart; updateChart(); }));
+                // Check Routine Progress
+                if (routinesModule && routinesModule.checkProgress(ex)) {
+                    triggerConfetti();
+                    showNotification("Routine Complete!", "success");
+                    if (gamificationModule) gamificationModule.unlock('routine_complete');
+                }
+
+                if (isPR) { triggerConfetti(); playBeep(); showNotification(`🏆 NEW PR: ${nw.weight}kg!`, "success"); } else showNotification("Added!", "info"); elements.form.reps.value = ''; elements.form.sets.value = ''; elements.form.weight.value = ''; update1RM(); if (!isCustomInput) { const trigger = document.querySelector('.custom-select-trigger'); if (trigger) trigger.textContent = 'Select an exercise'; }
+            } catch (e) { }
+        });
+
+        elements.chartTabs.forEach(t => t.addEventListener('click', () => {
+            document.querySelector('.chart-tab.active')?.classList.remove('active');
+            t.classList.add('active');
+
+            const type = t.dataset.chart;
+            const medalsDiv = document.getElementById('medals-display');
+            const chartsDiv = document.querySelector('.chart-container');
+
+            if (type === 'awards') {
+                chartsDiv.classList.add('hidden');
+                medalsDiv.classList.remove('hidden');
+                if (gamificationModule) gamificationModule.renderRewards(medalsDiv);
+            } else {
+                medalsDiv.classList.add('hidden');
+                chartsDiv.classList.remove('hidden');
+                currentChartType = type;
+                updateChart();
+            }
+        }));
         elements.analyticsExerciseSelect.addEventListener('change', updateChart);
         elements.bwDate.value = new Date().toISOString().split('T')[0];
     };
 
+    let routinesModule = null;
+    let gamificationModule = null;
+
     // ==========================================
     // 8. INIT
     // ==========================================
-    const init = async () => { try { await signInAnonymously(auth); await loadDataFromServer(); } catch (e) { console.error(e); } finally { applyCustomDropdown(elements.exerciseSelect); setupEventListeners(); updateAllUI(); hideLoader(); document.querySelector('.nav-item[data-target="view-home"]').click(); } };
+    const init = async () => {
+        try { await signInAnonymously(auth); await loadDataFromServer(); } catch (e) { console.error(e); } finally {
+            applyCustomDropdown(elements.exerciseSelect);
+            setupEventListeners();
+
+            // Init Modules
+            routinesModule = initRoutines(app, db, auth, elements);
+            gamificationModule = initGamification();
+
+            updateAllUI();
+            hideLoader();
+            document.querySelector('.nav-item[data-target="view-home"]').click();
+
+            // First Visit Award?
+            if (data.length === 0) {
+                // fresh user logic
+            }
+        }
+    };
     init();
 });
