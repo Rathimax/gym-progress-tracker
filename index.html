@@ -17,7 +17,9 @@
   <title>FitTrack Gym Tracker</title>
 
   <link rel="icon" type="image/jpeg" href="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Outfit:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=4">
 </head>
@@ -60,11 +62,16 @@
   <!-- Header -->
   <header>
     <div class="header-left">
-      <h1><span class="icon"><img src="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg"
-            alt="Icon" style="height: 24px; width: 24px; object-fit: cover;" /></span> FitTrack</h1>
+      <h1><span class="app-icon"><img src="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg"
+            alt="Icon" style="height: 30px; width: 30px; object-fit: cover; border-radius: 8px;" /></span> FitTrack</h1>
     </div>
-    <div class="switch"><input type="checkbox" id="theme-toggle" /><label for="theme-toggle"
-        class="toggle-switch"></label></div>
+    <div class="header-right" id="header-profile" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+      <!-- Profile injected by JS -->
+      <div class="profile-pic" style="width:35px; height:35px; border-radius:50%; background:#ddd; overflow:hidden;">
+        <img class="header-avatar" src="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg"
+          style="width:100%; height:100%; object-fit:cover;">
+      </div>
+    </div>
   </header>
 
   <div class="container">
@@ -233,6 +240,79 @@
 
         <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
       </div>
+
+      <!-- Muscle Heatmap Card -->
+      <div class="card card-wide">
+        <h2><span class="icon"><i class="ri-body-scan-line"></i></span> Muscle Heatmap (Last 7 Days)</h2>
+        <div class="heatmap-container">
+          <div class="heatmap-body front">
+            <div class="muscle-label-top">FRONT</div>
+            <!-- Head/Neck -->
+            <div class="body-part head"></div>
+            <div class="body-part neck"></div>
+
+            <!-- Torso -->
+            <div class="body-part trap-left" data-muscle="Traps"></div>
+            <div class="body-part trap-right" data-muscle="Traps"></div>
+            <div class="body-part chest-left" data-muscle="Chest"></div>
+            <div class="body-part chest-right" data-muscle="Chest"></div>
+            <div class="body-part abs" data-muscle="Abs"></div>
+            <div class="body-part oblique-left" data-muscle="Obliques"></div>
+            <div class="body-part oblique-right" data-muscle="Obliques"></div>
+
+            <!-- Arms -->
+            <div class="body-part delt-front-left" data-muscle="Shoulder"></div>
+            <div class="body-part delt-front-right" data-muscle="Shoulder"></div>
+            <div class="body-part bicep-left" data-muscle="Bicep"></div>
+            <div class="body-part bicep-right" data-muscle="Bicep"></div>
+            <div class="body-part forearm-front-left" data-muscle="Forearms"></div>
+            <div class="body-part forearm-front-right" data-muscle="Forearms"></div>
+
+            <!-- Legs -->
+            <div class="body-part quad-left" data-muscle="Quads"></div>
+            <div class="body-part quad-right" data-muscle="Quads"></div>
+            <div class="body-part calf-front-left" data-muscle="Calves"></div>
+            <div class="body-part calf-front-right" data-muscle="Calves"></div>
+          </div>
+
+          <div class="heatmap-body back">
+            <div class="muscle-label-top">BACK</div>
+            <!-- Head/Neck -->
+            <div class="body-part head"></div>
+            <div class="body-part neck"></div>
+
+            <!-- Torso -->
+            <div class="body-part trap-back-left" data-muscle="Traps"></div>
+            <div class="body-part trap-back-right" data-muscle="Traps"></div>
+            <div class="body-part lats-left" data-muscle="Lats"></div>
+            <div class="body-part lats-right" data-muscle="Lats"></div>
+            <div class="body-part lower-back" data-muscle="LowerBack"></div>
+
+            <!-- Arms -->
+            <div class="body-part delt-rear-left" data-muscle="Shoulder"></div>
+            <div class="body-part delt-rear-right" data-muscle="Shoulder"></div>
+            <div class="body-part tricep-left" data-muscle="Tricep"></div>
+            <div class="body-part tricep-right" data-muscle="Tricep"></div>
+            <div class="body-part forearm-back-left" data-muscle="Forearms"></div>
+            <div class="body-part forearm-back-right" data-muscle="Forearms"></div>
+
+            <!-- Legs -->
+            <div class="body-part glute-left" data-muscle="Glutes"></div>
+            <div class="body-part glute-right" data-muscle="Glutes"></div>
+            <div class="body-part hamstring-left" data-muscle="Hamstrings"></div>
+            <div class="body-part hamstring-right" data-muscle="Hamstrings"></div>
+            <div class="body-part calf-back-left" data-muscle="Calves"></div>
+            <div class="body-part calf-back-right" data-muscle="Calves"></div>
+          </div>
+        </div>
+        <div class="heatmap-legend">
+          <div class="legend-item"><span class="dot" style="background:var(--input-bg)"></span> Idle</div>
+          <div class="legend-item"><span class="dot" style="background:var(--accent-start); opacity:0.5;"></span> Active
+          </div>
+          <div class="legend-item"><span class="dot"
+              style="background:var(--accent-end); box-shadow:0 0 10px var(--accent-end);"></span> Intense</div>
+        </div>
+      </div>
     </div>
 
     <!-- VIEW 3: HISTORY -->
@@ -306,6 +386,66 @@
             Import</button></div>
         <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All Data</button>
         <input type="file" id="import-input" accept=".json" class="hidden" />
+      </div>
+      <div class="card">
+        <h2><span class="icon"><i class="ri-equalizer-fill"></i></span> App Preferences</h2>
+
+        <div class="setting-item">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <label class="setting-label" style="margin:0;">Dark Mode</label>
+            <div class="switch"><input type="checkbox" id="theme-toggle" /><label for="theme-toggle"
+                class="toggle-switch"></label></div>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.3rem;">Switch between light and dark themes.
+          </p>
+        </div>
+
+        <div class="setting-item">
+          <label class="setting-label">Font Style</label>
+          <div class="segmented-control">
+            <button class="segment-btn active" data-font="modern">Modern</button>
+            <button class="segment-btn" data-font="tech">Tech</button>
+            <button class="segment-btn" data-font="classic">Classic</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <label class="setting-label" style="margin:0;">Compact Mode</label>
+            <div class="switch"><input type="checkbox" id="compact-toggle" /><label for="compact-toggle"
+                class="form-switch"></label></div>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.3rem;">Denser layout, more data.</p>
+        </div>
+
+        <div class="setting-item">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <label class="setting-label" style="margin:0;">Units</label>
+            <div class="unit-toggle-wrapper">
+              <span id="unit-label-kg" class="unit-label active">KG</span>
+              <div class="switch"><input type="checkbox" id="unit-toggle" /><label for="unit-toggle"
+                  class="form-switch"></label></div>
+              <span id="unit-label-lbs" class="unit-label">LBS</span>
+            </div>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.3rem;">Display weights in Pounds.</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="setting-label">Header Avatar</label>
+          <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+            <img id="avatar-preview-settings"
+              src="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg"
+              style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--accent-start);">
+            <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+            <button id="btn-upload-avatar" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;">Upload
+              Photo</button>
+            <button id="btn-emoji-avatar"
+              style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--text); box-shadow:none;">Use
+              Emoji</button>
+          </div>
+        </div>
+
       </div>
       <div class="card">
         <h2><span class="icon"><i class="ri-palette-fill"></i></span> Theme Customization</h2>

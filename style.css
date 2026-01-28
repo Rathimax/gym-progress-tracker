@@ -1567,3 +1567,564 @@ select:focus {
   color: var(--text);
   text-align: center;
 }
+
+/* --- ADVANCED CUSTOMIZATION --- */
+
+/* 1. Font Styles */
+body.font-tech,
+body.font-tech button,
+body.font-tech input,
+body.font-tech select,
+body.font-tech textarea {
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+body.font-classic,
+body.font-classic button,
+body.font-classic input,
+body.font-classic select,
+body.font-classic textarea {
+  font-family: 'Merriweather', serif;
+}
+
+/* 2. Compact Mode */
+body.mode-compact .container {
+  gap: 1rem;
+  padding-bottom: 5rem;
+}
+
+body.mode-compact .card {
+  padding: 1rem;
+}
+
+body.mode-compact .inline-form input,
+body.mode-compact .inline-form button {
+  padding: 0.8rem;
+}
+
+body.mode-compact .nav-item {
+  padding: 0.8rem;
+}
+
+body.mode-compact h1 {
+  font-size: 1.5rem;
+}
+
+body.mode-compact .history-date table td,
+body.mode-compact .history-date table th {
+  padding: 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* 3. Settings UI Components */
+.setting-item {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.setting-label {
+  display: block;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: flex;
+  background: var(--input-bg);
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+}
+
+.segment-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.segment-btn.active {
+  background: #fff;
+  color: var(--accent-end);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Unit Toggle */
+.unit-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unit-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-light);
+  opacity: 0.5;
+  transition: 0.3s;
+}
+
+.unit-label.active {
+  color: var(--accent-end);
+  opacity: 1;
+}
+
+/* Generic Form Switch */
+.switch {
+  display: flex;
+  align-items: center;
+}
+
+.switch input[type="checkbox"] {
+  display: none;
+}
+
+.form-switch {
+  display: block;
+  width: 50px;
+  height: 28px;
+  background-color: var(--input-bg);
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  transition: 0.3s;
+}
+
+.form-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.switch input:checked+.form-switch {
+  background-color: var(--accent-start);
+  border-color: var(--accent-start);
+}
+
+.switch input:checked+.form-switch::after {
+  transform: translateX(22px);
+  background-color: #fff;
+}
+
+/* --- MUSCLE HEATMAP (DETAILED) --- */
+.heatmap-container {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  padding: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.heatmap-body {
+  position: relative;
+  width: 220px;
+  height: 480px;
+  margin-bottom: 2rem;
+}
+
+.muscle-label-top {
+  position: absolute;
+  top: -40px;
+  width: 100%;
+  text-align: center;
+  font-weight: 800;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+
+.body-part {
+  position: absolute;
+  background: var(--input-bg);
+  border-radius: 4px;
+  transition: 0.4s;
+  /* border: 1px solid rgba(0,0,0,0.02); */
+}
+
+/* --- COMMON HEAD / NECK --- */
+.head {
+  width: 40px;
+  height: 50px;
+  left: 90px;
+  top: 0;
+  border-radius: 16px;
+  z-index: 10;
+}
+
+.neck {
+  width: 24px;
+  height: 20px;
+  left: 98px;
+  top: 45px;
+  z-index: 5;
+}
+
+/* --- FRONT VIEW --- */
+/* Traps */
+.front .trap-left {
+  width: 30px;
+  height: 20px;
+  left: 75px;
+  top: 48px;
+  transform: skewY(20deg);
+  border-radius: 5px;
+}
+
+.front .trap-right {
+  width: 30px;
+  height: 20px;
+  right: 75px;
+  top: 48px;
+  transform: skewY(-20deg);
+  border-radius: 5px;
+}
+
+/* Delts (Front) */
+.front .delt-front-left {
+  width: 35px;
+  height: 35px;
+  left: 45px;
+  top: 55px;
+  border-radius: 15px;
+}
+
+.front .delt-front-right {
+  width: 35px;
+  height: 35px;
+  right: 45px;
+  top: 55px;
+  border-radius: 15px;
+}
+
+/* Chest (Pecs) */
+.front .chest-left {
+  width: 42px;
+  height: 40px;
+  left: 68px;
+  top: 60px;
+  border-radius: 5px 15px 10px 5px;
+}
+
+.front .chest-right {
+  width: 42px;
+  height: 40px;
+  right: 68px;
+  top: 60px;
+  border-radius: 15px 5px 5px 10px;
+}
+
+/* Arms */
+.front .bicep-left {
+  width: 28px;
+  height: 50px;
+  left: 42px;
+  top: 85px;
+  border-radius: 10px;
+  transform: rotate(5deg);
+}
+
+.front .bicep-right {
+  width: 28px;
+  height: 50px;
+  right: 42px;
+  top: 85px;
+  border-radius: 10px;
+  transform: rotate(-5deg);
+}
+
+.front .forearm-front-left {
+  width: 24px;
+  height: 60px;
+  left: 35px;
+  top: 138px;
+  border-radius: 8px;
+  transform: rotate(8deg);
+}
+
+.front .forearm-front-right {
+  width: 24px;
+  height: 60px;
+  right: 35px;
+  top: 138px;
+  border-radius: 8px;
+  transform: rotate(-8deg);
+}
+
+/* Abs / Core */
+.front .abs {
+  width: 40px;
+  height: 75px;
+  left: 90px;
+  top: 102px;
+  border-radius: 6px;
+}
+
+.front .oblique-left {
+  width: 20px;
+  height: 65px;
+  left: 68px;
+  top: 105px;
+  border-radius: 5px 0 0 10px;
+}
+
+.front .oblique-right {
+  width: 20px;
+  height: 65px;
+  right: 68px;
+  top: 105px;
+  border-radius: 0 5px 10px 0;
+}
+
+/* Legs */
+.front .quad-left {
+  width: 45px;
+  height: 100px;
+  left: 64px;
+  top: 180px;
+  border-radius: 10px;
+  transform: rotate(2deg);
+}
+
+.front .quad-right {
+  width: 45px;
+  height: 100px;
+  right: 64px;
+  top: 180px;
+  border-radius: 10px;
+  transform: rotate(-2deg);
+}
+
+.front .calf-front-left {
+  width: 35px;
+  height: 90px;
+  left: 66px;
+  top: 285px;
+  border-radius: 10px;
+  transform: rotate(1deg);
+}
+
+.front .calf-front-right {
+  width: 35px;
+  height: 90px;
+  right: 66px;
+  top: 285px;
+  border-radius: 10px;
+  transform: rotate(-1deg);
+}
+
+/* --- BACK VIEW --- */
+/* Traps */
+.back .trap-back-left {
+  width: 35px;
+  height: 40px;
+  left: 78px;
+  top: 50px;
+  transform: skewY(15deg);
+  border-radius: 5px;
+}
+
+.back .trap-back-right {
+  width: 35px;
+  height: 40px;
+  right: 78px;
+  top: 50px;
+  transform: skewY(-15deg);
+  border-radius: 5px;
+}
+
+/* Delts (Rear) */
+.back .delt-rear-left {
+  width: 38px;
+  height: 35px;
+  left: 42px;
+  top: 58px;
+  border-radius: 15px;
+}
+
+.back .delt-rear-right {
+  width: 38px;
+  height: 35px;
+  right: 42px;
+  top: 58px;
+  border-radius: 15px;
+}
+
+/* Lats */
+.back .lats-left {
+  width: 30px;
+  height: 70px;
+  left: 55px;
+  top: 85px;
+  border-radius: 20px 0 0 10px;
+  transform: rotate(10deg);
+}
+
+.back .lats-right {
+  width: 30px;
+  height: 70px;
+  right: 55px;
+  top: 85px;
+  border-radius: 0 20px 10px 0;
+  transform: rotate(-10deg);
+}
+
+.back .lower-back {
+  width: 40px;
+  height: 40px;
+  left: 90px;
+  top: 140px;
+  border-radius: 5px;
+}
+
+/* Arms (Triceps) */
+.back .tricep-left {
+  width: 30px;
+  height: 50px;
+  left: 40px;
+  top: 88px;
+  border-radius: 10px;
+  transform: rotate(5deg);
+}
+
+.back .tricep-right {
+  width: 30px;
+  height: 50px;
+  right: 40px;
+  top: 88px;
+  border-radius: 10px;
+  transform: rotate(-5deg);
+}
+
+.back .forearm-back-left {
+  width: 26px;
+  height: 60px;
+  left: 32px;
+  top: 140px;
+  border-radius: 8px;
+  transform: rotate(8deg);
+}
+
+.back .forearm-back-right {
+  width: 26px;
+  height: 60px;
+  right: 32px;
+  top: 140px;
+  border-radius: 8px;
+  transform: rotate(-8deg);
+}
+
+/* Glutes */
+.back .glute-left {
+  width: 44px;
+  height: 45px;
+  left: 66px;
+  top: 180px;
+  border-radius: 10px;
+}
+
+.back .glute-right {
+  width: 44px;
+  height: 45px;
+  right: 66px;
+  top: 180px;
+  border-radius: 10px;
+}
+
+/* Legs (Hamstrings) */
+.back .hamstring-left {
+  width: 42px;
+  height: 80px;
+  left: 67px;
+  top: 228px;
+  border-radius: 10px;
+  transform: rotate(1deg);
+}
+
+.back .hamstring-right {
+  width: 42px;
+  height: 80px;
+  right: 67px;
+  top: 228px;
+  border-radius: 10px;
+  transform: rotate(-1deg);
+}
+
+.back .calf-back-left {
+  width: 36px;
+  height: 80px;
+  left: 68px;
+  top: 312px;
+  border-radius: 12px;
+  transform: rotate(1deg);
+}
+
+.back .calf-back-right {
+  width: 36px;
+  height: 80px;
+  right: 68px;
+  top: 312px;
+  border-radius: 12px;
+  transform: rotate(-1deg);
+}
+
+
+.heatmap-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .heatmap-body {
+    transform: scale(0.7);
+    height: 380px;
+    margin-bottom: 0;
+  }
+
+  .heatmap-container {
+    gap: 0;
+  }
+}
