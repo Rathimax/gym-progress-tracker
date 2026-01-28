@@ -127,52 +127,275 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getUnitLabel = () => userPreferences.units.toUpperCase();
 
-    const EXERCISE_INTENSITY_FACTORS = { 'Push Up': 4.5, 'Chest Press': 4.0, 'Incline Dumbbell Press': 4.0, 'Chest Fly': 2.5, 'Shoulder Press': 4.0, 'Lateral Raise': 2.5, 'Front Raise': 2.5, 'Rear Delt Fly': 2.5, 'Arnold Press': 4.5, 'Pull Up': 6.0, 'Barbell Row': 5.0, 'Seated Row': 3.5, 'Lat Pulldown': 3.5, 'Face Pull': 2.5, 'Squat': 6.0, 'Leg Press': 5.5, 'Lunges': 4.5, 'Leg Curl': 3.0, 'Calf Raise': 2.5, 'Bicep Curl': 2.5, 'Hammer Curl': 2.5, 'Concentration Curl': 2.0, 'Preacher Curl': 2.0, 'Reverse Curl': 2.5, 'Tricep Pushdown': 2.5, 'Skull Crushers': 3.0, 'Overhead Tricep Extension': 3.0, 'Dumbbell Tricep Kickback': 2.5, 'Close Grip Bench Press': 4.5, 'Plank': 3.0, 'Burpees': 9.0, 'Mountain Climbers': 7.0, 'default': 3.5 };
+    const EXERCISE_INTENSITY_FACTORS = {
+        // CHEST
+        'Bench Press (Barbell)': 4.5, 'Bench Press (Dumbbell)': 4.5, 'Bench Press (Smith Machine)': 4.0,
+        'Incline Bench Press (Barbell)': 4.5, 'Incline Bench Press (Dumbbell)': 4.5, 'Incline Bench Press (Smith Machine)': 4.0,
+        'Decline Bench Press': 4.0, 'Chest Press (Machine)': 3.5,
+        'Push Up': 4.5, 'Weighted Push Up': 5.5,
+        'Chest Fly (Dumbbell)': 3.0, 'Chest Fly (Cable)': 3.0, 'Pec Deck / Machine Fly': 3.0,
+        'Dips (Chest Focus)': 5.0, 'Pullover (Dumbbell)': 3.5, 'Svend Press': 3.0,
+        'Landmine Press': 4.0, 'Floor Press': 4.5,
+
+        // BACK
+        'Deadlift (Conventional)': 8.0, 'Deadlift (Sumo)': 8.0, 'Deadlift (Romania)': 6.0,
+        'Rack Pull': 7.0,
+        'Pull Up': 6.0, 'Weighted Pull Up': 7.5, 'Chin Up': 6.0, 'Weighted Chin Up': 7.5,
+        'Lat Pulldown (Wide Grip)': 3.5, 'Lat Pulldown (Close Grip)': 3.5, 'Lat Pulldown (Reverse Grip)': 3.5,
+        'Barbell Row': 5.0, 'Pendlay Row': 5.5, 'Dumbbell Row (Single Arm)': 4.0,
+        'Seated Cable Row': 3.5, 'T-Bar Row': 5.0, 'Chest Supported Row': 4.0,
+        'Face Pull': 3.0, 'Shrugs (Barbell)': 4.0, 'Shrugs (Dumbbell)': 3.5,
+        'Back Extension / Hyperextension': 3.0, 'Good Morning': 4.5,
+
+        // SHOULDERS
+        'Overhead Press (Barbell)': 5.5, 'Overhead Press (Dumbbell)': 5.0,
+        'Seated Shoulder Press (Dumbbell)': 4.5, 'Seated Shoulder Press (Machine)': 4.0,
+        'Arnold Press': 5.0, 'Push Press': 6.0,
+        'Lateral Raise (Dumbbell)': 2.5, 'Lateral Raise (Cable)': 2.5, 'Lateral Raise (Machine)': 2.5,
+        'Front Raise (Dumbbell)': 2.5, 'Front Raise (Cable)': 2.5, 'Front Raise (Plate)': 2.5,
+        'Rear Delt Fly (Dumbbell)': 2.5, 'Rear Delt Fly (Machine)': 2.5, 'Rear Delt Fly (Cable)': 2.5,
+        'Upright Row': 4.0, 'Egyptian Lateral Raise': 2.5,
+
+        // LEGS (QUADS)
+        'Squat (Barbell Back)': 7.5, 'Squat (Barbell Front)': 7.0, 'Squat (Goblet)': 5.5,
+        'Leg Press': 5.5, 'Hack Squat': 6.0, 'Leg Extension': 3.5,
+        'Lunge (Walking)': 5.0, 'Lunge (Reverse)': 5.0,
+        'Split Squat (Bulgarian)': 6.0, 'Split Squat (Static)': 5.0,
+        'Step Up': 4.5, 'Sissy Squat': 4.5, 'Pistol Squat': 7.0,
+
+        // LEGS (HAMS & GLUTES)
+        'Romanian Deadlift (Barbell)': 6.0, 'Romanian Deadlift (Dumbbell)': 5.5,
+        'Leg Curl (Seated)': 3.0, 'Leg Curl (Lying)': 3.0, 'Nordic Hamstring Curl': 5.5,
+        'Hip Thrust (Barbell)': 6.0, 'Hip Thrust (Machine)': 5.0, 'Glute Bridge': 4.0,
+        'Cable Kickback': 3.0, 'Glute Ham Raise': 5.0,
+        'Hip Abduction (Machine)': 3.0, 'Hip Adduction (Machine)': 3.0,
+
+        // CALVES
+        'Calf Raise (Standing)': 3.0, 'Calf Raise (Seated)': 2.5,
+        'Calf Raise (Leg Press)': 3.0, 'Donkey Calf Raise': 3.0,
+
+        // BICEPS
+        'Bicep Curl (Barbell)': 3.0, 'Bicep Curl (Dumbbell)': 3.0, 'Hammer Curl': 3.0,
+        'Preacher Curl (Barbell)': 3.0, 'Preacher Curl (Machine)': 3.0,
+        'Concentration Curl': 2.5, 'Cable Curl': 3.0, 'Bayesian Curl': 3.0,
+        'Spider Curl': 3.0, 'Reverse Curl': 3.0,
+        'Zottman Curl': 3.0, 'Incline Dumbbell Curl': 3.0, 'Strict Curl': 3.0,
+
+        // TRICEPS
+        'Tricep Pushdown (Rope)': 3.0, 'Tricep Pushdown (Bar)': 3.0,
+        'Skull Crushers (Barbell)': 3.5, 'Skull Crushers (Dumbbell)': 3.5,
+        'Overhead Tricep Extension (Dumbbell)': 3.5, 'Overhead Tricep Extension (Cable)': 3.5,
+        'Close Grip Bench Press': 4.5, 'Dips (Tricep Focus)': 5.0,
+        'Kickback (Dumbbell)': 2.5, 'Kickback (Cable)': 2.5, 'JM Press': 4.0,
+
+        // ABS / CORE
+        'Plank': 4.0, 'Side Plank': 4.0, 'Crunch': 2.5, 'Sit Up': 3.0,
+        'Leg Raise (Hanging)': 4.5, 'Leg Raise (Lying)': 3.5,
+        'Captain\'s Chair Leg Raise': 4.0, 'Russian Twist': 3.5,
+        'Cable Crunch': 3.5, 'Ab Wheel Rollout': 5.0,
+        'Woodchopper': 4.0, 'Vacuum': 2.0, 'L-Sit': 6.0,
+
+        // CARDIO & PLYO
+        'Running (Treadmill)': 7.0, 'Running (Outdoor)': 7.5, 'Cycling': 6.0,
+        'Rowing Machine': 7.5, 'Jump Rope': 8.0,
+        'Box Jump': 7.0, 'Burpees': 9.0, 'Mountain Climbers': 7.0,
+        'Jumping Jacks': 6.0, 'Battle Ropes': 8.0,
+
+        // OLYMPIC & FULL BODY
+        'Clean and Jerk': 9.0, 'Snatch': 9.5, 'Power Clean': 8.5, 'Hang Clean': 8.0,
+        'Thruster': 8.0, 'Kettlebell Swing': 6.0, 'Turkish Get Up': 7.0, 'Farmers Walk': 6.5,
+
+        // OTHER
+        'Neck Curl': 2.0, 'Neck Extension': 2.0, 'Wrist Curl': 1.5, 'Wrist Extension': 1.5,
+        'default': 3.5
+    };
 
     const MUSCLE_IMAGES = {
         'Chest': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80',
         'Back': 'https://images.unsplash.com/photo-1603287681836-e566914d0957?auto=format&fit=crop&w=800&q=80',
         'Legs': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
+        'Legs - Quads': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
+        'Legs - Hams & Glutes': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
+        'Calves': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80',
         'Shoulder': 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80',
         'Bicep': 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80',
         'Tricep': 'https://images.unsplash.com/photo-1530822847156-5df684ec5ee1?auto=format&fit=crop&w=800&q=80',
         'Fullbody': 'https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=80',
+        'Olympic & Full Body': 'https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=80',
+        'Cardio & Plyo': 'https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=80',
+        'Abs & Core': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80',
         'Other': 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80',
     };
 
     const EXERCISE_MUSCLE_MAP = {
+        // CHEST
+        'Bench Press (Barbell)': ['Chest', 'Tricep', 'Shoulder'],
+        'Bench Press (Dumbbell)': ['Chest', 'Tricep', 'Shoulder'],
+        'Bench Press (Smith Machine)': ['Chest', 'Tricep', 'Shoulder'],
+        'Incline Bench Press (Barbell)': ['Chest', 'Tricep', 'Shoulder'],
+        'Incline Bench Press (Dumbbell)': ['Chest', 'Tricep', 'Shoulder'],
+        'Incline Bench Press (Smith Machine)': ['Chest', 'Tricep', 'Shoulder'],
+        'Decline Bench Press': ['Chest', 'Tricep'],
+        'Chest Press (Machine)': ['Chest', 'Tricep'],
         'Push Up': ['Chest', 'Tricep', 'Shoulder'],
-        'Chest Press': ['Chest', 'Tricep', 'Shoulder'],
-        'Incline Dumbbell Press': ['Chest', 'Shoulder', 'Tricep'],
-        'Chest Fly': ['Chest'],
-        'Shoulder Press': ['Shoulder', 'Tricep', 'Traps'],
-        'Lateral Raise': ['Shoulder', 'Traps'],
-        'Front Raise': ['Shoulder'],
-        'Rear Delt Fly': ['Shoulder', 'Traps'],
-        'Arnold Press': ['Shoulder', 'Tricep'],
+        'Weighted Push Up': ['Chest', 'Tricep', 'Shoulder'],
+        'Chest Fly (Dumbbell)': ['Chest'],
+        'Chest Fly (Cable)': ['Chest'],
+        'Pec Deck / Machine Fly': ['Chest'],
+        'Dips (Chest Focus)': ['Chest', 'Tricep'],
+        'Pullover (Dumbbell)': ['Chest', 'Lats'],
+        'Svend Press': ['Chest'],
+        'Landmine Press': ['Chest', 'Shoulder'],
+        'Floor Press': ['Tricep', 'Chest'],
+
+        // BACK
+        'Deadlift (Conventional)': ['LowerBack', 'Hamstrings', 'Glutes', 'Traps', 'Forearms'],
+        'Deadlift (Sumo)': ['Glutes', 'Quads', 'LowerBack', 'Forearms'],
+        'Deadlift (Romania)': ['Hamstrings', 'Glutes', 'LowerBack'],
+        'Rack Pull': ['Traps', 'LowerBack', 'Forearms'],
         'Pull Up': ['Lats', 'Bicep', 'Forearms', 'Traps'],
+        'Weighted Pull Up': ['Lats', 'Bicep', 'Forearms'],
+        'Chin Up': ['Lats', 'Bicep'],
+        'Weighted Chin Up': ['Lats', 'Bicep'],
+        'Lat Pulldown (Wide Grip)': ['Lats', 'Bicep'],
+        'Lat Pulldown (Close Grip)': ['Lats', 'Bicep'],
+        'Lat Pulldown (Reverse Grip)': ['Lats', 'Bicep'],
         'Barbell Row': ['Lats', 'Back', 'Bicep'],
-        'Seated Row': ['Back', 'Lats', 'Bicep'],
-        'Lat Pulldown': ['Lats', 'Bicep'],
+        'Pendlay Row': ['Lats', 'Back', 'Bicep'],
+        'Dumbbell Row (Single Arm)': ['Lats', 'Bicep', 'Back'],
+        'Seated Cable Row': ['Back', 'Lats', 'Bicep'],
+        'T-Bar Row': ['Back', 'Bicep'],
+        'Chest Supported Row': ['Back', 'Bicep'],
         'Face Pull': ['Shoulder', 'Traps'],
-        'Squat': ['Quads', 'Glutes', 'LowerBack'],
+        'Shrugs (Barbell)': ['Traps', 'Forearms'],
+        'Shrugs (Dumbbell)': ['Traps'],
+        'Back Extension / Hyperextension': ['LowerBack', 'Glutes'],
+        'Good Morning': ['Hamstrings', 'LowerBack'],
+
+        // SHOULDERS
+        'Overhead Press (Barbell)': ['Shoulder', 'Tricep', 'Traps'],
+        'Overhead Press (Dumbbell)': ['Shoulder', 'Tricep'],
+        'Seated Shoulder Press (Dumbbell)': ['Shoulder', 'Tricep'],
+        'Seated Shoulder Press (Machine)': ['Shoulder', 'Tricep'],
+        'Arnold Press': ['Shoulder', 'Tricep'],
+        'Push Press': ['Shoulder', 'Tricep', 'Quads'],
+        'Lateral Raise (Dumbbell)': ['Shoulder', 'Traps'],
+        'Lateral Raise (Cable)': ['Shoulder'],
+        'Lateral Raise (Machine)': ['Shoulder'],
+        'Front Raise (Dumbbell)': ['Shoulder'],
+        'Front Raise (Cable)': ['Shoulder'],
+        'Front Raise (Plate)': ['Shoulder'],
+        'Rear Delt Fly (Dumbbell)': ['Shoulder', 'Traps'],
+        'Rear Delt Fly (Machine)': ['Shoulder'],
+        'Rear Delt Fly (Cable)': ['Shoulder'],
+        'Upright Row': ['Shoulder', 'Traps', 'Bicep'],
+        'Egyptian Lateral Raise': ['Shoulder'],
+
+        // LEGS (QUADS)
+        'Squat (Barbell Back)': ['Quads', 'Glutes', 'LowerBack'],
+        'Squat (Barbell Front)': ['Quads', 'Glutes', 'Abs'],
+        'Squat (Goblet)': ['Quads', 'Glutes'],
         'Leg Press': ['Quads', 'Glutes'],
-        'Lunges': ['Quads', 'Glutes', 'Hamstrings'],
-        'Leg Curl': ['Hamstrings'],
-        'Calf Raise': ['Calves'],
-        'Bicep Curl': ['Bicep', 'Forearms'],
+        'Hack Squat': ['Quads', 'Glutes'],
+        'Leg Extension': ['Quads'],
+        'Lunge (Walking)': ['Quads', 'Glutes', 'Hamstrings'],
+        'Lunge (Reverse)': ['Quads', 'Glutes'],
+        'Split Squat (Bulgarian)': ['Quads', 'Glutes'],
+        'Split Squat (Static)': ['Quads', 'Glutes'],
+        'Step Up': ['Quads', 'Glutes'],
+        'Sissy Squat': ['Quads'],
+        'Pistol Squat': ['Quads', 'Glutes'],
+
+        // LEGS (HAMS & GLUTES)
+        'Romanian Deadlift (Barbell)': ['Hamstrings', 'Glutes', 'LowerBack'],
+        'Romanian Deadlift (Dumbbell)': ['Hamstrings', 'Glutes'],
+        'Leg Curl (Seated)': ['Hamstrings'],
+        'Leg Curl (Lying)': ['Hamstrings'],
+        'Nordic Hamstring Curl': ['Hamstrings'],
+        'Hip Thrust (Barbell)': ['Glutes', 'Hamstrings'],
+        'Hip Thrust (Machine)': ['Glutes'],
+        'Glute Bridge': ['Glutes'],
+        'Cable Kickback': ['Glutes'],
+        'Glute Ham Raise': ['Hamstrings', 'Glutes'],
+        'Hip Abduction (Machine)': ['Glutes'],
+        'Hip Adduction (Machine)': ['Groin'], // Groin not in heatmap, probably fine, will ignore
+
+        // CALVES
+        'Calf Raise (Standing)': ['Calves'],
+        'Calf Raise (Seated)': ['Calves'],
+        'Calf Raise (Leg Press)': ['Calves'],
+        'Donkey Calf Raise': ['Calves'],
+
+        // BICEPS
+        'Bicep Curl (Barbell)': ['Bicep', 'Forearms'],
+        'Bicep Curl (Dumbbell)': ['Bicep', 'Forearms'],
         'Hammer Curl': ['Bicep', 'Forearms'],
+        'Preacher Curl (Barbell)': ['Bicep'],
+        'Preacher Curl (Machine)': ['Bicep'],
         'Concentration Curl': ['Bicep'],
-        'Preacher Curl': ['Bicep'],
+        'Cable Curl': ['Bicep'],
+        'Bayesian Curl': ['Bicep'],
+        'Spider Curl': ['Bicep'],
         'Reverse Curl': ['Bicep', 'Forearms'],
-        'Tricep Pushdown': ['Tricep'],
-        'Skull Crushers': ['Tricep'],
-        'Overhead Tricep Extension': ['Tricep'],
-        'Dumbbell Tricep Kickback': ['Tricep'],
+        'Zottman Curl': ['Bicep', 'Forearms'],
+        'Incline Dumbbell Curl': ['Bicep'],
+        'Strict Curl': ['Bicep'],
+
+        // TRICEPS
+        'Tricep Pushdown (Rope)': ['Tricep'],
+        'Tricep Pushdown (Bar)': ['Tricep'],
+        'Skull Crushers (Barbell)': ['Tricep'],
+        'Skull Crushers (Dumbbell)': ['Tricep'],
+        'Overhead Tricep Extension (Dumbbell)': ['Tricep'],
+        'Overhead Tricep Extension (Cable)': ['Tricep'],
         'Close Grip Bench Press': ['Tricep', 'Chest'],
+        'Dips (Tricep Focus)': ['Tricep', 'Chest'],
+        'Kickback (Dumbbell)': ['Tricep'],
+        'Kickback (Cable)': ['Tricep'],
+        'JM Press': ['Tricep', 'Chest'],
+
+        // ABS / CORE
         'Plank': ['Abs', 'Obliques'],
+        'Side Plank': ['Obliques', 'Abs'],
+        'Crunch': ['Abs'],
+        'Sit Up': ['Abs'],
+        'Leg Raise (Hanging)': ['Abs', 'Obliques'],
+        'Leg Raise (Lying)': ['Abs'],
+        'Captain\'s Chair Leg Raise': ['Abs'],
+        'Russian Twist': ['Obliques'],
+        'Cable Crunch': ['Abs'],
+        'Ab Wheel Rollout': ['Abs', 'Lats'],
+        'Woodchopper': ['Obliques', 'Abs'],
+        'Vacuum': ['Abs'],
+        'L-Sit': ['Abs', 'Quads'],
+
+        // CARDIO & PLYO
+        'Running (Treadmill)': ['Quads', 'Calves', 'Glutes'],
+        'Running (Outdoor)': ['Quads', 'Calves', 'Glutes'],
+        'Cycling': ['Quads', 'Calves'],
+        'Rowing Machine': ['Back', 'Quads', 'Bicep', 'Hamstrings'],
+        'Jump Rope': ['Calves', 'Shoulder'],
+        'Box Jump': ['Quads', 'Glutes', 'Calves'],
         'Burpees': ['Chest', 'Quads', 'Glutes', 'Shoulder'],
-        'Mountain Climbers': ['Abs', 'Shoulder']
+        'Mountain Climbers': ['Abs', 'Shoulder'],
+        'Jumping Jacks': ['Calves', 'Shoulder'],
+        'Battle Ropes': ['Shoulder', 'Bicep', 'Tricep'],
+
+        // OLYMPIC & FULL BODY
+        'Clean and Jerk': ['Quads', 'Glutes', 'Shoulder', 'Traps', 'Tricep'],
+        'Snatch': ['Quads', 'Glutes', 'Shoulder', 'Traps', 'LowerBack'],
+        'Power Clean': ['Quads', 'Glutes', 'Traps', 'LowerBack'],
+        'Hang Clean': ['Quads', 'Glutes', 'Traps'],
+        'Thruster': ['Quads', 'Glutes', 'Shoulder', 'Tricep'],
+        'Kettlebell Swing': ['Hamstrings', 'Glutes', 'LowerBack'],
+        'Turkish Get Up': ['Shoulder', 'Abs', 'Glutes', 'Quads'],
+        'Farmers Walk': ['Traps', 'Forearms', 'Obliques'],
+
+        // OTHER
+        'Neck Curl': ['Traps'],
+        'Neck Extension': ['Traps'],
+        'Wrist Curl': ['Forearms'],
+        'Wrist Extension': ['Forearms']
     };
 
     // Fallback for unknown exercises: return array
