@@ -399,6 +399,104 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.bwDate.value = new Date().toISOString().split('T')[0];
     };
 
+    // ==========================================
+    // THEME CUSTOMIZATION
+    // ==========================================
+    const THEMES = [
+        { name: 'Megatron', start: '#c6ffdd', middle: '#fbd786', end: '#f7797d' },
+        { name: 'Moonlit Astroid', start: '#0f2027', middle: '#203a43', end: '#2c5364' },
+        { name: 'Cool Sky', start: '#2980b9', middle: '#6dd5fa', end: '#ffffff' },
+        { name: 'Ultra Violet', start: '#654ea3', end: '#eaafc8' },
+        { name: 'Burning Orange', start: '#ff416c', end: '#ff4b2b' },
+        { name: 'Coal', start: '#eb5757', end: '#000000' },
+        { name: 'Pidget', start: '#ee9ca7', end: '#ffdde1' }
+    ];
+
+    const initThemes = () => {
+        const grid = document.getElementById('theme-grid');
+        if (!grid) return;
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('appTheme');
+        if (savedTheme) {
+            const theme = JSON.parse(savedTheme);
+            applyTheme(theme, false); // Don't save again, just apply
+        }
+
+        grid.innerHTML = THEMES.map((theme, index) => {
+            const gradient = theme.middle
+                ? `linear-gradient(135deg, ${theme.start}, ${theme.middle}, ${theme.end})`
+                : `linear-gradient(135deg, ${theme.start}, ${theme.end})`;
+
+            return `
+                <div class="theme-option" data-index="${index}">
+                    <div class="theme-preview" style="background: ${gradient};"></div>
+                    <div class="theme-name">${theme.name}</div>
+                </div>
+            `;
+        }).join('');
+
+        // Listeners
+        grid.querySelectorAll('.theme-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const idx = opt.dataset.index;
+                const theme = THEMES[idx];
+                applyTheme(theme, true);
+
+                // Update active state
+                grid.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+            });
+        });
+    };
+
+    const applyTheme = (theme, save = true) => {
+        const root = document.documentElement;
+
+        // Construct gradient string
+        const gradient = theme.middle
+            ? `linear-gradient(135deg, ${theme.start}, ${theme.middle}, ${theme.end})`
+            : `linear-gradient(135deg, ${theme.start}, ${theme.end})`;
+
+        // Set Variables
+        root.style.setProperty('--accent-start', theme.start);
+        root.style.setProperty('--accent-end', theme.end);
+        root.style.setProperty('--accent-gradient', gradient);
+
+        // Update Ambient Background (Opacity variations)
+        // We use a little trick: convert hex to rgb for rgba usage or just use hex with opacity if browser supports it (modern browsers do #RRGGBBAA)
+        // But for safety/consistency with existing code which used rgba(), we might stick to simple calc or just use the hex in the gradient as they are background images.
+        // The existing CSS uses rgba(). Let's try to just update the colors in the radial gradient directly.
+        // Actually, the CSS uses 'rgba(..., 0.15)'. We can approximate by just using the start/end colors 
+        // and letting opacity be handled if we could, but CSS var interpolation in rgba() is tricky without broken-out r,g,b values.
+        // For now, let's just update the accent variables as that covers 90% of the UI. 
+        // For the ambient background, we can override the background-image property on body directly.
+
+        document.body.style.backgroundImage = `
+            radial-gradient(circle at 0% 0%, ${hexToRgba(theme.start, 0.15)} 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, ${hexToRgba(theme.end, 0.15)} 0%, transparent 50%)
+        `;
+
+        if (save) {
+            localStorage.setItem('appTheme', JSON.stringify(theme));
+            showNotification(`Theme set to ${theme.name}`, 'success');
+        }
+    };
+
+    // Helper to convert hex to rgba for the background glow
+    const hexToRgba = (hex, alpha) => {
+        let c;
+        if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+            c = hex.substring(1).split('');
+            if (c.length == 3) {
+                c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+            }
+            c = '0x' + c.join('');
+            return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',' + alpha + ')';
+        }
+        return hex; // Fallback
+    };
+
     let routinesModule = null;
     let gamificationModule = null;
 
@@ -409,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { await signInAnonymously(auth); await loadDataFromServer(); } catch (e) { console.error(e); } finally {
             applyCustomDropdown(elements.exerciseSelect);
             setupEventListeners();
+            initThemes();
 
             // Init Modules
             routinesModule = initRoutines(app, db, auth, elements);

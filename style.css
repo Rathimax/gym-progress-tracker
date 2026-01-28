@@ -14,9 +14,9 @@
   --text-light: #9395b0;
 
   /* Brand Gradient */
-  --accent-start: #C084FC;
-  --accent-end: #8B5CF6;
-  --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  --accent-start: #c6ffdd;
+  --accent-end: #f7797d;
+  --accent-gradient: linear-gradient(135deg, #c6ffdd, #fbd786, #f7797d);
 
   /* Inputs & Borders */
   --input-bg: #F3F4F9;
@@ -29,9 +29,9 @@
   --info-hover: #0ABDE3;
 
   /* Shadows */
-  --shadow-sm: 0 4px 15px rgba(139, 92, 246, 0.05);
-  --shadow-lg: 0 10px 30px rgba(139, 92, 246, 0.12);
-  --shadow-btn: 0 8px 20px rgba(139, 92, 246, 0.35);
+  --shadow-sm: 0 4px 15px rgba(247, 121, 125, 0.15);
+  --shadow-lg: 0 10px 30px rgba(247, 121, 125, 0.2);
+  --shadow-btn: 0 8px 20px rgba(247, 121, 125, 0.4);
 }
 
 body.dark-mode {
@@ -40,9 +40,9 @@ body.dark-mode {
   --text: #A9B1D6;
   --text-light: #787c99;
   --input-bg: #2F354B;
-  --card-border: rgba(192, 132, 252, 0.1);
-  --accent-start: #A78BFA;
-  --accent-end: #7C3AED;
+  --card-border: rgba(247, 121, 125, 0.1);
+  --accent-start: #c6ffdd;
+  --accent-end: #f7797d;
 }
 
 html {
@@ -159,7 +159,7 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%238B5CF6" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>');
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23f7797d" class="bi bi-chevron-down" viewBox="0 0 16 16"%3e%3cpath fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/%3e%3c/svg%3e');
   background-repeat: no-repeat;
   background-position: right 1.2rem center;
   background-size: 1em;
@@ -520,7 +520,7 @@ td:first-child {
   top: calc(100% + 5px);
   left: 0;
   right: 0;
-  background: #ffffff;
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -544,7 +544,7 @@ td:first-child {
 .dropdown-search-container {
   position: sticky;
   top: 0;
-  background: #ffffff;
+  background: var(--card-bg);
   padding: 0.8rem;
   z-index: 20;
   border-bottom: 1px solid var(--card-border);
@@ -563,7 +563,7 @@ td:first-child {
 
 .dropdown-search-input:focus {
   border-color: var(--accent-start);
-  background: #fff;
+  background: var(--input-bg);
 }
 
 .custom-option {
@@ -576,7 +576,7 @@ td:first-child {
 }
 
 .custom-option:hover {
-  background-color: #F3E8FF;
+  background-color: var(--input-bg);
   color: var(--accent-end);
   padding-left: 1.5rem;
 }
@@ -587,7 +587,7 @@ td:first-child {
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-light);
-  background-color: #fafafa;
+  background-color: var(--input-bg);
   pointer-events: none;
   letter-spacing: 1px;
 }
@@ -814,6 +814,7 @@ body {
   font-family: 'Outfit', sans-serif;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
   border: none;
@@ -1191,8 +1192,8 @@ header {
 body {
   /* Keeps your base color but adds very faint spotlights in the corners */
   background-image:
-    radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(52, 152, 219, 0.08) 0%, transparent 50%);
+    radial-gradient(circle at 0% 0%, rgba(198, 255, 221, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(247, 121, 125, 0.15) 0%, transparent 50%);
   background-attachment: fixed;
   /* Background stays still while you scroll */
 }
@@ -1460,7 +1461,7 @@ select:focus {
   color: white;
   border: none;
   font-weight: 700;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 15px rgba(247, 121, 125, 0.4);
 }
 
 
@@ -1522,4 +1523,47 @@ select:focus {
   font-size: 0.7rem;
   color: var(--text-light);
   margin-top: 0.2rem;
+}
+
+/* --- THEME CUSTOMIZATION --- */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 16px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.theme-option:hover {
+  background: var(--input-bg);
+  transform: translateY(-2px);
+}
+
+.theme-option.active {
+  background: var(--input-bg);
+  box-shadow: 0 0 0 2px var(--accent-start);
+}
+
+.theme-preview {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid #fff;
+}
+
+.theme-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
 }
