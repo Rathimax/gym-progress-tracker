@@ -88,7 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
         timerDisplay: document.getElementById('timer-display'),
         timerToggleIcon: document.getElementById('timer-toggle-icon'),
         timerBtns: document.querySelectorAll('.timer-btn[data-time]'),
-        timerCancel: document.getElementById('timer-cancel')
+        timerCancel: document.getElementById('timer-cancel'),
+
+        // Achievements
+        achievementsGrid: document.getElementById('achievements-grid-container'),
+        achievementsProgress: document.getElementById('achievements-progress'),
+        achievementsProgressBar: document.getElementById('achievements-progress-bar')
     };
 
     // State
@@ -171,8 +176,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateBodyWeightStats = () => { if (!bwData.length) { elements.bwCurrent.textContent = "--"; elements.bwStart.textContent = "--"; elements.bwChange.textContent = "--"; return; } const current = bwData[bwData.length - 1].weight; const start = bwData[0].weight; const diff = (current - start).toFixed(1); elements.bwCurrent.textContent = `${current} kg`; elements.bwStart.textContent = `${start} kg`; elements.bwChange.textContent = `${diff > 0 ? '+' : ''}${diff} kg`; };
     const updateStats = () => { elements.totalWorkouts.textContent = data.length; elements.totalVolume.textContent = Math.round(data.reduce((s, w) => s + (w.reps * w.sets * w.weight), 0)); const mins = Math.round(data.reduce((s, w) => s + (w.durationMinutes || 0) + (w.durationSeconds || 0) / 60, 0)); elements.totalTime.textContent = `${mins}m`; elements.caloriesBurned.textContent = Math.round(data.reduce((s, w) => s + calculateCalories(w), 0)); };
 
+    const updateAchievementsUI = () => {
+        if (!gamificationModule) return;
+        gamificationModule.renderRewards(elements.achievementsGrid);
+
+        const progress = gamificationModule.getProgress();
+        if (progress) {
+            elements.achievementsProgress.textContent = `${progress.current} / ${progress.total} Unlocked`;
+            const pct = Math.round((progress.current / progress.total) * 100);
+            elements.achievementsProgressBar.style.width = `${pct}%`;
+        }
+    };
+
     const updatePRSection = () => {
-        if (Object.keys(prMap).length === 0) { elements.prList.innerHTML = `<div class="empty-state" style="padding:1rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486803.png" style="width:60px; display:block; margin:0 auto 0.5rem; opacity:0.6;"><p style="opacity:0.7;">Log a workout to earn your trophy! 🏆</p></div>`; return; }
+        if (Object.keys(prMap).length === 0) { elements.prList.innerHTML = `<div class="empty-state" style="padding:1rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486803.png" style="width:60px; display:block; margin:0 auto 0.5rem; opacity:0.6;"><p style="opacity:0.7;">Log a workout to earn your trophy! <i class="ri-trophy-line"></i></p></div>`; return; }
         elements.prList.innerHTML = Object.entries(prMap).sort(([exA], [exB]) => exA.localeCompare(exB)).map(([ex, wt]) => `<li><strong>${ex}</strong><span>${wt} kg</span></li>`).join('');
     };
 
@@ -196,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const grouped = filtered.reduce((acc, d) => { const date = d.date.split('T')[0]; (acc[date] = acc[date] || []).push(d); return acc; }, {});
         const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
-        elements.historyList.innerHTML = sortedDates.map(date => ` <div class="history-date"> <h3>${new Date(date).toLocaleDateString()}</h3> <table> <thead><tr><th>Exercise</th><th>Reps</th><th>Sets</th><th>Weight</th><th>Time</th><th></th></tr></thead> <tbody> ${grouped[date].map(e => `<tr><td>${e.exercise}</td><td>${e.reps}</td><td>${e.sets}</td><td>${e.weight} <span class="rm-tag">(1RM: ${calculate1RM(e.weight, e.reps)})</span></td><td>${e.durationMinutes}m</td><td><button class="delete-item-btn" data-id="${e.id}">🗑️</button></td></tr>`).join('')} </tbody> </table> </div>`).join('');
+        elements.historyList.innerHTML = sortedDates.map(date => ` <div class="history-date"> <h3>${new Date(date).toLocaleDateString()}</h3> <table> <thead><tr><th>Exercise</th><th>Reps</th><th>Sets</th><th>Weight</th><th>Time</th><th></th></tr></thead> <tbody> ${grouped[date].map(e => `<tr><td>${e.exercise}</td><td>${e.reps}</td><td>${e.sets}</td><td>${e.weight} <span class="rm-tag">(1RM: ${calculate1RM(e.weight, e.reps)})</span></td><td>${e.durationMinutes}m</td><td><button class="delete-item-btn" data-id="${e.id}"><i class="ri-delete-bin-line"></i></button></td></tr>`).join('')} </tbody> </table> </div>`).join('');
     };
 
     const updateFilteredHistory = () => {
@@ -311,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.navItems.forEach(n => n.classList.toggle('active', n.dataset.target === target));
 
             if (item.dataset.target === 'view-analytics') setTimeout(updateChart, 100);
+            if (item.dataset.target === 'view-achievements') updateAchievementsUI();
         }));
         elements.themeToggle.addEventListener('change', () => { document.body.classList.toggle('dark-mode'); updateChart(); });
         elements.timerToggleIcon.addEventListener('click', () => elements.timerWidget.classList.toggle('open')); elements.timerBtns.forEach(btn => btn.addEventListener('click', () => startTimer(parseInt(btn.dataset.time)))); elements.timerCancel.addEventListener('click', () => { clearInterval(timerInterval); elements.timerDisplay.classList.add('hidden'); elements.timerCancel.classList.add('hidden'); elements.timerWidget.classList.remove('timer-active'); });
@@ -339,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // MAIN SUBMIT
         elements.form.addEventListener('submit', async (e) => {
-            e.preventDefault(); let ex = isCustomInput ? elements.exerciseText.value.trim() : elements.exerciseSelect.value; if (isCustomInput && ex) ex = ex.charAt(0).toUpperCase() + ex.slice(1); if (!ex) return showNotification("Select exercise.", "error"); const nw = { exercise: ex, reps: parseInt(elements.form.reps.value), sets: parseInt(elements.form.sets.value), weight: parseFloat(elements.form.weight.value), durationMinutes: parseInt(elements.form['duration-minutes'].value) || 0, durationSeconds: parseInt(elements.form['duration-seconds'].value) || 0, date: new Date().toISOString().split('T')[0] }; const curMax = data.filter(d => d.exercise === ex).reduce((m, c) => Math.max(m, c.weight), 0); const isPR = nw.weight > curMax; try {
+            e.preventDefault(); let ex = isCustomInput ? elements.exerciseText.value.trim() : elements.exerciseSelect.value; if (isCustomInput && ex) ex = ex.charAt(0).toUpperCase() + ex.slice(1); if (!ex) return showNotification("Select exercise.", "error"); const nw = { exercise: ex, reps: parseInt(elements.form.reps.value), sets: parseInt(elements.form.sets.value), weight: parseFloat(elements.form.weight.value), durationMinutes: parseInt(elements.form['duration-minutes'].value) || 0, durationSeconds: parseInt(elements.form['duration-seconds'].value) || 0, date: new Date().toISOString().split('T')[0], timestamp: new Date().toISOString() }; const curMax = data.filter(d => d.exercise === ex).reduce((m, c) => Math.max(m, c.weight), 0); const isPR = nw.weight > curMax; try {
                 const id = await addWorkoutToServer(nw); data.push({ ...nw, id }); updateAllUI();
 
                 // Check Routine Progress
@@ -347,6 +365,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     triggerConfetti();
                     showNotification("Routine Complete!", "success");
                     if (gamificationModule) gamificationModule.unlock('routine_complete');
+                }
+
+                // Check Milestones
+                if (gamificationModule) {
+                    gamificationModule.checkMilestones(data, nw);
                 }
 
                 if (isPR) { triggerConfetti(); playBeep(); showNotification(`🏆 NEW PR: ${nw.weight}kg!`, "success"); } else showNotification("Added!", "info"); elements.form.reps.value = ''; elements.form.sets.value = ''; elements.form.weight.value = ''; update1RM(); if (!isCustomInput) { const trigger = document.querySelector('.custom-select-trigger'); if (trigger) trigger.textContent = 'Select an exercise'; }

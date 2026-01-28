@@ -18,6 +18,7 @@
 
   <link rel="icon" type="image/jpeg" href="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=3">
 </head>
 
@@ -37,14 +38,20 @@
       <h2>FitTrack</h2>
     </div>
     <ul class="nav-links">
-      <li class="nav-item active" data-target="view-home"><span class="icon">🏠</span> <span class="label">Home</span>
+      <li class="nav-item active" data-target="view-home"><span class="icon"><i class="ri-home-4-line"></i></span> <span
+          class="label">Home</span>
       </li>
-      <li class="nav-item" data-target="view-analytics"><span class="icon">📊</span> <span
-          class="label">Analytics</span></li>
-      <li class="nav-item" data-target="view-history"><span class="icon">📅</span> <span class="label">History</span>
+      <li class="nav-item" data-target="view-analytics"><span class="icon"><i
+            class="ri-bar-chart-grouped-line"></i></span> <span class="label">Analytics</span></li>
+      <li class="nav-item" data-target="view-history"><span class="icon"><i class="ri-calendar-todo-line"></i></span>
+        <span class="label">History</span>
       </li>
-      <li class="nav-item" data-target="view-tools"><span class="icon">🛠️</span> <span class="label">Tools</span></li>
-      <li class="nav-item" data-target="view-settings"><span class="icon">⚙️</span> <span class="label">Settings</span>
+      <li class="nav-item" data-target="view-achievements"><span class="icon"><i class="ri-trophy-line"></i></span>
+        <span class="label">Awards</span></li>
+      <li class="nav-item" data-target="view-tools"><span class="icon"><i class="ri-tools-line"></i></span> <span
+          class="label">Tools</span></li>
+      <li class="nav-item" data-target="view-settings"><span class="icon"><i class="ri-settings-4-line"></i></span>
+        <span class="label">Settings</span>
       </li>
     </ul>
   </nav>
@@ -64,13 +71,12 @@
     <!-- VIEW 1: HOME -->
     <div id="view-home" class="view-section active-view">
 
-
-
       <!-- Active Routine Widget -->
       <div id="routine-widget" class="card card-compact hidden"
         style="margin-bottom:2rem; border:2px solid var(--accent-start); background:#FBF9FF;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <h3 style="margin:0; font-size:1.1rem; color:var(--accent-end);">⚡ Active Routine</h3>
+          <h3 style="margin:0; font-size:1.1rem; color:var(--accent-end);"><i class="ri-flashlight-fill"></i> Active
+            Routine</h3>
           <button id="btn-quit-routine"
             style="width:auto; padding:0.4rem 0.8rem; background:transparent; color:var(--text-light); border:1px solid var(--card-border); border-radius:12px; font-size:0.8rem;">Exit</button>
         </div>
@@ -83,10 +89,11 @@
       <div class="card card-log-workout">
         <div
           style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:2px solid var(--card-border); padding-bottom:0.75rem;">
-          <h2 style="border:none; margin:0; padding:0;"><span class="icon">📝</span> Log Workout</h2>
+          <h2 style="border:none; margin:0; padding:0;"><span class="icon"><i class="ri-edit-circle-fill"></i></span>
+            Log Workout</h2>
           <button id="btn-open-routines"
             style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-end); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px;">
-            <span>📂</span> Load Routine
+            <span><i class="ri-folder-open-fill"></i></span> Load Routine
           </button>
         </div>
         <form id="workout-form">
@@ -148,7 +155,8 @@
               </optgroup>
             </select>
             <input type="text" id="exercise-text" class="hidden" placeholder="Type custom exercise..." />
-            <button type="button" id="toggle-input-btn" title="Type custom exercise">➕</button>
+            <button type="button" id="toggle-input-btn" title="Type custom exercise"><i
+                class="ri-add-line"></i></button>
           </div>
 
           <label for="reps">Reps:</label><input type="number" id="reps" step="1" required placeholder="e.g., 10" />
@@ -169,7 +177,7 @@
 
       <!-- Body Weight -->
       <div class="card card-compact">
-        <h2><span class="icon">⚖️</span> Body Weight Tracker</h2>
+        <h2><span class="icon"><i class="ri-scales-3-fill"></i></span> Body Weight Tracker</h2>
         <form id="bw-form" class="inline-form">
           <input type="number" id="bw-input" step="0.1" placeholder="Current Weight (kg)" required />
           <input type="date" id="bw-date" required />
@@ -186,7 +194,7 @@
     <!-- VIEW 2: ANALYTICS -->
     <div id="view-analytics" class="view-section">
       <div class="card card-wide">
-        <h2><span class="icon">📊</span> Analytics</h2>
+        <h2><span class="icon"><i class="ri-pie-chart-2-fill"></i></span> Analytics</h2>
         <div class="dropdown-wrapper"><label for="analytics-exercise-select">Filter by Exercise:</label><select
             id="analytics-exercise-select">
             <option value="All">All Exercises</option>
@@ -210,7 +218,7 @@
           </div>
           <div class="stat-card stat-card-full">
             <div class="stat-number" id="calories-burned">0</div>
-            <div class="stat-label">🔥 Est. Calories Burned</div>
+            <div class="stat-label"><i class="ri-fire-fill"></i> Est. Calories Burned</div>
           </div>
         </div>
 
@@ -220,28 +228,43 @@
           <button class="chart-tab" data-chart="duration">Duration</button>
           <button class="chart-tab" data-chart="exercises">Distribution</button>
           <button class="chart-tab" data-chart="bodyweight">Body Weight</button>
-          <button class="chart-tab" data-chart="awards" style="color:var(--accent-end); font-weight:700;">Awards
-            🏆</button>
         </div>
 
         <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
-        <div id="medals-display" class="hidden" style="margin-top:1rem;"></div>
       </div>
     </div>
 
     <!-- VIEW 3: HISTORY -->
     <div id="view-history" class="view-section">
       <div class="card card-wide">
-        <h2><span class="icon">📅</span> Workout History</h2>
+        <h2><span class="icon"><i class="ri-history-line"></i></span> Workout History</h2>
         <div id="history-controls"></div>
         <div id="history-list"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 6: ACHIEVEMENTS -->
+    <div id="view-achievements" class="view-section">
+      <div class="card card-wide">
+        <h2><span class="icon"><i class="ri-medal-fill"></i></span> Trophy Case</h2>
+        <div style="margin-bottom:1.5rem; text-align:center;">
+          <div id="achievements-progress"
+            style="font-size:1.2rem; font-weight:700; color:var(--accent-end); margin-bottom:0.5rem;">0 / 0 Unlocked
+          </div>
+          <div class="progress-bar-bg"
+            style="width:100%; height:8px; background:var(--input-bg); border-radius:10px; overflow:hidden;">
+            <div id="achievements-progress-bar"
+              style="width:0%; height:100%; background:var(--accent-gradient); transition: width 0.5s ease;"></div>
+          </div>
+        </div>
+        <div id="achievements-grid-container"></div>
       </div>
     </div>
 
     <!-- VIEW 4: TOOLS -->
     <div id="view-tools" class="view-section">
       <div class="card">
-        <h2><span class="icon">🧮</span> 1RM Calculator</h2>
+        <h2><span class="icon"><i class="ri-calculator-fill"></i></span> 1RM Calculator</h2>
         <div class="calculator-grid">
           <input type="text" id="calc-exercise" placeholder="Exercise Name (Optional)" />
           <div class="calc-inputs">
@@ -265,7 +288,7 @@
         </div>
       </div>
       <div class="card">
-        <h2><span class="icon">🏆</span> Personal Records</h2>
+        <h2><span class="icon"><i class="ri-cup-fill"></i></span> Personal Records</h2>
         <div id="pr-section">
           <ul id="pr-list"></ul>
         </div>
@@ -275,11 +298,12 @@
     <!-- VIEW 5: SETTINGS -->
     <div id="view-settings" class="view-section">
       <div class="card">
-        <h2><span class="icon">🧰</span> Data Management</h2>
+        <h2><span class="icon"><i class="ri-database-2-fill"></i></span> Data Management</h2>
         <div class="data-info"><strong>Data Status:</strong> <span id="data-status">Loading...</span></div>
-        <div class="button-row"><button id="export-btn"><span class="icon-btn">📤</span> Export</button><button
-            id="import-btn"><span class="icon-btn">📥</span> Import</button></div>
-        <button id="clear-btn"><span class="icon-btn">🗑️</span> Clear All Data</button>
+        <div class="button-row"><button id="export-btn"><span class="icon-btn"><i class="ri-download-2-fill"></i></span>
+            Export</button><button id="import-btn"><span class="icon-btn"><i class="ri-upload-2-fill"></i></span>
+            Import</button></div>
+        <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All Data</button>
         <input type="file" id="import-input" accept=".json" class="hidden" />
       </div>
     </div>
@@ -289,23 +313,27 @@
   <!-- Mobile Bottom Navigation -->
   <nav class="bottom-nav">
     <div class="nav-item active" data-target="view-home">
-      <span class="icon">🏠</span>
+      <span class="icon"><i class="ri-home-4-line"></i></span>
       <span class="label">Home</span>
     </div>
     <div class="nav-item" data-target="view-analytics">
-      <span class="icon">📊</span>
+      <span class="icon"><i class="ri-bar-chart-grouped-line"></i></span>
       <span class="label">Analytics</span>
     </div>
     <div class="nav-item" data-target="view-history">
-      <span class="icon">📅</span>
+      <span class="icon"><i class="ri-calendar-todo-line"></i></span>
       <span class="label">History</span>
     </div>
+    <div class="nav-item" data-target="view-achievements">
+      <span class="icon"><i class="ri-trophy-line"></i></span>
+      <span class="label">Awards</span>
+    </div>
     <div class="nav-item" data-target="view-tools">
-      <span class="icon">🛠️</span>
+      <span class="icon"><i class="ri-tools-line"></i></span>
       <span class="label">Tools</span>
     </div>
     <div class="nav-item" data-target="view-settings">
-      <span class="icon">⚙️</span>
+      <span class="icon"><i class="ri-settings-4-line"></i></span>
       <span class="label">Settings</span>
     </div>
   </nav>
