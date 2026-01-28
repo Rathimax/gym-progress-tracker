@@ -702,18 +702,16 @@ document.addEventListener('DOMContentLoaded', () => {
         root.style.setProperty('--accent-gradient', gradient);
 
         // Update Ambient Background (Opacity variations)
-        // We use a little trick: convert hex to rgb for rgba usage or just use hex with opacity if browser supports it (modern browsers do #RRGGBBAA)
-        // But for safety/consistency with existing code which used rgba(), we might stick to simple calc or just use the hex in the gradient as they are background images.
-        // The existing CSS uses rgba(). Let's try to just update the colors in the radial gradient directly.
-        // Actually, the CSS uses 'rgba(..., 0.15)'. We can approximate by just using the start/end colors 
-        // and letting opacity be handled if we could, but CSS var interpolation in rgba() is tricky without broken-out r,g,b values.
-        // For now, let's just update the accent variables as that covers 90% of the UI. 
-        // For the ambient background, we can override the background-image property on body directly.
-
         document.body.style.backgroundImage = `
             radial-gradient(circle at 0% 0%, ${hexToRgba(theme.start, 0.15)} 0%, transparent 50%),
             radial-gradient(circle at 100% 100%, ${hexToRgba(theme.end, 0.15)} 0%, transparent 50%)
         `;
+
+        // Update Mobile Status Bar (meta theme-color)
+        const metaThemeColor = document.querySelector("meta[name=theme-color]");
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute("content", theme.start);
+        }
 
         if (save) {
             localStorage.setItem('appTheme', JSON.stringify(theme));
