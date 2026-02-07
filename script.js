@@ -420,7 +420,41 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => elements.notification.classList.remove('show'), 3000);
     };
 
-    const hideLoader = () => { elements.loader.style.opacity = '0'; setTimeout(() => elements.loader.style.visibility = 'hidden', 500); };
+    // Equipment Cycling Animation for Custom Loader
+    const startLoaderAnimation = () => {
+        const equipment = ['dumbbell', 'barbell', 'kettlebell'];
+        let currentIndex = 0;
+
+        const cycleEquipment = () => {
+            // Remove active class from all equipment
+            equipment.forEach(eq => {
+                const el = document.querySelector(`.${eq}`);
+                if (el) el.classList.remove('active');
+            });
+
+            // Add active class to current equipment
+            const currentEl = document.querySelector(`.${equipment[currentIndex]}`);
+            if (currentEl) currentEl.classList.add('active');
+
+            // Move to next equipment
+            currentIndex = (currentIndex + 1) % equipment.length;
+        };
+
+        // Start cycling (change every 1.2 seconds)
+        cycleEquipment(); // Initial
+        const cycleInterval = setInterval(cycleEquipment, 1200);
+
+        return cycleInterval;
+    };
+
+    // Start the animation immediately
+    let loaderInterval = startLoaderAnimation();
+
+    const hideLoader = () => {
+        if (loaderInterval) clearInterval(loaderInterval);
+        elements.loader.style.opacity = '0';
+        setTimeout(() => elements.loader.style.visibility = 'hidden', 600);
+    };
 
     const playBeep = () => {
         try {
