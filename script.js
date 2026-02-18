@@ -2,7 +2,7 @@
 // 1. IMPORTS & FIREBASE CONFIGURATION
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
@@ -21,6 +21,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+// auth.useDeviceLanguage(); // Optional: Localize language
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         importBtn: document.getElementById('import-btn'),
         importInput: document.getElementById('import-input'),
         clearBtn: document.getElementById('clear-btn'),
+        logoutBtn: document.getElementById('logout-btn'), // New Logout Button
         themeToggle: document.getElementById('theme-toggle'),
         loader: document.getElementById('loader'),
         notification: document.getElementById('notification'),
@@ -415,9 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. HELPER FUNCTIONS
     // ==========================================
     const showNotification = (msg, type = 'success') => {
-        elements.notification.textContent = msg;
-        elements.notification.className = `notification show ${type}`;
-        setTimeout(() => elements.notification.classList.remove('show'), 3000);
+        const notif = document.getElementById('notification');
+        if (!notif) return;
+        notif.textContent = msg;
+        notif.className = `notification show ${type}`;
+        setTimeout(() => notif.classList.remove('show'), 3000);
     };
 
     // Equipment Cycling Animation for Custom Loader
@@ -974,6 +978,10 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('appTheme', JSON.stringify(theme));
             showNotification(`Theme set to ${theme.name}`, 'success');
         }
+        // LOGOUT BTN LISTENER
+        if (elements.logoutBtn) {
+            elements.logoutBtn.addEventListener('click', handleLogout);
+        }
     };
 
     // Preferences Logic ==============================
@@ -1142,24 +1150,120 @@ document.addEventListener('DOMContentLoaded', () => {
     // 8. INIT
     // ==========================================
     const init = async () => {
-        try { await signInAnonymously(auth); await loadDataFromServer(); } catch (e) { console.error(e); } finally {
-            applyCustomDropdown(elements.exerciseSelect);
-            setupEventListeners();
-            initThemes();
-            initPreferences();
+        applyCustomDropdown(elements.exerciseSelect);
+        setupEventListeners();
+        initAuth(); // New Auth Flow
+        initThemes();
+        initPreferences();
 
-            // Init Modules
-            routinesModule = initRoutines(app, db, auth, elements);
-            gamificationModule = initGamification();
+        // Init Modules
+        routinesModule = initRoutines(app, db, auth, elements);
+        gamificationModule = initGamification();
 
-            updateAllUI();
-            hideLoader();
-            document.querySelector('.nav-item[data-target="view-home"]').click();
+        // Hide loader initially, but UI might be locked until auth
+        hideLoader();
+    };
 
-            // First Visit Award?
-            if (data.length === 0) {
-                // fresh user logic
+    // ==========================================
+    // 9. AUTHENTICATION LOGIC
+    // ==========================================
+    const initAuth = () => {
+        const authModal = document.getElementById('auth-modal');
+        const googleBtn = document.getElementById('btn-google-login');
+        const authForm = document.getElementById('auth-form');
+        const validEmailInput = document.getElementById('auth-email');
+        const validPassInput = document.getElementById('auth-password');
+        const switchBtn = document.getElementById('auth-switch-btn');
+        const switchText = document.getElementById('auth-switch-text');
+        const authTitle = document.getElementById('auth-title');
+        let isSignUp = false;
+
+        // AUTH STATE LISTENER
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                authModal.style.display = 'none';
+                showNotification(`Welcome back, ${user.displayName || user.email}!`);
+                updateDataStatus();
+                // Load Data
+                await loadDataFromServer();
+                updateAllUI();
+            } else {
+                // User is signed out
+                authModal.style.display = 'flex';
+                data = [];
+                bwData = [];
+                updateAllUI();
             }
+        });
+
+        // GOOGLE LOGIN
+        if (googleBtn) {
+            googleBtn.addEventListener('click', async () => {
+                const provider = new GoogleAuthProvider();
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (error) {
+                    console.error(error);
+                    showNotification(error.message, 'error');
+                }
+            });
+        }
+
+        // EMAIL LOGIN / SIGN UP
+        if (authForm) {
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = validEmailInput.value;
+                const password = validPassInput.value;
+
+                try {
+                    if (isSignUp) {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                        showNotification("Account created successfully!");
+                    } else {
+                        await signInWithEmailAndPassword(auth, email, password);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    let msg = error.message;
+                    if (error.code === 'auth/wrong-password') msg = "Incorrect password.";
+                    if (error.code === 'auth/user-not-found') msg = "No user found with this email.";
+                    if (error.code === 'auth/email-already-in-use') msg = "Email already in use.";
+                    showNotification(msg, 'error');
+                }
+            });
+        }
+
+        // TOGGLE SIGN UP MODE
+        if (switchBtn) {
+            switchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                isSignUp = !isSignUp;
+                if (isSignUp) {
+                    authTitle.textContent = "Create Account";
+                    document.getElementById('btn-auth-submit').textContent = "Sign Up";
+                    switchText.textContent = "Already have an account?";
+                    switchBtn.textContent = "Sign In";
+                } else {
+                    authTitle.textContent = "Welcome to FitTrack";
+                    document.getElementById('btn-auth-submit').textContent = "Sign In";
+                    switchText.textContent = "Don't have an account?";
+                    switchBtn.textContent = "Sign Up";
+                }
+            });
+        }
+    };
+
+    // LOGOUT FUNCTION
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            showNotification("Logged out successfully.");
+            // Optional: Reload page to clear any in-memory state artifacts
+            // window.location.reload(); 
+        } catch (error) {
+            console.error(error);
         }
     };
     init();

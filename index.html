@@ -75,6 +75,41 @@
   </div>
   <div id="notification" class="notification" role="alert" aria-live="polite"></div>
 
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="modal" style="display:flex; z-index: 20000;">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <h2 id="auth-title" style="margin-bottom: 1rem;">Welcome to FitTrack</h2>
+      <p style="color: var(--text-light); margin-bottom: 2rem;">Sign in to save your progress correctly.</p>
+
+      <button id="btn-google-login" class="btn-primary"
+        style="background: white; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1.5rem; width: 100%;">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20">
+        Sign in with Google
+      </button>
+
+      <div class="divider"
+        style="display: flex; align-items: center; margin: 1.5rem 0; color: var(--text-light); font-size: 0.8rem;">
+        <span style="flex: 1; height: 1px; background: var(--card-border);"></span>
+        <span style="padding: 0 10px;">OR</span>
+        <span style="flex: 1; height: 1px; background: var(--card-border);"></span>
+      </div>
+
+      <form id="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
+        <input type="email" id="auth-email" placeholder="Email Address" required
+          style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);">
+        <input type="password" id="auth-password" placeholder="Password" required
+          style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);">
+        <button type="submit" id="btn-auth-submit" class="btn-primary" style="width: 100%;">Sign In</button>
+      </form>
+
+      <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-light);">
+        <span id="auth-switch-text">Don't have an account?</span>
+        <a href="#" id="auth-switch-btn" style="color: var(--accent-end); font-weight: 600; text-decoration: none;">Sign
+          Up</a>
+      </p>
+    </div>
+  </div>
+
   <!-- Mobile Navigation Overlay (Removed) -->
 
   <!-- Sidebar -->
@@ -570,6 +605,8 @@
             Export</button><button id="import-btn"><span class="icon-btn"><i class="ri-upload-2-fill"></i></span>
             Import</button></div>
         <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All Data</button>
+        <button id="logout-btn" style="background-color: var(--text-light); margin-top: 1rem;"><span class="icon-btn"><i
+              class="ri-logout-box-r-line"></i></span> Logout</button>
         <input type="file" id="import-input" accept=".json" class="hidden" />
       </div>
       <div class="card">
