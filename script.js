@@ -95,7 +95,39 @@ document.addEventListener('DOMContentLoaded', () => {
         // Achievements
         achievementsGrid: document.getElementById('achievements-grid-container'),
         achievementsProgress: document.getElementById('achievements-progress'),
-        achievementsProgressBar: document.getElementById('achievements-progress-bar')
+        achievementsProgressBar: document.getElementById('achievements-progress-bar'),
+
+        // BMI & Body Fat
+        bmiHeight: document.getElementById('bmi-height'),
+        bmiHeightFt: document.getElementById('bmi-height-ft'),
+        bmiHeightIn: document.getElementById('bmi-height-in'),
+        bmiHeightCmWrapper: document.getElementById('bmi-height-cm-wrapper'),
+        bmiHeightFtWrapper: document.getElementById('bmi-height-ft-wrapper'),
+        bmiUnitRadios: document.querySelectorAll('input[name="bmi-height-unit"]'),
+        bmiRefreshBtn: document.getElementById('btn-bmi-refresh'),
+
+        bmiWeight: document.getElementById('bmi-weight'),
+        btnCalculateBMI: document.getElementById('btn-calculate-bmi'),
+        bmiResultsArea: document.getElementById('bmi-results-area'),
+        bmiValue: document.getElementById('bmi-value'),
+        bmiCategory: document.getElementById('bmi-category'),
+
+        bfGender: document.getElementById('bf-gender'),
+        bfHeight: document.getElementById('bf-height'),
+        bfWaist: document.getElementById('bf-waist'),
+        bfNeck: document.getElementById('bf-neck'),
+        bfHip: document.getElementById('bf-hip'),
+        bfFemaleInputs: document.getElementById('bf-female-inputs'),
+        btnCalculateBF: document.getElementById('btn-calculate-bf'),
+        bfResultsArea: document.getElementById('bf-results-area'),
+        bfValue: document.getElementById('bf-value'),
+        bfCategory: document.getElementById('bf-category'),
+
+        // Body Fat Info Modal
+        btnBfInfo: document.getElementById('btn-bf-info'),
+        modalBfInfo: document.getElementById('modal-bf-info'),
+        closeBfInfo: document.getElementById('close-bf-info'),
+        btnCloseBfInfoModal: document.getElementById('btn-close-bf-info-modal'),
     };
 
     // State
@@ -480,6 +512,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calculate1RM = (weight, reps) => { if (!weight || !reps) return 0; if (reps === 1) return weight; return Math.round(weight * (1 + reps / 30)); };
 
+    const calculateBMI = (h, w) => {
+        if (!h || !w) return null;
+        return (w / ((h / 100) ** 2)).toFixed(1);
+    };
+
+    const getBMICategory = (bmi) => {
+        if (bmi < 18.5) return "Underweight";
+        if (bmi < 24.9) return "Normal Weight";
+        if (bmi < 29.9) return "Overweight";
+        return "Obese";
+    };
+
+    const calculateBodyFat = (gender, h, w, n, hip) => {
+        // US Navy Method
+        if (gender === 'male') {
+            // 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
+            if (w - n <= 0) return null;
+            const res = 495 / (1.0324 - 0.19077 * Math.log10(w - n) + 0.15456 * Math.log10(h)) - 450;
+            return res.toFixed(1);
+        } else {
+            // 495 / (1.29579 - 0.35004 * log10(waist + hip - neck) + 0.22100 * log10(height)) - 450
+            if (w + hip - n <= 0) return null;
+            const res = 495 / (1.29579 - 0.35004 * Math.log10(w + hip - n) + 0.22100 * Math.log10(h)) - 450;
+            return res.toFixed(1);
+        }
+    };
+
     // ==========================================
     // 4. DATABASE FUNCTIONS
     // ==========================================
@@ -812,6 +871,116 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.calcMaxDisplay.textContent = `${max} ${getUnitLabel()}`;
             elements.calcResultsArea.classList.remove('hidden');
             elements.percentageList.innerHTML = [95, 90, 85, 80, 75, 70, 65, 60].map(p => `<tr><td>${p}%</td><td>${Math.round(max * (p / 100))} ${getUnitLabel()}</td><td>~${Math.max(1, Math.round(30 * ((max / (max * (p / 100))) - 1)))} reps</td></tr>`).join('');
+        });
+
+        // BMI Listener
+        if (elements.btnCalculateBMI) {
+            // Unit Toggle
+            elements.bmiUnitRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'ft') {
+                        elements.bmiHeightCmWrapper.classList.add('hidden');
+                        elements.bmiHeightFtWrapper.classList.remove('hidden');
+                        elements.bmiHeightFtWrapper.style.display = 'grid'; // Ensure grid layout
+                    } else {
+                        elements.bmiHeightFtWrapper.classList.add('hidden');
+                        elements.bmiHeightFtWrapper.style.display = 'none';
+                        elements.bmiHeightCmWrapper.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Refresh
+            if (elements.bmiRefreshBtn) {
+                elements.bmiRefreshBtn.addEventListener('click', () => {
+                    elements.bmiHeight.value = '';
+                    elements.bmiHeightFt.value = '';
+                    elements.bmiHeightIn.value = '';
+                    elements.bmiWeight.value = '';
+                    elements.bmiResultsArea.classList.add('hidden');
+                    showNotification("BMI Calculator Reset", "info");
+                });
+            }
+
+            elements.btnCalculateBMI.addEventListener('click', () => {
+                let h = 0;
+                // Check unit
+                const unit = document.querySelector('input[name="bmi-height-unit"]:checked').value;
+
+                if (unit === 'ft') {
+                    const ft = parseFloat(elements.bmiHeightFt.value) || 0;
+                    const inc = parseFloat(elements.bmiHeightIn.value) || 0;
+                    if (!ft && !inc) return showNotification("Enter height", "error");
+                    // Convert to CM: (ft * 12 + in) * 2.54
+                    h = ((ft * 12) + inc) * 2.54;
+                } else {
+                    h = parseFloat(elements.bmiHeight.value);
+                }
+
+                const w = parseFloat(elements.bmiWeight.value);
+
+                if (!h || !w) return showNotification("Enter height & weight", "error");
+
+                const bmi = calculateBMI(h, w);
+                const cat = getBMICategory(bmi);
+                elements.bmiValue.textContent = bmi;
+                elements.bmiCategory.textContent = cat;
+                elements.bmiResultsArea.classList.remove('hidden');
+            });
+        }
+
+        // Body Fat Listener
+        if (elements.bfGender) {
+            elements.bfGender.addEventListener('change', (e) => {
+                if (e.target.value === 'female') elements.bfFemaleInputs.classList.remove('hidden');
+                else elements.bfFemaleInputs.classList.add('hidden');
+            });
+        }
+        if (elements.btnCalculateBF) {
+            elements.btnCalculateBF.addEventListener('click', () => {
+                const gender = elements.bfGender.value;
+                const h = parseFloat(elements.bfHeight.value);
+                const w = parseFloat(elements.bfWaist.value);
+                const n = parseFloat(elements.bfNeck.value);
+                const hip = elements.bfFemaleInputs.classList.contains('hidden') ? 0 : parseFloat(elements.bfHip.value);
+
+                if (!h || !w || !n) return showNotification("Enter all fields", "error");
+                if (gender === 'female' && !hip) return showNotification("Enter hip measurement", "error");
+
+                const bf = calculateBodyFat(gender, h, w, n, hip);
+                if (!bf || bf < 0) return showNotification("Invalid inputs", "error");
+
+                elements.bfValue.textContent = bf + "%";
+                elements.bfValue.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-end'); // Use CSS variable color if possible, or js reference
+                elements.bfCategory.textContent = getBFCategory(gender, bf);
+                elements.bfResultsArea.classList.remove('hidden');
+            });
+        }
+
+        // Body Fat Info Modal Listeners
+        if (elements.btnBfInfo) {
+            elements.btnBfInfo.addEventListener('click', () => {
+                elements.modalBfInfo.classList.remove('hidden');
+            });
+        }
+
+        if (elements.closeBfInfo) {
+            elements.closeBfInfo.addEventListener('click', () => {
+                elements.modalBfInfo.classList.add('hidden');
+            });
+        }
+
+        if (elements.btnCloseBfInfoModal) {
+            elements.btnCloseBfInfoModal.addEventListener('click', () => {
+                elements.modalBfInfo.classList.add('hidden');
+            });
+        }
+
+        // Close on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target === elements.modalBfInfo) {
+                elements.modalBfInfo.classList.add('hidden');
+            }
         });
         elements.historyList.addEventListener('click', async (e) => { if (e.target.classList.contains('delete-item-btn') && confirm("Delete?")) { if (await deleteWorkoutFromServer(e.target.dataset.id)) { data = data.filter(i => i.id !== e.target.dataset.id); updateAllUI(); showNotification("Deleted."); } } });
         elements.bwForm.addEventListener('submit', async (e) => { e.preventDefault(); const w = parseFloat(elements.bwInput.value); if (w) { const id = await addBodyWeightToServer({ weight: w, date: elements.bwDate.value }); bwData.push({ id, weight: w, date: elements.bwDate.value }); bwData.sort((a, b) => new Date(a.date) - new Date(b.date)); updateAllUI(); showNotification("Logged."); } });
