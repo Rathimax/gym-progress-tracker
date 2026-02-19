@@ -114,6 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bfGender: document.getElementById('bf-gender'),
         bfHeight: document.getElementById('bf-height'),
+        bfHeightFt: document.getElementById('bf-height-ft'),
+        bfHeightIn: document.getElementById('bf-height-in'),
+        bfHeightCmWrapper: document.getElementById('bf-height-cm-wrapper'),
+        bfHeightFtWrapper: document.getElementById('bf-height-ft-wrapper'),
+        bfUnitRadios: document.querySelectorAll('input[name="bf-height-unit"]'),
+
         bfWaist: document.getElementById('bf-waist'),
         bfNeck: document.getElementById('bf-neck'),
         bfHip: document.getElementById('bf-hip'),
@@ -510,34 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fire(0.25, { spread: 26, startVelocity: 55 }); fire(0.2, { spread: 60 }); fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 }); fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 }); fire(0.1, { spread: 120, startVelocity: 45 });
     };
 
-    const calculate1RM = (weight, reps) => { if (!weight || !reps) return 0; if (reps === 1) return weight; return Math.round(weight * (1 + reps / 30)); };
-
-    const calculateBMI = (h, w) => {
-        if (!h || !w) return null;
-        return (w / ((h / 100) ** 2)).toFixed(1);
-    };
-
-    const getBMICategory = (bmi) => {
-        if (bmi < 18.5) return "Underweight";
-        if (bmi < 24.9) return "Normal Weight";
-        if (bmi < 29.9) return "Overweight";
-        return "Obese";
-    };
-
-    const calculateBodyFat = (gender, h, w, n, hip) => {
-        // US Navy Method
-        if (gender === 'male') {
-            // 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
-            if (w - n <= 0) return null;
-            const res = 495 / (1.0324 - 0.19077 * Math.log10(w - n) + 0.15456 * Math.log10(h)) - 450;
-            return res.toFixed(1);
-        } else {
-            // 495 / (1.29579 - 0.35004 * log10(waist + hip - neck) + 0.22100 * log10(height)) - 450
-            if (w + hip - n <= 0) return null;
-            const res = 495 / (1.29579 - 0.35004 * Math.log10(w + hip - n) + 0.22100 * Math.log10(h)) - 450;
-            return res.toFixed(1);
-        }
-    };
+    // Helpers moved to end of file to fix scope
 
     // ==========================================
     // 4. DATABASE FUNCTIONS
@@ -936,10 +915,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 else elements.bfFemaleInputs.classList.add('hidden');
             });
         }
+
+        // Body Fat Unit Toggle
+        if (elements.bfUnitRadios) {
+            elements.bfUnitRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'ft') {
+                        elements.bfHeightCmWrapper.classList.add('hidden');
+                        elements.bfHeightFtWrapper.classList.remove('hidden');
+                    } else {
+                        elements.bfHeightFtWrapper.classList.add('hidden');
+                        elements.bfHeightCmWrapper.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
         if (elements.btnCalculateBF) {
             elements.btnCalculateBF.addEventListener('click', () => {
                 const gender = elements.bfGender.value;
-                const h = parseFloat(elements.bfHeight.value);
+                let h = 0;
+
+                // Check unit
+                const unit = document.querySelector('input[name="bf-height-unit"]:checked').value;
+
+                if (unit === 'ft') {
+                    const ft = parseFloat(elements.bfHeightFt.value) || 0;
+                    const inc = parseFloat(elements.bfHeightIn.value) || 0;
+                    h = ((ft * 12) + inc) * 2.54;
+                } else {
+                    h = parseFloat(elements.bfHeight.value);
+                }
+
                 const w = parseFloat(elements.bfWaist.value);
                 const n = parseFloat(elements.bfNeck.value);
                 const hip = elements.bfFemaleInputs.classList.contains('hidden') ? 0 : parseFloat(elements.bfHip.value);
@@ -948,7 +955,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (gender === 'female' && !hip) return showNotification("Enter hip measurement", "error");
 
                 const bf = calculateBodyFat(gender, h, w, n, hip);
-                if (!bf || bf < 0) return showNotification("Invalid inputs", "error");
+
+                if (!bf || bf <= 0) return showNotification("Invalid inputs", "error");
 
                 elements.bfValue.textContent = bf + "%";
                 elements.bfValue.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-end'); // Use CSS variable color if possible, or js reference
@@ -1435,5 +1443,56 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
         }
     };
+
+    // ==========================================
+    // HELPER FUNCTIONS (Moved inside scope)
+    // ==========================================
+    const calculateBMI = (h, w) => {
+        const m = h / 100;
+        return (w / (m * m)).toFixed(1);
+    };
+
+    const getBMICategory = (bmi) => {
+        if (bmi < 18.5) return "Underweight";
+        if (bmi < 25) return "Normal weight";
+        if (bmi < 30) return "Overweight";
+        return "Obese";
+    };
+
+    const calculateBodyFat = (gender, h, w, n, hip) => {
+        let bf = 0;
+        try {
+            if (gender === 'male') {
+                if (w - n <= 0) return 0;
+                bf = 495 / (1.0324 - 0.19077 * Math.log10(w - n) + 0.15456 * Math.log10(h)) - 450;
+            } else {
+                if (w + hip - n <= 0) return 0;
+                bf = 495 / (1.29579 - 0.35004 * Math.log10(w + hip - n) + 0.22100 * Math.log10(h)) - 450;
+            }
+            return Math.max(0, bf).toFixed(1);
+        } catch (e) {
+            return 0;
+        }
+    };
+
+    const getBFCategory = (gender, bf) => {
+        bf = parseFloat(bf);
+        if (gender === 'male') {
+            if (bf < 6) return "Essential Fat";
+            if (bf < 14) return "Athletes";
+            if (bf < 18) return "Fitness";
+            if (bf < 25) return "Average";
+            return "Obese";
+        } else {
+            if (bf < 14) return "Essential Fat";
+            if (bf < 21) return "Athletes";
+            if (bf < 25) return "Fitness";
+            if (bf < 32) return "Average";
+            return "Obese";
+        }
+    };
+
+    const calculate1RM = (w, r) => { if (!weight || !reps) return 0; if (reps === 1) return weight; return Math.round(weight * (1 + reps / 30)); };
+
     init();
 });

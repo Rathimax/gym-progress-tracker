@@ -21,7 +21,7 @@
     href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Outfit:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap"
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=14">
 </head>
 
 <body>
@@ -642,16 +642,40 @@
           <h2><span class="icon"><i class="ri-body-scan-fill"></i></span> Body Fat % (Navy Method)</h2>
           <button id="btn-bf-info" class="refresh-btn" title="Information"><i class="ri-information-line"></i></button>
         </div>
-        <div class="calculator-grid" style="gap: 1rem;">
-          <div class="calc-inputs" style="grid-template-columns: 1fr 1fr;">
+        <div class="calculator-grid" style="gap: 2rem;">
+          <!-- Unit Toggle -->
+          <div class="unit-toggle-container">
+            <div class="unit-toggle-group">
+              <label class="unit-radio-label">
+                <input type="radio" name="bf-height-unit" value="cm" checked> CM
+              </label>
+              <label class="unit-radio-label">
+                <input type="radio" name="bf-height-unit" value="ft"> FT
+              </label>
+            </div>
+          </div>
+
+          <div class="calc-inputs">
             <select id="bf-gender"
               style="padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);">
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
-            <input type="number" id="bf-height" placeholder="Height (cm)" />
           </div>
-          <div class="calc-inputs" style="grid-template-columns: 1fr 1fr;">
+
+          <div class="calc-inputs">
+            <!-- CM Input -->
+            <div id="bf-height-cm-wrapper" style="width: 100%;">
+              <input type="number" id="bf-height" placeholder="Height (cm)" />
+            </div>
+
+            <!-- FT/IN Input -->
+            <div id="bf-height-ft-wrapper" class="bmi-inputs-row hidden" style="width: 100%;">
+              <input type="number" id="bf-height-ft" placeholder="Feet" />
+              <input type="number" id="bf-height-in" placeholder="Inches" />
+            </div>
+          </div>
+          <div class="calc-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
             <input type="number" id="bf-waist" placeholder="Waist (cm)" />
             <input type="number" id="bf-neck" placeholder="Neck (cm)" />
           </div>
@@ -854,7 +878,7 @@
   <script
     src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-  <script type="module" src="script.js?v=4"></script>
+  <script type="module" src="script.js?v=16"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {
