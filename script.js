@@ -65,7 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
         historyControls: document.getElementById('history-controls'),
         historyList: document.getElementById('history-list'),
         prList: document.getElementById('pr-list'),
-        dataStatus: document.getElementById('data-status'),
+        dataStatusWorkouts: document.getElementById('data-status-workouts'),
+        dataStatusUser: document.getElementById('data-status-user'),
         exportBtn: document.getElementById('export-btn'),
         importBtn: document.getElementById('import-btn'),
         importInput: document.getElementById('import-input'),
@@ -151,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userPreferences = {
         font: 'modern',
         compactMode: false,
+        darkMode: false,
         units: 'kg', // 'kg' or 'lbs'
         avatar: null, // DataURL or null
         avatarType: 'image' // 'image' or 'emoji'
@@ -454,6 +456,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 3. HELPER FUNCTIONS
     // ==========================================
+    window.showConfirmDialog = (title, message, onOk) => {
+        const overlay = document.getElementById('custom-confirm-overlay');
+        if (!overlay) return;
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = message;
+        const btnOk = document.getElementById('btn-confirm-ok');
+        const btnCancel = document.getElementById('btn-confirm-cancel');
+        const closeModal = () => overlay.classList.add('hidden');
+        btnCancel.onclick = closeModal;
+        btnOk.onclick = () => { closeModal(); if (onOk) onOk(); };
+        overlay.classList.remove('hidden');
+    };
     const showNotification = (msg, type = 'success') => {
         const notif = document.getElementById('notification');
         if (!notif) return;
@@ -537,7 +551,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateCalories = (workout) => { const intensity = EXERCISE_INTENSITY_FACTORS[workout.exercise] || EXERCISE_INTENSITY_FACTORS['default']; let duration = (workout.durationMinutes || 0) + ((workout.durationSeconds || 0) / 60); if (duration === 0) duration = (workout.sets || 1) * 1.5; return duration * intensity; };
     const calculatePRs = () => { prMap = {}; prDates = {}; data.forEach(w => { if (w.weight && (!prMap[w.exercise] || w.weight > prMap[w.exercise])) { prMap[w.exercise] = w.weight; prDates[w.exercise] = w.date; } }); };
 
-    const updateAllUI = () => { calculatePRs(); updateDataStatus(); updateStats(); updateBodyWeightStats(); updateHistory(); updatePRSection(); updateAnalyticsDropdown(); updateChart(); updateMuscleHeatmap(); };
+    const updateAllUI = () => { calculatePRs(); updateDataStatus(); updateStats(); updateBodyWeightStats(); updateHistory(); updatePRSection(); updateAnalyticsDropdown(); updateChart(); updateMuscleHeatmap(); updateWeeklySummary(); populatePRHistoryDropdown(); };
+
+
+    // ─── Weekly Summary ──────────────────────────────────────────────────────
+    const updateWeeklySummary = () => {
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
+        startOfWeek.setHours(0, 0, 0, 0);
+        const weekData = data.filter(w => new Date(w.date) >= startOfWeek);
+        const workoutCount = new Set(weekData.map(w => w.date?.substring(0, 10))).size;
+        const totalVolume = weekData.reduce((sum, w) => sum + ((w.weight || 0) * (w.sets || 1) * (w.reps || 1)), 0);
+        const totalTimeMins = weekData.reduce((sum, w) => sum + (w.durationMinutes || 0) + ((w.durationSeconds || 0) / 60), 0);
+        const muscleCounts = {};
+        weekData.forEach(w => {
+            const ex = w.exercise || '';
+            const entry = Object.entries(EXERCISE_MUSCLE_MAP || {}).find(([k]) => ex.toLowerCase().includes(k.toLowerCase()));
+            const rawMuscle = entry ? entry[1] : null;
+            // entry[1] may be a comma-joined string — take only the first muscle
+            const muscle = rawMuscle ? String(rawMuscle).split(',')[0].trim() : null;
+            if (muscle) muscleCounts[muscle] = (muscleCounts[muscle] || 0) + 1;
+        });
+        const topMuscle = (Object.entries(muscleCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '--').split(',')[0].trim();
+        const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+        el('week-workouts', workoutCount);
+        el('week-volume', totalVolume >= 1000 ? `${(totalVolume / 1000).toFixed(1)}t` : `${Math.round(totalVolume)} kg`);
+        el('week-time', `${Math.round(totalTimeMins)} min`);
+        el('week-muscle', topMuscle);
+    };
+
+    // ─── PR History Chart ─────────────────────────────────────────────────────
+    let prHistoryChart = null;
+    const populatePRHistoryDropdown = () => {
+        const sel = document.getElementById('pr-history-exercise');
+        if (!sel) return;
+        const exercises = [...new Set(data.filter(w => w.weight).map(w => w.exercise))].sort();
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Select an exercise to see PR history…</option>';
+        exercises.forEach(ex => { const opt = document.createElement('option'); opt.value = ex; opt.textContent = ex; sel.appendChild(opt); });
+
+        // Re-apply custom dropdown styling
+        if (typeof applyCustomDropdown === 'function') {
+            applyCustomDropdown(sel);
+        }
+
+        if (current && exercises.includes(current)) { sel.value = current; renderPRHistoryChart(current); }
+    };
+    const renderPRHistoryChart = (exerciseName) => {
+        const canvas = document.getElementById('prHistoryChart');
+        const empty = document.getElementById('pr-chart-empty');
+        if (!canvas || !exerciseName) return;
+        const byDate = {};
+        data.filter(w => w.exercise === exerciseName && w.weight)
+            .forEach(w => { const d = (w.date || '').substring(0, 10); if (!byDate[d] || w.weight > byDate[d]) byDate[d] = w.weight; });
+        const points = Object.entries(byDate).sort(([a], [b]) => a.localeCompare(b));
+        if (points.length === 0) {
+            canvas.style.display = 'none';
+            if (empty) { empty.style.display = ''; empty.textContent = 'No data logged for this exercise yet.'; }
+            return;
+        }
+        canvas.style.display = 'block';
+        if (empty) empty.style.display = 'none';
+        if (prHistoryChart) prHistoryChart.destroy();
+        prHistoryChart = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: points.map(([d]) => d),
+                datasets: [{ label: exerciseName, data: points.map(([, v]) => v), borderColor: '#f7797d', backgroundColor: 'rgba(247,121,125,0.1)', tension: 0.4, pointRadius: 5, pointHoverRadius: 7, fill: true, borderWidth: 2 }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y} kg` } } },
+                scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 6 } }, y: { beginAtZero: false, ticks: { callback: v => `${v} kg` } } }
+            }
+        });
+    };
+    document.getElementById('pr-history-exercise')?.addEventListener('change', e => renderPRHistoryChart(e.target.value));
 
     const updateMuscleHeatmap = () => {
         // 1. Calculate Volume for Last 7 Days per Muscle Group
@@ -586,7 +677,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const updateDataStatus = () => { const user = auth.currentUser; elements.dataStatus.textContent = `${data.length} workouts • User: ${user ? user.uid.slice(0, 5) : 'Guest'}`; };
+    const updateDataStatus = () => {
+        const user = auth.currentUser;
+        let userDisplay = 'Guest';
+        if (user && user.email) {
+            const emailParts = user.email.split('@');
+            if (emailParts.length === 2) {
+                const name = emailParts[0];
+                const domain = emailParts[1];
+                const maskedName = name.length > 4 ? name.substring(0, 4) + '*'.repeat(name.length - 4) : name;
+                userDisplay = `${maskedName}@${domain}`;
+            } else {
+                userDisplay = user.email;
+            }
+        }
+        if (elements.dataStatusWorkouts) elements.dataStatusWorkouts.textContent = data.length.toString();
+        if (elements.dataStatusUser) elements.dataStatusUser.textContent = userDisplay;
+    };
     const updateBodyWeightStats = () => {
         if (!bwData.length) {
             elements.bwCurrent.textContent = "--";
@@ -824,7 +931,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        elements.themeToggle.addEventListener('change', () => { document.body.classList.toggle('dark-mode'); updateChart(); });
+        elements.themeToggle.addEventListener('change', (e) => {
+            document.body.classList.toggle('dark-mode', e.target.checked);
+            userPreferences.darkMode = e.target.checked;
+            savePreferences();
+            updateChart();
+        });
         elements.timerToggleIcon.addEventListener('click', () => elements.timerWidget.classList.toggle('open')); elements.timerBtns.forEach(btn => btn.addEventListener('click', () => startTimer(parseInt(btn.dataset.time)))); elements.timerCancel.addEventListener('click', () => { clearInterval(timerInterval); elements.timerDisplay.classList.add('hidden'); elements.timerCancel.classList.add('hidden'); elements.timerWidget.classList.remove('timer-active'); });
 
         // Custom Text Input Toggle
@@ -993,10 +1105,94 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.modalBfInfo.classList.add('hidden');
             }
         });
-        elements.historyList.addEventListener('click', async (e) => { if (e.target.classList.contains('delete-item-btn') && confirm("Delete?")) { if (await deleteWorkoutFromServer(e.target.dataset.id)) { data = data.filter(i => i.id !== e.target.dataset.id); updateAllUI(); showNotification("Deleted."); } } });
+        elements.historyList.addEventListener('click', async (e) => {
+            const deleteBtn = e.target.closest('.delete-item-btn');
+            if (deleteBtn) {
+                const tempId = deleteBtn.dataset.id;
+                window.showConfirmDialog("Delete Workout?", "Are you sure you want to delete this workout?", async () => {
+                    if (await deleteWorkoutFromServer(tempId)) {
+                        data = data.filter(i => i.id !== tempId);
+                        updateAllUI();
+                        showNotification("Deleted.");
+                    }
+                });
+            }
+        });
         elements.bwForm.addEventListener('submit', async (e) => { e.preventDefault(); const w = parseFloat(elements.bwInput.value); if (w) { const id = await addBodyWeightToServer({ weight: w, date: elements.bwDate.value }); bwData.push({ id, weight: w, date: elements.bwDate.value }); bwData.sort((a, b) => new Date(a.date) - new Date(b.date)); updateAllUI(); showNotification("Logged."); } });
-        elements.exportBtn.addEventListener('click', () => { if (!data.length) return showNotification("No data.", "error"); const blob = new Blob([JSON.stringify({ workouts: data, bodyweight: bwData })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `fittrack.json`; a.click(); });
-        elements.importInput.addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async (ev) => { try { const i = JSON.parse(ev.target.result); if (i.workouts) for (const w of i.workouts) await addWorkoutToServer(w); if (i.bodyweight) for (const b of i.bodyweight) await addBodyWeightToServer(b); await loadDataFromServer(); updateAllUI(); showNotification("Imported!"); } catch (err) { showNotification("Import failed", "error"); } }; r.readAsText(f); }); elements.importBtn.addEventListener('click', () => elements.importInput.click()); elements.clearBtn.addEventListener('click', async () => { if (confirm("Delete ALL?")) { await clearAllDataOnServer(); data = []; bwData = []; updateAllUI(); } });
+        elements.exportBtn.addEventListener('click', () => {
+            if (!data.length) return showNotification("No data to export.", "error");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const accent = [247, 121, 125];
+
+            // ── Header ──
+            doc.setFillColor(...accent);
+            doc.rect(0, 0, 210, 28, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(18); doc.setTextColor(255, 255, 255);
+            doc.text('FitTrack Workout Report', 14, 12);
+            doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+            doc.text(`Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`, 14, 21);
+
+            let y = 38;
+
+            // ── Quick Stats ──
+            doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(72, 75, 106);
+            doc.text('Summary', 14, y); y += 6;
+            doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 120);
+            const totalVol = data.reduce((s, w) => s + ((w.weight || 0) * (w.sets || 1) * (w.reps || 1)), 0);
+            doc.text(`Total Workouts: ${data.length}`, 14, y);
+            doc.text(`Total Volume: ${totalVol >= 1000 ? (totalVol / 1000).toFixed(1) + 't' : Math.round(totalVol) + ' kg'}`, 90, y);
+            y += 10;
+
+            // ── Workout History Table ──
+            doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(72, 75, 106);
+            doc.text('Workout History', 14, y); y += 4;
+            doc.autoTable({
+                startY: y,
+                head: [['Date', 'Exercise', 'Reps', 'Sets', 'Weight']],
+                body: [...data].reverse().map(w => [
+                    w.date ? new Date(w.date).toLocaleDateString('en-GB') : '--',
+                    w.exercise || '--',
+                    w.reps || '--',
+                    w.sets || '--',
+                    w.weight ? `${w.weight} kg` : '--'
+                ]),
+                headStyles: { fillColor: accent, textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [250, 248, 255] },
+                styles: { fontSize: 8, cellPadding: 3 },
+                margin: { left: 14, right: 14 },
+            });
+
+            // ── PR List ──
+            y = doc.lastAutoTable.finalY + 10;
+            if (Object.keys(prMap).length > 0) {
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(72, 75, 106);
+                doc.text('Personal Records', 14, y); y += 4;
+                doc.autoTable({
+                    startY: y,
+                    head: [['Exercise', 'Best Weight']],
+                    body: Object.entries(prMap).sort(([a], [b]) => a.localeCompare(b)).map(([ex, wt]) => [ex, `${wt} kg`]),
+                    headStyles: { fillColor: accent, textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [250, 248, 255] },
+                    styles: { fontSize: 8, cellPadding: 3 },
+                    margin: { left: 14, right: 14 },
+                });
+            }
+
+            doc.save('fittrack-report.pdf');
+            showNotification('PDF exported! 📄');
+        });
+        elements.importInput.addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async (ev) => { try { const i = JSON.parse(ev.target.result); if (i.workouts) for (const w of i.workouts) await addWorkoutToServer(w); if (i.bodyweight) for (const b of i.bodyweight) await addBodyWeightToServer(b); await loadDataFromServer(); updateAllUI(); showNotification("Imported!"); } catch (err) { showNotification("Import failed", "error"); } }; r.readAsText(f); });
+        elements.importBtn.addEventListener('click', () => elements.importInput.click());
+        elements.clearBtn.addEventListener('click', async () => {
+            window.showConfirmDialog("Clear All Data?", "This will permanently delete all your workouts and body weight data.", async () => {
+                await clearAllDataOnServer();
+                data = [];
+                bwData = [];
+                updateAllUI();
+            });
+        });
 
         // MAIN SUBMIT
         elements.form.addEventListener('submit', async (e) => {
@@ -1082,13 +1278,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // THEME CUSTOMIZATION
     // ==========================================
     const THEMES = [
-        { name: 'Megatron', start: '#c6ffdd', middle: '#fbd786', end: '#f7797d' },
-        { name: 'Moonlit Astroid', start: '#0f2027', middle: '#203a43', end: '#2c5364' },
-        { name: 'Cool Sky', start: '#2980b9', end: '#6dd5fa' },
-        { name: 'Ultra Violet', start: '#654ea3', end: '#eaafc8' },
-        { name: 'Burning Orange', start: '#ff416c', end: '#ff4b2b' },
-        { name: 'Coal', start: '#eb5757', end: '#000000' },
-        { name: 'Pidget', start: '#ee9ca7', end: '#ffdde1' }
+        { name: 'Megatron', start: '#c6ffdd', middle: '#fbd786', end: '#f7797d', text: '#1e293b' },
+        { name: 'Moonlit Astroid', start: '#0f2027', middle: '#203a43', end: '#2c5364', text: '#ffffff' },
+        { name: 'Cool Sky', start: '#2980b9', end: '#6dd5fa', text: '#ffffff' },
+        { name: 'Ultra Violet', start: '#654ea3', end: '#eaafc8', text: '#ffffff' },
+        { name: 'Burning Orange', start: '#ff416c', end: '#ff4b2b', text: '#ffffff' },
+        { name: 'Coal', start: '#eb5757', end: '#000000', text: '#ffffff' },
+        { name: 'Pidget', start: '#ee9ca7', end: '#ffdde1', text: '#1e293b' },
+        { name: 'Snowflake', start: '#b5c6e0', end: '#ebf4f5', text: '#1e293b' }
     ];
 
     const initThemes = () => {
@@ -1141,6 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         root.style.setProperty('--accent-start', theme.start);
         root.style.setProperty('--accent-end', theme.end);
         root.style.setProperty('--accent-gradient', gradient);
+        root.style.setProperty('--accent-text', theme.text || '#ffffff');
 
         // Update Ambient Background (Opacity variations)
         document.body.style.backgroundImage = `
@@ -1173,6 +1371,11 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFont(userPreferences.font || 'modern');
         // Apply Compact Mode
         applyCompactMode(userPreferences.compactMode || false);
+        // Apply Dark Mode
+        if (userPreferences.darkMode) {
+            document.body.classList.add('dark-mode');
+            if (elements.themeToggle) elements.themeToggle.checked = true;
+        }
         // Apply Units
         applyUnits(userPreferences.units || 'kg');
         // Apply Avatar
@@ -1437,14 +1640,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // LOGOUT FUNCTION
     const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            showNotification("Logged out successfully.");
-            // Optional: Reload page to clear any in-memory state artifacts
-            // window.location.reload(); 
-        } catch (error) {
-            console.error(error);
-        }
+        window.showConfirmDialog("Log Out?", "Do you want to log out from this account?", async () => {
+            try {
+                await signOut(auth);
+                showNotification("Logged out successfully.");
+                // Optional: Reload page to clear any in-memory state artifacts
+                window.location.reload();
+            } catch (error) {
+                console.error(error);
+                showNotification("Failed to log out.", "error");
+            }
+        });
     };
 
     // ==========================================

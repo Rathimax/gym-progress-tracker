@@ -21,7 +21,7 @@
     href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Outfit:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap"
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=28">
 </head>
 
 <body>
@@ -75,8 +75,21 @@
   </div>
   <div id="notification" class="notification" role="alert" aria-live="polite"></div>
 
+  <!-- Custom Confirm Modal -->
+  <div id="custom-confirm-overlay" class="confirm-overlay hidden">
+    <div class="confirm-modal">
+      <div class="confirm-icon"><i class="ri-error-warning-fill"></i></div>
+      <h3 id="confirm-title">Are you sure?</h3>
+      <p id="confirm-message">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button id="btn-confirm-cancel">Cancel</button>
+        <button id="btn-confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- AUTH MODAL -->
-  <div id="auth-modal" class="modal" style="display:flex; z-index: 20000;">
+  <div id="auth-modal" class="modal" style="display:none; z-index: 20000;">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
       <h2 id="auth-title" style="margin-bottom: 1rem;">Welcome to FitTrack</h2>
       <p style="color: var(--text-light); margin-bottom: 2rem;">Sign in to save your progress correctly.</p>
@@ -171,7 +184,6 @@
         <div id="routine-checklist" class="checklist-grid"></div>
       </div>
 
-
       <!-- Log Workout -->
       <div class="card card-log-workout">
         <div
@@ -179,7 +191,7 @@
           <h2 style="border:none; margin:0; padding:0;"><span class="icon"><i class="ri-edit-circle-fill"></i></span>
             Log Workout</h2>
           <button id="btn-open-routines"
-            style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-end); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px;">
+            style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-text, var(--accent-end)); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px;">
             <span><i class="ri-folder-open-fill"></i></span> Load Routine
           </button>
         </div>
@@ -444,6 +456,30 @@
 
     <!-- VIEW 3: HISTORY -->
     <div id="view-history" class="view-section">
+
+      <!-- Weekly Summary Card -->
+      <div id="weekly-summary-card" class="card card-wide">
+        <h2><span class="icon"><i class="ri-calendar-check-fill"></i></span> This Week</h2>
+        <div class="weekly-grid">
+          <div class="weekly-stat">
+            <div class="weekly-stat-value" id="week-workouts">0</div>
+            <div class="weekly-stat-label"><i class="ri-fire-fill"></i> Workouts</div>
+          </div>
+          <div class="weekly-stat">
+            <div class="weekly-stat-value" id="week-volume">0 kg</div>
+            <div class="weekly-stat-label"><i class="ri-weight-fill"></i> Volume</div>
+          </div>
+          <div class="weekly-stat">
+            <div class="weekly-stat-value" id="week-time">0 min</div>
+            <div class="weekly-stat-label"><i class="ri-time-fill"></i> Time</div>
+          </div>
+          <div class="weekly-stat">
+            <div class="weekly-stat-value" id="week-muscle">--</div>
+            <div class="weekly-stat-label"><i class="ri-body-scan-line"></i> Top Muscle</div>
+          </div>
+        </div>
+      </div>
+
       <div class="card card-wide">
         <h2><span class="icon"><i class="ri-history-line"></i></span> Workout History</h2>
         <div id="history-controls"></div>
@@ -502,7 +538,21 @@
         </div>
       </div>
 
+      <!-- PR History Chart -->
+      <div class="card card-wide">
+        <h2><span class="icon"><i class="ri-line-chart-fill"></i></span> PR Progress</h2>
+        <div style="margin-bottom:1rem; width: 100%;">
+          <select id="pr-history-exercise">
+            <option value="">Select an exercise to see PR history…</option>
+          </select>
+        </div>
+        <div id="pr-chart-empty" style="text-align:center; opacity:0.5; font-size:0.9rem; padding:1rem 0;">Log workouts
+          to see your PR progression here.</div>
+        <canvas id="prHistoryChart" style="display:none; max-height:260px;"></canvas>
+      </div>
+
       <!-- BMI Calculator -->
+
       <div class="card">
         <div class="card-header-flex">
           <h2><span class="icon"><i class="ri-scales-fill"></i></span> BMI Calculator</h2>
@@ -675,13 +725,23 @@
     <div id="view-settings" class="view-section">
       <div class="card">
         <h2><span class="icon"><i class="ri-database-2-fill"></i></span> Data Management</h2>
-        <div class="data-info"><strong>Data Status:</strong> <span id="data-status">Loading...</span></div>
-        <div class="button-row"><button id="export-btn"><span class="icon-btn"><i class="ri-download-2-fill"></i></span>
-            Export</button><button id="import-btn"><span class="icon-btn"><i class="ri-upload-2-fill"></i></span>
-            Import</button></div>
-        <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All Data</button>
-        <button id="logout-btn" style="background-color: var(--text-light); margin-top: 1rem;"><span class="icon-btn"><i
-              class="ri-logout-box-r-line"></i></span> Logout</button>
+        <div class="data-info-columns">
+          <div class="data-info-item">
+            <strong>Workouts</strong>
+            <span id="data-status-workouts">...</span>
+          </div>
+          <div class="data-info-item">
+            <strong>User</strong>
+            <span id="data-status-user">...</span>
+          </div>
+        </div>
+        <div class="data-management-grid">
+          <button id="export-btn"><span class="icon-btn"><i class="ri-file-pdf-fill"></i></span> Export PDF</button>
+          <button id="import-btn"><span class="icon-btn"><i class="ri-upload-2-fill"></i></span> Import</button>
+          <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All
+            Data</button>
+          <button id="logout-btn"><span class="icon-btn"><i class="ri-logout-box-r-line"></i></span> Logout</button>
+        </div>
         <input type="file" id="import-input" accept=".json" class="hidden" />
       </div>
       <div class="card">
@@ -900,7 +960,9 @@
   <script
     src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-  <script type="module" src="script.js?v=17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script type="module" src="script.js?v=28"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

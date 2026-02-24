@@ -155,9 +155,34 @@ export const initRoutines = (app, db, auth, elements) => {
             // Delete button
             div.querySelector('.btn-delete-routine').addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (confirm(`Delete "${routine.name}"?`)) {
-                    localRoutines = localRoutines.filter(r => r.id !== routine.id);
-                    saveRoutineToStorage();
+                if (window.showConfirmDialog) {
+                    window.showConfirmDialog("Delete Routine?", `Are you sure you want to delete "${routine.name}"?`, () => {
+                        localRoutines = localRoutines.filter(r => r.id !== routine.id);
+                        saveRoutineToStorage();
+                        // If the deleted routine was being edited, reset the create view
+                        if (editingRoutineId === routine.id) {
+                            editingRoutineId = null;
+                            nameInput.value = '';
+                            if (createViewTitle) createViewTitle.textContent = 'Create Routine';
+                            btnSave.textContent = 'Save Routine';
+                            createView.classList.add('hidden');
+                            listView.classList.remove('hidden');
+                        }
+                    });
+                } else {
+                    if (confirm(`Delete "${routine.name}"?`)) {
+                        localRoutines = localRoutines.filter(r => r.id !== routine.id);
+                        saveRoutineToStorage();
+                        // If the deleted routine was being edited, reset the create view
+                        if (editingRoutineId === routine.id) {
+                            editingRoutineId = null;
+                            nameInput.value = '';
+                            if (createViewTitle) createViewTitle.textContent = 'Create Routine';
+                            btnSave.textContent = 'Save Routine';
+                            createView.classList.add('hidden');
+                            listView.classList.remove('hidden');
+                        }
+                    }
                 }
             });
 
