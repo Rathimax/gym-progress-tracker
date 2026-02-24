@@ -629,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updatePRSection = () => {
         if (Object.keys(prMap).length === 0) { elements.prList.innerHTML = `<div class="empty-state" style="padding:1rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486803.png" style="width:60px; display:block; margin:0 auto 0.5rem; opacity:0.6;"><p style="opacity:0.7;">Log a workout to earn your trophy! <i class="ri-trophy-line"></i></p></div>`; return; }
-        elements.prList.innerHTML = Object.entries(prMap).sort(([exA], [exB]) => exA.localeCompare(exB)).map(([ex, wt]) => `<li><strong>${ex}</strong><span>${formatWeight(wt)} ${getUnitLabel()}</span></li>`).join('');
+        elements.prList.innerHTML = Object.entries(prMap).sort(([exA], [exB]) => exA.localeCompare(exB)).map(([ex, wt]) => `<li class="pr-item"><span class="pr-name"><i class="ri-trophy-fill pr-icon"></i>${ex}</span><span class="pr-weight">${formatWeight(wt)} ${getUnitLabel()}</span></li>`).join('');
     };
 
     // --- HISTORY SECTION (WITH CUSTOM DROPDOWN FIX) ---

@@ -2751,3 +2751,54 @@ button.refresh-btn:hover {
     /* 65px header + 65px bottom-nav + container top padding */
   }
 }
+
+/* ── Personal Records List ── */
+#pr-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pr-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  background: var(--input-bg);
+  border-radius: 16px;
+  border: 1px solid var(--card-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pr-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(247, 121, 125, 0.12);
+}
+
+.pr-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.pr-icon {
+  color: var(--accent-end);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.pr-weight {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--accent-end);
+  background: rgba(247, 121, 125, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  white-space: nowrap;
+}

@@ -21,7 +21,7 @@
     href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Outfit:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap"
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 
 <body>
@@ -472,6 +472,12 @@
     <!-- VIEW 4: TOOLS -->
     <div id="view-tools" class="view-section">
       <div class="card">
+        <h2><span class="icon"><i class="ri-cup-fill"></i></span> Personal Records</h2>
+        <div id="pr-section">
+          <ul id="pr-list"></ul>
+        </div>
+      </div>
+      <div class="card">
         <h2><span class="icon"><i class="ri-calculator-fill"></i></span> 1RM Calculator</h2>
         <div class="calculator-grid">
           <input type="text" id="calc-exercise" placeholder="Exercise Name (Optional)" />
@@ -493,12 +499,6 @@
             </thead>
             <tbody id="percentage-list"></tbody>
           </table>
-        </div>
-      </div>
-      <div class="card">
-        <h2><span class="icon"><i class="ri-cup-fill"></i></span> Personal Records</h2>
-        <div id="pr-section">
-          <ul id="pr-list"></ul>
         </div>
       </div>
 
@@ -898,7 +898,7 @@
   <script
     src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-  <script type="module" src="script.js?v=16"></script>
+  <script type="module" src="script.js?v=17"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {
