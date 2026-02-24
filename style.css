@@ -1035,17 +1035,16 @@ header {
 
 #timer-toggle-icon {
   width: auto;
-  height: 50px;
+  height: 44px;
   padding: 0 1.4rem;
   border-radius: 50px;
   background: var(--accent-end);
   color: white;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
   cursor: pointer;
   transition: transform 0.3s;
   white-space: nowrap;
@@ -1059,6 +1058,48 @@ header {
   display: none;
   flex-direction: column-reverse;
   gap: 10px;
+}
+
+.timer-btn[data-time] {
+  width: auto !important;
+  height: 40px;
+  padding: 0 1.2rem;
+  border-radius: 50px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: none;
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timer-btn[data-time]:hover {
+  background: var(--accent-gradient);
+  color: white;
+  border-color: transparent;
+}
+
+.timer-btn-cancel {
+  width: auto !important;
+  height: 40px;
+  padding: 0 1.2rem;
+  border-radius: 50px;
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: none;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timer-btn-cancel:hover {
+  background: var(--danger);
+  color: white;
+  border-color: transparent;
 }
 
 .timer-widget.open #timer-controls {
@@ -1096,14 +1137,18 @@ header {
 
 #timer-display {
   display: none;
-  font-size: 2.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--accent-end);
   background: var(--card-bg);
-  padding: 0.8rem 1.5rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
-  border: 2px solid var(--accent-start);
+  padding: 0 1.2rem;
+  height: 40px;
+  line-height: 40px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+  border: 1px solid var(--card-border);
+  white-space: nowrap;
+  text-align: center;
 }
 
 .timer-active #timer-display {
@@ -1792,15 +1837,19 @@ select:focus {
 }
 
 .routine-card-item {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background: var(--input-bg);
   border-radius: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   border: 1px solid transparent;
-  cursor: pointer;
   transition: 0.2s;
+}
+
+.routine-card-info {
+  cursor: pointer;
 }
 
 .routine-card-item:hover {
