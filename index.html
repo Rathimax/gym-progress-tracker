@@ -122,8 +122,7 @@
       <li class="nav-item active" data-target="view-home"><span class="icon"><i class="ri-home-4-line"></i></span> <span
           class="label">Home</span>
       </li>
-      <li class="nav-item" data-target="view-analytics"><span class="icon"><i
-            class="ri-bar-chart-grouped-line"></i></span> <span class="label">Analytics</span></li>
+      <li class="nav-item" data-target="view-ai"><span class="icon"><i class="ri-robot-2-fill"></i></span> <span class="label">AI Assistant</span></li>
       <li class="nav-item" data-target="view-history"><span class="icon"><i class="ri-calendar-todo-line"></i></span>
         <span class="label">History</span>
       </li>
@@ -419,118 +418,18 @@
       </div>
     </div>
 
-    <!-- VIEW 2: ANALYTICS -->
-    <div id="view-analytics" class="view-section">
-      <div class="card card-wide">
-        <h2><span class="icon"><i class="ri-pie-chart-2-fill"></i></span> Analytics</h2>
-        <div class="dropdown-wrapper"><label for="analytics-exercise-select">Filter by Exercise:</label><select
-            id="analytics-exercise-select">
-            <option value="All">All Exercises</option>
-          </select></div>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-number" id="total-workouts">0</div>
-            <div class="stat-label">Total Workouts</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="total-volume">0</div>
-            <div class="stat-label">Total Volume (kg)</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="total-time">0m</div>
-            <div class="stat-label">Total Time</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="avg-session">0m</div>
-            <div class="stat-label">Avg Session</div>
-          </div>
-          <div class="stat-card stat-card-full">
-            <div class="stat-number" id="calories-burned">0</div>
-            <div class="stat-label"><i class="ri-fire-fill"></i> Est. Calories Burned</div>
+    <!-- VIEW 2: AI ASSISTANT -->
+    <div id="view-ai" class="view-section">
+      <div class="card card-wide" style="height: 70vh; display: flex; flex-direction: column;">
+        <h2><span class="icon"><i class="ri-sparkling-fill"></i></span> FitTrack AI Assistant</h2>
+        <div id="ai-chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 12px; background: rgba(0,0,0,0.02)">
+          <div class="ai-message bot" style="align-self: flex-start; background: var(--input-bg); padding: 1rem; border-radius: 12px; max-width: 80%; line-height: 1.5;">
+            Hello! I'm your FitTrack AI. I can analyze your workout history, suggest routines, and answer gym-related questions. How can I help?
           </div>
         </div>
-
-        <div class="chart-tabs">
-          <button class="chart-tab active" data-chart="weight">Weight Progress</button>
-          <button class="chart-tab" data-chart="volume">Volume</button>
-          <button class="chart-tab" data-chart="duration">Duration</button>
-          <button class="chart-tab" data-chart="exercises">Distribution</button>
-          <button class="chart-tab" data-chart="bodyweight">Body Weight</button>
-        </div>
-
-        <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
-      </div>
-
-      <!-- Muscle Heatmap Card -->
-      <div class="card card-wide">
-        <h2><span class="icon"><i class="ri-body-scan-line"></i></span> Muscle Heatmap (Last 7 Days)</h2>
-        <div class="heatmap-container">
-          <div class="heatmap-body front">
-            <div class="muscle-label-top">FRONT</div>
-            <!-- Head/Neck -->
-            <div class="body-part head"></div>
-            <div class="body-part neck"></div>
-
-            <!-- Torso -->
-            <div class="body-part trap-left" data-muscle="Traps"></div>
-            <div class="body-part trap-right" data-muscle="Traps"></div>
-            <div class="body-part chest-left" data-muscle="Chest"></div>
-            <div class="body-part chest-right" data-muscle="Chest"></div>
-            <div class="body-part abs" data-muscle="Abs"></div>
-            <div class="body-part oblique-left" data-muscle="Obliques"></div>
-            <div class="body-part oblique-right" data-muscle="Obliques"></div>
-
-            <!-- Arms -->
-            <div class="body-part delt-front-left" data-muscle="Shoulder"></div>
-            <div class="body-part delt-front-right" data-muscle="Shoulder"></div>
-            <div class="body-part bicep-left" data-muscle="Bicep"></div>
-            <div class="body-part bicep-right" data-muscle="Bicep"></div>
-            <div class="body-part forearm-front-left" data-muscle="Forearms"></div>
-            <div class="body-part forearm-front-right" data-muscle="Forearms"></div>
-
-            <!-- Legs -->
-            <div class="body-part quad-left" data-muscle="Quads"></div>
-            <div class="body-part quad-right" data-muscle="Quads"></div>
-            <div class="body-part calf-front-left" data-muscle="Calves"></div>
-            <div class="body-part calf-front-right" data-muscle="Calves"></div>
-          </div>
-
-          <div class="heatmap-body back">
-            <div class="muscle-label-top">BACK</div>
-            <!-- Head/Neck -->
-            <div class="body-part head"></div>
-            <div class="body-part neck"></div>
-
-            <!-- Torso -->
-            <div class="body-part trap-back-left" data-muscle="Traps"></div>
-            <div class="body-part trap-back-right" data-muscle="Traps"></div>
-            <div class="body-part lats-left" data-muscle="Lats"></div>
-            <div class="body-part lats-right" data-muscle="Lats"></div>
-            <div class="body-part lower-back" data-muscle="LowerBack"></div>
-
-            <!-- Arms -->
-            <div class="body-part delt-rear-left" data-muscle="Shoulder"></div>
-            <div class="body-part delt-rear-right" data-muscle="Shoulder"></div>
-            <div class="body-part tricep-left" data-muscle="Tricep"></div>
-            <div class="body-part tricep-right" data-muscle="Tricep"></div>
-            <div class="body-part forearm-back-left" data-muscle="Forearms"></div>
-            <div class="body-part forearm-back-right" data-muscle="Forearms"></div>
-
-            <!-- Legs -->
-            <div class="body-part glute-left" data-muscle="Glutes"></div>
-            <div class="body-part glute-right" data-muscle="Glutes"></div>
-            <div class="body-part hamstring-left" data-muscle="Hamstrings"></div>
-            <div class="body-part hamstring-right" data-muscle="Hamstrings"></div>
-            <div class="body-part calf-back-left" data-muscle="Calves"></div>
-            <div class="body-part calf-back-right" data-muscle="Calves"></div>
-          </div>
-        </div>
-        <div class="heatmap-legend">
-          <div class="legend-item"><span class="dot" style="background:var(--input-bg)"></span> Idle</div>
-          <div class="legend-item"><span class="dot" style="background:var(--accent-start); opacity:0.5;"></span> Active
-          </div>
-          <div class="legend-item"><span class="dot"
-              style="background:var(--accent-end); box-shadow:0 0 10px var(--accent-end);"></span> Intense</div>
+        <div class="ai-input-area" style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+          <input type="text" id="ai-chat-input" placeholder="Ask about your progress or workouts..." style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);" />
+          <button id="ai-chat-send" style="width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i class="ri-send-plane-fill"></i></button>
         </div>
       </div>
     </div>
@@ -772,6 +671,118 @@
           <!-- Themes injected by JS -->
         </div>
       </div>
+      <div class="card card-wide">
+        <h2><span class="icon"><i class="ri-pie-chart-2-fill"></i></span> Analytics</h2>
+        <div class="dropdown-wrapper"><label for="analytics-exercise-select">Filter by Exercise:</label><select
+            id="analytics-exercise-select">
+            <option value="All">All Exercises</option>
+          </select></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="total-workouts">0</div>
+            <div class="stat-label">Total Workouts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-volume">0</div>
+            <div class="stat-label">Total Volume (kg)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-time">0m</div>
+            <div class="stat-label">Total Time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="avg-session">0m</div>
+            <div class="stat-label">Avg Session</div>
+          </div>
+          <div class="stat-card stat-card-full">
+            <div class="stat-number" id="calories-burned">0</div>
+            <div class="stat-label"><i class="ri-fire-fill"></i> Est. Calories Burned</div>
+          </div>
+        </div>
+
+        <div class="chart-tabs">
+          <button class="chart-tab active" data-chart="weight">Weight Progress</button>
+          <button class="chart-tab" data-chart="volume">Volume</button>
+          <button class="chart-tab" data-chart="duration">Duration</button>
+          <button class="chart-tab" data-chart="exercises">Distribution</button>
+          <button class="chart-tab" data-chart="bodyweight">Body Weight</button>
+        </div>
+
+        <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
+      </div>
+
+      <!-- Muscle Heatmap Card -->
+      <div class="card card-wide">
+        <h2><span class="icon"><i class="ri-body-scan-line"></i></span> Muscle Heatmap (Last 7 Days)</h2>
+        <div class="heatmap-container">
+          <div class="heatmap-body front">
+            <div class="muscle-label-top">FRONT</div>
+            <!-- Head/Neck -->
+            <div class="body-part head"></div>
+            <div class="body-part neck"></div>
+
+            <!-- Torso -->
+            <div class="body-part trap-left" data-muscle="Traps"></div>
+            <div class="body-part trap-right" data-muscle="Traps"></div>
+            <div class="body-part chest-left" data-muscle="Chest"></div>
+            <div class="body-part chest-right" data-muscle="Chest"></div>
+            <div class="body-part abs" data-muscle="Abs"></div>
+            <div class="body-part oblique-left" data-muscle="Obliques"></div>
+            <div class="body-part oblique-right" data-muscle="Obliques"></div>
+
+            <!-- Arms -->
+            <div class="body-part delt-front-left" data-muscle="Shoulder"></div>
+            <div class="body-part delt-front-right" data-muscle="Shoulder"></div>
+            <div class="body-part bicep-left" data-muscle="Bicep"></div>
+            <div class="body-part bicep-right" data-muscle="Bicep"></div>
+            <div class="body-part forearm-front-left" data-muscle="Forearms"></div>
+            <div class="body-part forearm-front-right" data-muscle="Forearms"></div>
+
+            <!-- Legs -->
+            <div class="body-part quad-left" data-muscle="Quads"></div>
+            <div class="body-part quad-right" data-muscle="Quads"></div>
+            <div class="body-part calf-front-left" data-muscle="Calves"></div>
+            <div class="body-part calf-front-right" data-muscle="Calves"></div>
+          </div>
+
+          <div class="heatmap-body back">
+            <div class="muscle-label-top">BACK</div>
+            <!-- Head/Neck -->
+            <div class="body-part head"></div>
+            <div class="body-part neck"></div>
+
+            <!-- Torso -->
+            <div class="body-part trap-back-left" data-muscle="Traps"></div>
+            <div class="body-part trap-back-right" data-muscle="Traps"></div>
+            <div class="body-part lats-left" data-muscle="Lats"></div>
+            <div class="body-part lats-right" data-muscle="Lats"></div>
+            <div class="body-part lower-back" data-muscle="LowerBack"></div>
+
+            <!-- Arms -->
+            <div class="body-part delt-rear-left" data-muscle="Shoulder"></div>
+            <div class="body-part delt-rear-right" data-muscle="Shoulder"></div>
+            <div class="body-part tricep-left" data-muscle="Tricep"></div>
+            <div class="body-part tricep-right" data-muscle="Tricep"></div>
+            <div class="body-part forearm-back-left" data-muscle="Forearms"></div>
+            <div class="body-part forearm-back-right" data-muscle="Forearms"></div>
+
+            <!-- Legs -->
+            <div class="body-part glute-left" data-muscle="Glutes"></div>
+            <div class="body-part glute-right" data-muscle="Glutes"></div>
+            <div class="body-part hamstring-left" data-muscle="Hamstrings"></div>
+            <div class="body-part hamstring-right" data-muscle="Hamstrings"></div>
+            <div class="body-part calf-back-left" data-muscle="Calves"></div>
+            <div class="body-part calf-back-right" data-muscle="Calves"></div>
+          </div>
+        </div>
+        <div class="heatmap-legend">
+          <div class="legend-item"><span class="dot" style="background:var(--input-bg)"></span> Idle</div>
+          <div class="legend-item"><span class="dot" style="background:var(--accent-start); opacity:0.5;"></span> Active
+          </div>
+          <div class="legend-item"><span class="dot"
+              style="background:var(--accent-end); box-shadow:0 0 10px var(--accent-end);"></span> Intense</div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -782,9 +793,9 @@
       <span class="icon"><i class="ri-home-4-line"></i></span>
       <span class="label">Home</span>
     </div>
-    <div class="nav-item" data-target="view-analytics">
-      <span class="icon"><i class="ri-bar-chart-grouped-line"></i></span>
-      <span class="label">Analytics</span>
+    <div class="nav-item" data-target="view-ai">
+      <span class="icon"><i class="ri-robot-2-fill"></i></span>
+      <span class="label">AI Assistant</span>
     </div>
     <div class="nav-item" data-target="view-history">
       <span class="icon"><i class="ri-calendar-todo-line"></i></span>

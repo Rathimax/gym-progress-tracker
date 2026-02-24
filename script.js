@@ -809,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = item.dataset.target;
             elements.navItems.forEach(n => n.classList.toggle('active', n.dataset.target === target));
 
-            if (item.dataset.target === 'view-analytics') setTimeout(updateChart, 100);
+            if (item.dataset.target === 'view-settings') setTimeout(updateChart, 100);
             if (item.dataset.target === 'view-achievements') updateAchievementsUI();
         }));
 
@@ -1081,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const THEMES = [
         { name: 'Megatron', start: '#c6ffdd', middle: '#fbd786', end: '#f7797d' },
         { name: 'Moonlit Astroid', start: '#0f2027', middle: '#203a43', end: '#2c5364' },
-        { name: 'Cool Sky', start: '#2980b9', middle: '#6dd5fa', end: '#ffffff' },
+        { name: 'Cool Sky', start: '#2980b9', end: '#6dd5fa' },
         { name: 'Ultra Violet', start: '#654ea3', end: '#eaafc8' },
         { name: 'Burning Orange', start: '#ff416c', end: '#ff4b2b' },
         { name: 'Coal', start: '#eb5757', end: '#000000' },
@@ -1495,4 +1495,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculate1RM = (w, r) => { if (!weight || !reps) return 0; if (reps === 1) return weight; return Math.round(weight * (1 + reps / 30)); };
 
     init();
+
+    // ==========================================
+    // 9. AI ASSISTANT LOGIC
+    // ==========================================
+    const aiChatInput = document.getElementById('ai-chat-input');
+    const aiChatSend = document.getElementById('ai-chat-send');
+    const aiChatMessages = document.getElementById('ai-chat-messages');
+
+    const appendMessage = (text, sender) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `ai-message ${sender}`;
+        msgDiv.style.alignSelf = sender === 'user' ? 'flex-end' : 'flex-start';
+        msgDiv.style.background = sender === 'user' ? 'var(--accent-gradient)' : 'var(--input-bg)';
+        msgDiv.style.color = sender === 'user' ? '#fff' : 'var(--text)';
+        msgDiv.style.padding = '1rem';
+        msgDiv.style.borderRadius = '12px';
+        msgDiv.style.maxWidth = '80%';
+        msgDiv.style.lineHeight = '1.5';
+        msgDiv.innerHTML = text;
+        aiChatMessages.appendChild(msgDiv);
+        aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    };
+
+    const handleSendAI = async () => {
+        const query = aiChatInput.value.trim();
+        if (!query) return;
+
+        appendMessage(query, 'user');
+        aiChatInput.value = '';
+
+        const typingId = 'typing-' + Date.now();
+        const typingDiv = document.createElement('div');
+        typingDiv.id = typingId;
+        typingDiv.className = 'ai-message bot typing-indicator';
+        typingDiv.style.alignSelf = 'flex-start';
+        typingDiv.style.background = 'transparent';
+        typingDiv.style.padding = '1rem';
+        typingDiv.innerHTML = '<span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-light);margin-right:4px;"></span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-light);margin-right:4px;"></span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text-light);"></span>';
+        aiChatMessages.appendChild(typingDiv);
+        aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+
+        try {
+            // Include a compressed version of recent workout history (last 30 entries) to avoid API token limits!
+            const recentData = data.slice(-30);
+            const historyContext = JSON.stringify(recentData.map(d => ({
+                date: d.date,
+                exercise: d.exercise,
+                reps: d.reps,
+                sets: d.sets,
+                weight: d.weight
+            })));
+
+            const fullPrompt = `User Query: ${query}\n\nUser Workout History Context (Last 30 workouts): ${historyContext}`;
+
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: fullPrompt })
+            });
+
+            const typingEl = document.getElementById(typingId);
+            if (typingEl) typingEl.remove();
+
+            if (!response.ok) {
+                appendMessage("Sorry, I'm having trouble connecting to the server.", 'bot');
+                return;
+            }
+
+            const result = await response.json();
+
+            let formattedText = result.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formattedText = formattedText.replace(/\n/g, '<br/>');
+
+            appendMessage(formattedText, 'bot');
+
+        } catch (err) {
+            console.error(err);
+            const typingEl = document.getElementById(typingId);
+            if (typingEl) typingEl.remove();
+            appendMessage("An error occurred while communicating with the AI. Ensure you are running on a server that supports vercel functions, or using Vercel locally.", 'bot');
+        }
+    };
+
+    if (aiChatSend && aiChatInput) {
+        aiChatSend.addEventListener('click', handleSendAI);
+        aiChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendAI();
+        });
+    }
+
 });
