@@ -1034,18 +1034,21 @@ header {
 }
 
 #timer-toggle-icon {
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
+  width: auto;
+  height: 50px;
+  padding: 0 1.4rem;
+  border-radius: 50px;
   background: var(--accent-end);
   color: white;
-  font-size: 2rem;
+  font-size: 1.4rem;
   box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
   cursor: pointer;
   transition: transform 0.3s;
+  white-space: nowrap;
 }
 
 #timer-toggle-icon:hover {
@@ -2733,4 +2736,18 @@ button.refresh-btn:hover {
 
 #ai-chat-send:active {
   transform: scale(0.95);
+}
+
+/* ── Mobile: AI tab fills full available height ── */
+@media (max-width: 768px) {
+  #view-ai {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #view-ai .card-wide {
+    flex: 1;
+    height: calc(100dvh - 65px - 65px - 2rem) !important;
+    /* 65px header + 65px bottom-nav + container top padding */
+  }
 }

@@ -809,6 +809,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = item.dataset.target;
             elements.navItems.forEach(n => n.classList.toggle('active', n.dataset.target === target));
 
+            // Show timer only on Home tab
+            elements.timerWidget.style.display = target === 'view-home' ? '' : 'none';
+
             if (item.dataset.target === 'view-settings') setTimeout(updateChart, 100);
             if (item.dataset.target === 'view-achievements') updateAchievementsUI();
         }));
