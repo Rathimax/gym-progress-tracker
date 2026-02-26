@@ -1879,7 +1879,7 @@ select:focus {
 }
 
 .checklist-item {
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   padding: 0.5rem 1rem;
   border-radius: 12px;
@@ -1944,7 +1944,7 @@ select:focus {
 
 .routine-card-item:hover {
   border-color: var(--accent-start);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 @keyframes bounce {
@@ -2002,15 +2002,15 @@ select:focus {
 
 .medal-card:hover {
   transform: translateY(-3px);
-  background: #fff;
+  background: var(--card-bg);
   border-color: var(--accent-start);
   box-shadow: var(--shadow-sm);
 }
 
 .medal-card.locked {
-  opacity: 0.6;
+  opacity: 0.5;
   filter: grayscale(100%);
-  background: #f5f5f5;
+  background: var(--input-bg);
   cursor: not-allowed;
 }
 
