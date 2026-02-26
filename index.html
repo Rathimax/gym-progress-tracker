@@ -131,7 +131,9 @@
     <div class="sidebar-header">
       <h2>FitTrack</h2>
     </div>
-    <ul class="nav-links">
+
+    <!-- EXERCISE SIDEBAR -->
+    <ul id="sidebar-exercise" class="nav-links">
       <li class="nav-item active" data-target="view-home"><span class="icon"><i class="ri-home-4-line"></i></span> <span
           class="label">Home</span>
       </li>
@@ -149,6 +151,28 @@
         <span class="label">Settings</span>
       </li>
     </ul>
+
+    <!-- DIET SIDEBAR (Hidden by default) -->
+    <ul id="sidebar-diet" class="nav-links hidden-mode">
+      <li class="nav-item active" data-target="view-diet-dashboard"><span class="icon"><i
+            class="ri-dashboard-line"></i></span> <span class="label">Dashboard</span>
+      </li>
+      <li class="nav-item" data-target="view-diet-log-meal"><span class="icon"><i
+            class="ri-restaurant-2-line"></i></span> <span class="label">Log Meal</span></li>
+      <li class="nav-item" data-target="view-diet-ai-scan"><span class="icon"><i class="ri-camera-lens-line"></i></span>
+        <span class="label">AI Food Scan</span>
+      </li>
+      <li class="nav-item" data-target="view-diet-history"><span class="icon"><i class="ri-history-line"></i></span>
+        <span class="label">History</span>
+      </li>
+      <li class="nav-item" data-target="view-diet-ai-coach"><span class="icon"><i class="ri-user-heart-line"></i></span>
+        <span class="label">AI Diet Coach</span>
+      </li>
+      <li class="nav-item" data-target="view-settings"><span class="icon"><i class="ri-settings-4-line"></i></span>
+        <span class="label">Settings</span>
+      </li>
+    </ul>
+
   </nav>
 
   <!-- Header -->
@@ -157,6 +181,16 @@
       <h1><span class="app-icon"><img src="https://i.pinimg.com/736x/da/90/9a/da909a8e5bbacd83c82222006ebf7321.jpg"
             alt="Icon" style="height: 30px; width: 30px; object-fit: cover; border-radius: 8px;" /></span> FitTrack</h1>
     </div>
+
+    <!-- GLOBAL APP MODE TOGGLE -->
+    <div class="mode-toggle-container">
+      <div class="mode-toggle" id="global-mode-toggle">
+        <div class="slider exercise" id="mode-slider"></div>
+        <button class="toggle-btn active" data-mode="exercise">Exercise</button>
+        <button class="toggle-btn" data-mode="diet">Diet</button>
+      </div>
+    </div>
+
     <div class="header-right" id="header-profile" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
       <!-- Profile injected by JS -->
       <div class="profile-pic" style="width:35px; height:35px; border-radius:50%; background:#ddd; overflow:hidden;">
@@ -166,7 +200,7 @@
     </div>
   </header>
 
-  <div class="container">
+  <div class="container" id="app-container-exercise">
 
     <!-- VIEW 1: HOME -->
     <div id="view-home" class="view-section active-view">
@@ -856,15 +890,112 @@
 
   </div>
 
-  <!-- Mobile Bottom Navigation -->
-  <nav class="bottom-nav">
+  <!-- VIEW DIET (Container for Diet Routes) -->
+  <div class="container hidden-mode" id="app-container-diet">
+
+    <!-- DIET: Dashboard -->
+    <div id="view-diet-dashboard" class="view-section">
+      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-dashboard-line"></i>
+        </div>
+        <h2>Diet Dashboard Comming Soon ✨</h2>
+      </div>
+    </div>
+
+    <!-- DIET: Log Meal -->
+    <div id="view-diet-log-meal" class="view-section">
+      <div class="card card-wide">
+        <!-- Reusing existing gym app typography and dark form classes -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2
+            style="font-size: 1.8rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent;">
+            Log Meal</h2>
+        </div>
+
+        <form id="diet-log-form" class="workout-form">
+          <div class="form-group">
+            <label for="diet-meal-type">Meal Type</label>
+            <select id="diet-meal-type" required>
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Dinner">Dinner</option>
+              <option value="Snack">Snack</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="diet-food-name">Food Name</label>
+            <input type="text" id="diet-food-name" placeholder="e.g., Oatmeal with Berries" required>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="diet-calories">Calories (kcal)</label>
+              <input type="number" id="diet-calories" placeholder="0" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="diet-protein">Protein (g)</label>
+              <input type="number" id="diet-protein" placeholder="0" min="0" step="0.1" required>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+              <label for="diet-carbs">Carbs (g)</label>
+              <input type="number" id="diet-carbs" placeholder="0" min="0" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label for="diet-fat">Fat (g)</label>
+              <input type="number" id="diet-fat" placeholder="0" min="0" step="0.1" required>
+            </div>
+          </div>
+
+          <!-- Reusing existing button styles -->
+          <button type="submit" class="btn-primary" id="btn-submit-meal" style="width: 100%; margin-top: 2rem;">
+            <i class="ri-add-line"></i> Log Meal
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- DIET: AI Food Scan -->
+    <div id="view-diet-ai-scan" class="view-section">
+      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-camera-lens-line"></i>
+        </div>
+        <h2>AI Food Scan Coming Soon ✨</h2>
+      </div>
+    </div>
+
+    <!-- DIET: History -->
+    <div id="view-diet-history" class="view-section">
+      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-history-line"></i>
+        </div>
+        <h2>Diet History Coming Soon ✨</h2>
+      </div>
+    </div>
+
+    <!-- DIET: AI Diet Coach -->
+    <div id="view-diet-ai-coach" class="view-section">
+      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-user-heart-line"></i>
+        </div>
+        <h2>AI Diet Coach Coming Soon ✨</h2>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mobile Bottom Navigation (Exercise) -->
+  <nav id="nav-exercise" class="bottom-nav">
     <div class="nav-item active" data-target="view-home">
       <span class="icon"><i class="ri-home-4-line"></i></span>
       <span class="label">Home</span>
     </div>
     <div class="nav-item" data-target="view-ai">
       <span class="icon"><i class="ri-robot-2-fill"></i></span>
-      <span class="label">AI Assistant</span>
+      <span class="label">AI</span>
     </div>
     <div class="nav-item" data-target="view-history">
       <span class="icon"><i class="ri-calendar-todo-line"></i></span>
@@ -881,6 +1012,30 @@
     <div class="nav-item" data-target="view-settings">
       <span class="icon"><i class="ri-settings-4-line"></i></span>
       <span class="label">Settings</span>
+    </div>
+  </nav>
+
+  <!-- Mobile Bottom Navigation (Diet) -->
+  <nav id="nav-diet" class="bottom-nav hidden-mode">
+    <div class="nav-item active" data-target="view-diet-dashboard">
+      <span class="icon"><i class="ri-dashboard-line"></i></span>
+      <span class="label">Hub</span>
+    </div>
+    <div class="nav-item" data-target="view-diet-log-meal">
+      <span class="icon"><i class="ri-restaurant-2-line"></i></span>
+      <span class="label">Log</span>
+    </div>
+    <div class="nav-item" data-target="view-diet-ai-scan">
+      <span class="icon"><i class="ri-camera-lens-line"></i></span>
+      <span class="label">Scan</span>
+    </div>
+    <div class="nav-item" data-target="view-diet-history">
+      <span class="icon"><i class="ri-history-line"></i></span>
+      <span class="label">History</span>
+    </div>
+    <div class="nav-item" data-target="view-diet-ai-coach">
+      <span class="icon"><i class="ri-user-heart-line"></i></span>
+      <span class="label">Coach</span>
     </div>
   </nav>
 

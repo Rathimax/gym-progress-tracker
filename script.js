@@ -6,6 +6,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPasswor
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
+import * as dietService from "./dietService.js"; // New Diet Service
 
 const firebaseConfig = {
     apiKey: "AIzaSyD0hdb9-NZ3Et3owriYW5d6iEl6JIdqvV4",
@@ -23,6 +24,11 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 // auth.useDeviceLanguage(); // Optional: Localize language
 
+// Expose Diet Service for console testing during development
+window.dietService = dietService;
+window.db = db;
+window.auth = auth;
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
@@ -30,7 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const elements = {
         navOverlay: document.getElementById('nav-overlay'),
-        sidebar: document.getElementById('sidebar'),
+        sidebar: document.getElementById('sidebar'), // Container
+        sidebarExercise: document.getElementById('sidebar-exercise'),
+        sidebarDiet: document.getElementById('sidebar-diet'),
+        navExercise: document.getElementById('nav-exercise'),
+        navDiet: document.getElementById('nav-diet'),
         hamburgerBtn: document.getElementById('hamburger-btn'),
         closeNavBtn: document.getElementById('close-nav-btn'),
         navItems: document.querySelectorAll('.nav-item'),
@@ -44,6 +54,16 @@ document.addEventListener('DOMContentLoaded', () => {
         rmDisplay: document.getElementById('rm-display'),
         exercisePreview: document.getElementById('exercise-preview'),
         previewLabel: document.getElementById('preview-label'),
+
+        // Diet Forms
+        dietForm: document.getElementById('diet-log-form'),
+        dietMealType: document.getElementById('diet-meal-type'),
+        dietFoodName: document.getElementById('diet-food-name'),
+        dietCalories: document.getElementById('diet-calories'),
+        dietProtein: document.getElementById('diet-protein'),
+        dietCarbs: document.getElementById('diet-carbs'),
+        dietFat: document.getElementById('diet-fat'),
+        btnSubmitMeal: document.getElementById('btn-submit-meal'),
 
         // 1RM Calculator
         calcWeight: document.getElementById('calc-weight'),
@@ -147,6 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let isCustomInput = false;
     let timerInterval = null;
     let audioContext = null;
+
+    // Global App Mode
+    let appMode = 'exercise'; // 'exercise' or 'diet'
 
     // Preferences State
     let userPreferences = {
@@ -1194,6 +1217,54 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // ==========================================
+        // DIET: LOG MEAL SUBMIT
+        // ==========================================
+        if (elements.dietForm) {
+            elements.dietForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const user = auth.currentUser;
+                if (!user) {
+                    return showNotification("Please log in to log a meal.", "error");
+                }
+
+                const mealData = {
+                    mealType: elements.dietMealType.value,
+                    foodName: elements.dietFoodName.value.trim(),
+                    calories: parseFloat(elements.dietCalories.value) || 0,
+                    protein: parseFloat(elements.dietProtein.value) || 0,
+                    carbs: parseFloat(elements.dietCarbs.value) || 0,
+                    fat: parseFloat(elements.dietFat.value) || 0
+                };
+
+                const originalBtnText = elements.btnSubmitMeal.innerHTML;
+                elements.btnSubmitMeal.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Logging...';
+                elements.btnSubmitMeal.disabled = true;
+
+                try {
+                    // Force strictly YYYY-MM-DD
+                    const today = new Date().toISOString().split('T')[0];
+                    const result = await dietService.addMeal(db, user.uid, today, mealData);
+
+                    if (result.success) {
+                        showNotification(`Logged ${mealData.calories} kcal for ${mealData.mealType}! 🍎`);
+                        elements.dietForm.reset();
+                        elements.dietMealType.value = "Breakfast"; // Reset selected opt
+                        if (typeof applyCustomDropdown === 'function') applyCustomDropdown(elements.dietMealType);
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (err) {
+                    console.error("Meal Log Error:", err);
+                    showNotification("Failed to log meal.", "error");
+                } finally {
+                    elements.btnSubmitMeal.innerHTML = originalBtnText;
+                    elements.btnSubmitMeal.disabled = false;
+                }
+            });
+        }
+
         // MAIN SUBMIT
         elements.form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1534,6 +1605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const init = async () => {
         applyCustomDropdown(elements.exerciseSelect);
+        if (elements.dietMealType) applyCustomDropdown(elements.dietMealType);
         setupEventListeners();
         initAuth(); // New Auth Flow
         initThemes();
@@ -1702,6 +1774,71 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const calculate1RM = (w, r) => { if (!weight || !reps) return 0; if (reps === 1) return weight; return Math.round(weight * (1 + reps / 30)); };
+
+    // ─────────────────────────────────────────────────────────────
+    // NEW: GLOBAL MODE FEATURE
+    // ─────────────────────────────────────────────────────────────
+    const initGlobalModeToggle = () => {
+        const toggleBtns = document.querySelectorAll('#global-mode-toggle .toggle-btn');
+        const slider = document.getElementById('mode-slider');
+        const appContainerExercise = document.getElementById('app-container-exercise');
+        const appContainerDiet = document.getElementById('app-container-diet');
+
+        // Note: elements.navExercise and elements.navDiet are used below instead of a single bottomNav
+
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const selectedMode = btn.dataset.mode;
+                if (appMode === selectedMode) return;
+
+                // Update state
+                appMode = selectedMode;
+
+                // Update UI Buttons
+                toggleBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update Slider
+                slider.className = `slider ${selectedMode}`;
+
+                // Swap Containers cleanly
+                if (appMode === 'exercise') {
+                    appContainerDiet.classList.add('hidden-mode');
+                    appContainerExercise.classList.remove('hidden-mode');
+
+                    // Show Exercise Navigation
+                    elements.sidebarDiet.style.display = '';
+                    elements.sidebarDiet.classList.add('hidden-mode');
+                    elements.sidebarExercise.style.display = '';
+                    elements.sidebarExercise.classList.remove('hidden-mode');
+                    elements.navDiet.classList.add('hidden-mode');
+                    elements.navExercise.classList.remove('hidden-mode');
+
+                    // Auto-route to home if no active tab in exercise
+                    const hasActiveExercise = elements.sidebarExercise.querySelector('.active');
+                    if (!hasActiveExercise) document.querySelector('.nav-item[data-target="view-home"]').click();
+
+                } else if (appMode === 'diet') {
+                    appContainerExercise.classList.add('hidden-mode');
+                    appContainerDiet.classList.remove('hidden-mode');
+
+                    // Show Diet Navigation
+                    elements.sidebarExercise.style.display = '';
+                    elements.sidebarExercise.classList.add('hidden-mode');
+                    elements.sidebarDiet.style.display = '';
+                    elements.sidebarDiet.classList.remove('hidden-mode');
+                    elements.navExercise.classList.add('hidden-mode');
+                    elements.navDiet.classList.remove('hidden-mode');
+
+                    // Auto-route to diet dashboard if no active tab
+                    const hasActiveDiet = elements.sidebarDiet.querySelector('.active');
+                    if (!hasActiveDiet) document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
+                }
+            });
+        });
+    };
+
+    initGlobalModeToggle(); // INITIALIZE GLOBAL MODE
 
     init();
 
