@@ -1780,25 +1780,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.btnAnalyzeFood.style.display = 'none';
                 elements.scanLoader.classList.remove('hidden');
 
-                // 1. Read Image as Base64 Client-Side
-                const reader = new FileReader();
-                const base64Promise = new Promise((resolve, reject) => {
-                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                    reader.onerror = error => reject(error);
+                // 1. Compress + Encode Image Client-Side (keeps payload under Vercel's 4.5MB body limit)
+                const compressImage = (file) => new Promise((resolve, reject) => {
+                    const img = new Image();
+                    const objectUrl = URL.createObjectURL(file);
+                    img.onload = () => {
+                        const MAX_DIM = 800;
+                        let { width, height } = img;
+                        if (width > MAX_DIM || height > MAX_DIM) {
+                            if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
+                            else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        URL.revokeObjectURL(objectUrl);
+                        // Export as JPEG at 70% quality (~300–600KB for typical food photos)
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+                    };
+                    img.onerror = reject;
+                    img.src = objectUrl;
                 });
-                reader.readAsDataURL(selectedFile);
-                const base64Data = await base64Promise;
 
-                // 2. Transmit base64 to backend Express Gemini Endpoint
+                const { base64: base64Data, mimeType: compressedMimeType } = await compressImage(selectedFile);
+
+                // 2. Transmit compressed base64 to Vercel serverless endpoint
                 const aiResponse = await fetch('/api/analyze-food', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         imageBase64: base64Data,
-                        mimeType: selectedFile.type || 'image/jpeg',
+                        mimeType: compressedMimeType,
                         uid: user.uid
                     })
                 });
+
 
                 if (!aiResponse.ok) {
                     throw new Error('AI Engine failed to parse image. Please try another clearer image.');
