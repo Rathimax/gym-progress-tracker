@@ -4,6 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
 import * as dietService from "./dietService.js"; // New Diet Service
@@ -22,12 +23,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 // auth.useDeviceLanguage(); // Optional: Localize language
 
 // Expose Diet Service for console testing during development
 window.dietService = dietService;
 window.db = db;
 window.auth = auth;
+window.storage = storage;
+window.ref = ref;
+window.uploadBytes = uploadBytes;
+window.getDownloadURL = getDownloadURL;
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -64,6 +70,39 @@ document.addEventListener('DOMContentLoaded', () => {
         dietCarbs: document.getElementById('diet-carbs'),
         dietFat: document.getElementById('diet-fat'),
         btnSubmitMeal: document.getElementById('btn-submit-meal'),
+
+        // Diet Dashboard
+        dietCaloriesConsumed: document.getElementById('diet-calories-consumed'),
+        dietCaloriesGoal: document.getElementById('diet-calories-goal'),
+        dietCaloriesRemaining: document.getElementById('diet-calories-remaining'),
+        calorieProgressRing: document.getElementById('calorie-progress-ring'),
+        dietProteinVal: document.getElementById('diet-protein-val'),
+        dietProteinBar: document.getElementById('diet-protein-bar'),
+        dietCarbsVal: document.getElementById('diet-carbs-val'),
+        dietCarbsBar: document.getElementById('diet-carbs-bar'),
+        dietFatVal: document.getElementById('diet-fat-val'),
+        dietFatBar: document.getElementById('diet-fat-bar'),
+        dietWaterVal: document.getElementById('diet-water-val'),
+        dietWaterBar: document.getElementById('diet-water-bar'),
+        btnAddWater: document.getElementById('btn-add-water'),
+
+        // AI Food Scan
+        scanUploadZone: document.getElementById('ai-scan-upload-zone'),
+        scanFileInput: document.getElementById('ai-scan-file-input'),
+        scanPreviewImg: document.getElementById('ai-scan-preview-img'),
+        btnAnalyzeFood: document.getElementById('btn-analyze-food'),
+        scanLoader: document.getElementById('ai-scan-loader'),
+        scanResults: document.getElementById('ai-scan-results'),
+
+        // AI Scan Modals 
+        scanFoodName: document.getElementById('scan-food-name'),
+        scanFoodQty: document.getElementById('scan-food-qty'),
+        scanCalories: document.getElementById('scan-calories'),
+        scanProtein: document.getElementById('scan-protein'),
+        scanCarbs: document.getElementById('scan-carbs'),
+        scanFat: document.getElementById('scan-fat'),
+        btnCancelScan: document.getElementById('btn-cancel-scan'),
+        btnConfirmScan: document.getElementById('btn-confirm-scan'),
 
         // 1RM Calculator
         calcWeight: document.getElementById('calc-weight'),
@@ -1265,6 +1304,94 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ==========================================
+        // DIET: DASHBOARD OBSERVERS & RENDER
+        // ==========================================
+        let unsubscribeMeals = null;
+        let unsubscribeWater = null;
+
+        window.updateDietDashboard = () => {
+            const user = auth.currentUser;
+            if (!user || appMode !== 'diet') return;
+
+            if (unsubscribeMeals) unsubscribeMeals();
+            if (unsubscribeWater) unsubscribeWater();
+
+            const today = new Date().toISOString().split('T')[0];
+
+            unsubscribeMeals = dietService.observeMealsByDate(db, user.uid, today, (result) => {
+                if (result.success) {
+                    renderDietMacros(result.meals);
+                }
+            });
+
+            unsubscribeWater = dietService.observeWaterByDate(db, user.uid, today, (result) => {
+                if (result.success) {
+                    renderDietWater(result.totalMl);
+                }
+            });
+        };
+
+        const renderDietMacros = (meals) => {
+            let totalCals = 0; let totalProtein = 0; let totalCarbs = 0; let totalFat = 0;
+            meals.forEach(m => {
+                totalCals += (m.calories || 0); totalProtein += (m.protein || 0);
+                totalCarbs += (m.carbs || 0); totalFat += (m.fat || 0);
+            });
+
+            const goal = 2000;
+            const remaining = Math.max(0, goal - totalCals);
+
+            if (elements.dietCaloriesConsumed) elements.dietCaloriesConsumed.textContent = Math.round(totalCals);
+            if (elements.dietCaloriesGoal) elements.dietCaloriesGoal.textContent = goal;
+            if (elements.dietCaloriesRemaining) elements.dietCaloriesRemaining.textContent = Math.round(remaining);
+
+            // Circular Ring (circumference = 283)
+            const circleLength = 283;
+            const pctCals = Math.min(100, (totalCals / goal) * 100);
+            if (elements.calorieProgressRing) {
+                elements.calorieProgressRing.style.strokeDashoffset = circleLength - (circleLength * pctCals / 100);
+            }
+
+            // Approximate macro goals for 2000 cal: 150g Protein, 200g Carbs, 65g Fat
+            const pGoal = 150; const cGoal = 200; const fGoal = 67;
+
+            if (elements.dietProteinVal) elements.dietProteinVal.textContent = Math.round(totalProtein) + 'g';
+            if (elements.dietProteinBar) elements.dietProteinBar.style.width = Math.min(100, (totalProtein / pGoal) * 100) + '%';
+            if (elements.dietCarbsVal) elements.dietCarbsVal.textContent = Math.round(totalCarbs) + 'g';
+            if (elements.dietCarbsBar) elements.dietCarbsBar.style.width = Math.min(100, (totalCarbs / cGoal) * 100) + '%';
+            if (elements.dietFatVal) elements.dietFatVal.textContent = Math.round(totalFat) + 'g';
+            if (elements.dietFatBar) elements.dietFatBar.style.width = Math.min(100, (totalFat / fGoal) * 100) + '%';
+        };
+
+        const renderDietWater = (totalMl) => {
+            const waterGoal = 2500;
+            if (elements.dietWaterVal) elements.dietWaterVal.textContent = `${totalMl} / ${waterGoal} ml`;
+            const pct = Math.min(100, (totalMl / waterGoal) * 100);
+            if (elements.dietWaterBar) elements.dietWaterBar.style.width = `${pct}%`;
+        };
+
+        if (elements.btnAddWater) {
+            elements.btnAddWater.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) return showNotification("Please log in.", "error");
+
+                elements.btnAddWater.disabled = true;
+                elements.btnAddWater.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+
+                const today = new Date().toISOString().split('T')[0];
+                const result = await dietService.addWater(db, user.uid, today, 250);
+
+                if (result.success) {
+                    showNotification("Added 250ml water! 💧");
+                } else {
+                    showNotification("Failed to add water.", "error");
+                }
+                elements.btnAddWater.innerHTML = '<i class="ri-drop-fill"></i> +250 ml';
+                elements.btnAddWater.disabled = false;
+            });
+        }
+
         // MAIN SUBMIT
         elements.form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1601,11 +1728,182 @@ document.addEventListener('DOMContentLoaded', () => {
     let gamificationModule = null;
 
     // ==========================================
+    // DIET MODE: AI FOOD SCANNER LOGIC
+    // ==========================================
+    const initAIFoodScanner = () => {
+        let selectedFile = null;
+
+        // Trigger file input click when zone clicked
+        elements.scanUploadZone.addEventListener('click', (e) => {
+            if (e.target !== elements.scanFileInput) {
+                elements.scanFileInput.click();
+            }
+        });
+
+        // Handle File Selection & Render Preview
+        elements.scanFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate Size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('Image size must be under 5MB.', 'error');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Hide the upload text + icon, show the preview image
+            const contentDiv = elements.scanUploadZone.querySelector('.upload-content');
+            contentDiv.style.display = 'none';
+            elements.scanPreviewImg.src = URL.createObjectURL(file);
+            elements.scanPreviewImg.classList.remove('hidden');
+
+            // Reset States
+            elements.scanResults.classList.add('hidden');
+            elements.btnAnalyzeFood.style.display = 'block';
+            elements.btnAnalyzeFood.disabled = false;
+        });
+
+        // Handle Form Submission -> Firebase Storage -> Express API
+        elements.btnAnalyzeFood.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Please sign in to analyze food.', 'error');
+                return;
+            }
+            if (!selectedFile) return;
+
+            try {
+                // UI Toggle
+                elements.btnAnalyzeFood.disabled = true;
+                elements.btnAnalyzeFood.style.display = 'none';
+                elements.scanLoader.classList.remove('hidden');
+
+                // 1. Read Image as Base64 Client-Side
+                const reader = new FileReader();
+                const base64Promise = new Promise((resolve, reject) => {
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = error => reject(error);
+                });
+                reader.readAsDataURL(selectedFile);
+                const base64Data = await base64Promise;
+
+                // 2. Transmit base64 to backend Express Gemini Endpoint
+                const aiResponse = await fetch('/api/analyze-food', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64: base64Data,
+                        mimeType: selectedFile.type || 'image/jpeg',
+                        uid: user.uid
+                    })
+                });
+
+                if (!aiResponse.ok) {
+                    throw new Error('AI Engine failed to parse image. Please try another clearer image.');
+                }
+
+                const payload = await aiResponse.json();
+                if (!payload.success || !payload.data) throw new Error('Invalid JSON Payload Returned.');
+
+                const aiData = payload.data; // { food, estimatedQuantity, calories, protein, carbs, fat }
+
+                // 3. Map Data to Editable Macro Fields
+                elements.scanFoodName.value = aiData.food || '';
+                elements.scanFoodQty.value = aiData.estimatedQuantity || '';
+                elements.scanCalories.value = aiData.calories || 0;
+                elements.scanProtein.value = aiData.protein || 0;
+                elements.scanCarbs.value = aiData.carbs || 0;
+                elements.scanFat.value = aiData.fat || 0;
+
+                // Toggle Views
+                elements.scanLoader.classList.add('hidden');
+                elements.scanResults.classList.remove('hidden');
+
+            } catch (e) {
+                console.error(e);
+                showNotification(e.message || 'Error communicating with AI engine.', 'error');
+
+                // Reset View
+                elements.scanLoader.classList.add('hidden');
+                elements.btnAnalyzeFood.disabled = false;
+                elements.btnAnalyzeFood.style.display = 'block';
+            }
+        });
+
+        // Confirmation Actions
+        elements.btnCancelScan.addEventListener('click', () => {
+            // Reset state
+            selectedFile = null;
+            elements.scanFileInput.value = '';
+            elements.scanResults.classList.add('hidden');
+            elements.scanPreviewImg.classList.add('hidden');
+            elements.scanPreviewImg.src = '';
+
+            elements.scanUploadZone.querySelector('.upload-content').style.display = 'block';
+            elements.btnAnalyzeFood.style.display = 'none';
+        });
+
+        elements.btnConfirmScan.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Validate Numerics
+            const cals = parseInt(elements.scanCalories.value);
+            const pro = parseFloat(elements.scanProtein.value);
+            const carb = parseFloat(elements.scanCarbs.value);
+            const fat = parseFloat(elements.scanFat.value);
+            const fName = elements.scanFoodName.value.trim();
+
+            if (!fName || isNaN(cals)) {
+                showNotification('Food name and valid calories are required.', 'error');
+                return;
+            }
+
+            try {
+                // Formatting Date
+                const dateObj = new Date();
+                const today = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
+                const safeFoodName = elements.scanFoodQty.value.trim()
+                    ? `${fName} (${elements.scanFoodQty.value.trim()})`
+                    : fName;
+
+                const payloadObj = {
+                    foodName: safeFoodName,
+                    calories: cals,
+                    protein: isNaN(pro) ? 0 : pro,
+                    carbs: isNaN(carb) ? 0 : carb,
+                    fat: isNaN(fat) ? 0 : fat,
+                    mealType: 'Snack' // Defaulting to Snack for AI scans since you can't infer intent directly
+                };
+
+                await dietService.addMeal(db, user.uid, today, payloadObj);
+                showNotification(`Added ${safeFoodName} via AI successfully!`, 'success');
+
+                // Clean Up Form
+                elements.btnCancelScan.click();
+
+                // Auto-redirect user to Diet Dashboard
+                document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
+
+            } catch (err) {
+                console.error('Save AI Meal error:', err);
+                showNotification('Failed to save AI meal reading.', 'error');
+            }
+        });
+    };
+
+    // ==========================================
     // 8. INIT
     // ==========================================
     const init = async () => {
         applyCustomDropdown(elements.exerciseSelect);
         if (elements.dietMealType) applyCustomDropdown(elements.dietMealType);
+
+        initAIFoodScanner(); // Initialize diet analyzer listeners
+
         setupEventListeners();
         initAuth(); // New Auth Flow
         initThemes();
@@ -1643,6 +1941,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Load Data
                 await loadDataFromServer();
                 updateAllUI();
+                if (window.appMode === 'diet' && window.updateDietDashboard) window.updateDietDashboard();
             } else {
                 // User is signed out
                 authModal.style.display = 'flex';
@@ -1830,9 +2129,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.navExercise.classList.add('hidden-mode');
                     elements.navDiet.classList.remove('hidden-mode');
 
-                    // Auto-route to diet dashboard if no active tab
+                    // Auto-route specifically to dashboard
                     const hasActiveDiet = elements.sidebarDiet.querySelector('.active');
                     if (!hasActiveDiet) document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
+
+                    if (window.updateDietDashboard) window.updateDietDashboard();
                 }
             });
         });

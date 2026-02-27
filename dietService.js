@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 /**
  * Ensures date is strictly formatted as YYYY-MM-DD
@@ -122,4 +122,49 @@ export const getWaterByDate = async (db, uid, date) => {
         console.error("Error fetching water log:", error);
         return { success: false, error: error.message, totalMl: 0 };
     }
+};
+
+// ==========================================
+// 3. REAL-TIME OBSERVERS
+// ==========================================
+
+export const observeMealsByDate = (db, uid, date, callback) => {
+    if (!uid || !date || !callback) return () => { };
+
+    const formattedDate = formatDate(date);
+    const itemsRef = collection(db, "users", uid, "meals", formattedDate, "items");
+    const q = query(itemsRef, orderBy("timestamp", "asc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const meals = [];
+        snapshot.forEach((doc) => {
+            meals.push({ id: doc.id, ...doc.data() });
+        });
+        callback({ success: true, meals });
+    }, (error) => {
+        console.error("Error observing meals:", error);
+        callback({ success: false, error: error.message, meals: [] });
+    });
+
+    return unsubscribe; // Returns function to stop listening
+};
+
+export const observeWaterByDate = (db, uid, date, callback) => {
+    if (!uid || !date || !callback) return () => { };
+
+    const formattedDate = formatDate(date);
+    const waterLogRef = doc(db, "users", uid, "waterLogs", formattedDate);
+
+    const unsubscribe = onSnapshot(waterLogRef, (docSnap) => {
+        if (docSnap.exists()) {
+            callback({ success: true, totalMl: docSnap.data().totalMl || 0 });
+        } else {
+            callback({ success: true, totalMl: 0 });
+        }
+    }, (error) => {
+        console.error("Error observing water:", error);
+        callback({ success: false, error: error.message, totalMl: 0 });
+    });
+
+    return unsubscribe;
 };

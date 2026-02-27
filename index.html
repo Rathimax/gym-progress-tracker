@@ -894,12 +894,78 @@
   <div class="container hidden-mode" id="app-container-diet">
 
     <!-- DIET: Dashboard -->
-    <div id="view-diet-dashboard" class="view-section">
-      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-dashboard-line"></i>
+    <div id="view-diet-dashboard" class="view-section active-view">
+
+      <!-- Calorie Summary Card -->
+      <div class="card card-wide diet-summary-card">
+        <h3 style="margin-bottom: 20px;">Daily Summary</h3>
+        <div class="diet-top-section">
+          <div class="calorie-ring-container">
+            <svg class="calorie-ring" viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+              <circle class="ring-progress" id="calorie-progress-ring" cx="50" cy="50" r="45"
+                style="stroke-dasharray: 283; stroke-dashoffset: 283;"></circle>
+            </svg>
+            <div class="calorie-text">
+              <span id="diet-calories-consumed" class="consumed-val">0</span>
+              <span class="goal-val">/ <span id="diet-calories-goal">2000</span> kcal</span>
+            </div>
+          </div>
+
+          <div class="calorie-details">
+            <div class="detail-box">
+              <div class="label" style="color: var(--text-muted); font-size: 0.9rem;">Remaining</div>
+              <div class="value" id="diet-calories-remaining"
+                style="font-size: 1.5rem; font-weight: bold; color: var(--accent-start);">2000</div>
+            </div>
+          </div>
         </div>
-        <h2>Diet Dashboard Comming Soon ✨</h2>
       </div>
+
+      <!-- Macros Card -->
+      <div class="card card-wide macros-card">
+        <h3 style="margin-bottom: 1rem;">Macros</h3>
+
+        <div class="macro-row">
+          <div class="macro-label"><span>Protein</span> <span id="diet-protein-val" style="font-weight: 600;">0g</span>
+          </div>
+          <div class="macro-bar-bg">
+            <div class="macro-bar-fill protein-fill" id="diet-protein-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="macro-row">
+          <div class="macro-label"><span>Carbs</span> <span id="diet-carbs-val" style="font-weight: 600;">0g</span>
+          </div>
+          <div class="macro-bar-bg">
+            <div class="macro-bar-fill carbs-fill" id="diet-carbs-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="macro-row">
+          <div class="macro-label"><span>Fat</span> <span id="diet-fat-val" style="font-weight: 600;">0g</span></div>
+          <div class="macro-bar-bg">
+            <div class="macro-bar-fill fat-fill" id="diet-fat-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Water Tracker Card -->
+      <div class="card card-wide water-card">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:1rem;">
+          <h3>Water Intake</h3>
+          <div class="water-val" id="diet-water-val" style="color: var(--text-light); font-weight: bold;">0 / 2500 ml
+          </div>
+        </div>
+        <div class="macro-bar-bg water-bg">
+          <div class="macro-bar-fill water-fill" id="diet-water-bar" style="width: 0%;"></div>
+        </div>
+
+        <button class="btn-primary" id="btn-add-water" style="width:100%; margin-top:1.5rem;">
+          <i class="ri-drop-fill"></i> +250 ml
+        </button>
+      </div>
+
     </div>
 
     <!-- DIET: Log Meal -->
@@ -960,10 +1026,79 @@
 
     <!-- DIET: AI Food Scan -->
     <div id="view-diet-ai-scan" class="view-section">
-      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-camera-lens-line"></i>
+      <div class="card card-wide diet-scan-container">
+        <div class="header-with-icon">
+          <i class="ri-camera-lens-line"></i>
+          <h2>AI Food Scan</h2>
         </div>
-        <h2>AI Food Scan Coming Soon ✨</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 2rem;">Upload a photo of your meal and let
+          our AI calculate the macros.</p>
+
+        <!-- UPLOAD ZONE -->
+        <div id="ai-scan-upload-zone" class="upload-zone">
+          <input type="file" id="ai-scan-file-input" accept="image/*" capture="environment" class="hidden-file-input">
+          <div class="upload-content">
+            <i class="ri-upload-cloud-2-line"
+              style="font-size: 3rem; color: var(--accent-start); margin-bottom: 1rem; display: block;"></i>
+            <h3>Tap to Capture or Upload</h3>
+            <p>PNG, JPG up to 5MB</p>
+          </div>
+          <!-- Preview Frame (Hidden until image selected) -->
+          <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
+        </div>
+
+        <button class="btn-primary" id="btn-analyze-food" style="width: 100%; margin-top: 2rem; display: none;">
+          <i class="ri-magic-line"></i> Analyze Meal
+        </button>
+
+        <!-- LOADING STATE -->
+        <div id="ai-scan-loader" class="scan-loader hidden">
+          <div class="loader-spinner"></div>
+          <p>Analyzing nutritional content...</p>
+        </div>
+
+        <!-- RESULTS / CONFIRMATION MODAL (Hidden initially) -->
+        <div id="ai-scan-results" class="scan-results-container hidden">
+          <h3>Confirm Nutritional Data</h3>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <label for="scan-food-name">Detected Food</label>
+            <input type="text" id="scan-food-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="scan-food-qty">Estimated Quantity</label>
+            <input type="text" id="scan-food-qty" required>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+              <label for="scan-calories">Calories (kcal)</label>
+              <input type="number" id="scan-calories" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="scan-protein">Protein (g)</label>
+              <input type="number" id="scan-protein" min="0" step="0.1" required>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+              <label for="scan-carbs">Carbs (g)</label>
+              <input type="number" id="scan-carbs" min="0" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label for="scan-fat">Fat (g)</label>
+              <input type="number" id="scan-fat" min="0" step="0.1" required>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn-secondary" id="btn-cancel-scan" style="flex: 1;">Cancel</button>
+            <button class="btn-primary" id="btn-confirm-scan" style="flex: 1;">Save Meal</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
