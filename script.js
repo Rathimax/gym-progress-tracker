@@ -1914,13 +1914,250 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 8. INIT
+    // 8. DIET HISTORY & ANALYTICS INIT
+    // ==========================================
+    let historyWeeklyCalsChart = null;
+    let historyWeeklyProteinChart = null;
+
+    const renderDietDailyHistory = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const date = document.getElementById('diet-history-date').value;
+        const result = await dietService.getMealsByDate(db, user.uid, date);
+        const waterResult = await dietService.getWaterByDate(db, user.uid, date);
+
+        if (result.success) {
+            let tCals = 0, tPro = 0, tCarb = 0, tFat = 0;
+            const mealList = document.getElementById('history-meal-list');
+            mealList.innerHTML = '';
+
+            result.meals.forEach(m => {
+                tCals += (m.calories || 0); tPro += (m.protein || 0); tCarb += (m.carbs || 0); tFat += (m.fat || 0);
+                const li = document.createElement('div');
+                li.className = 'history-meal-item';
+                li.innerHTML = `
+                    <div class="meal-info">
+                        <strong>${m.foodName}</strong>
+                        <span class="meal-type-badge">${m.mealType}</span>
+                    </div>
+                    <div class="meal-macros">
+                        <span>${m.calories || 0} kcal</span>
+                        <button class="btn-delete-meal" data-id="${m.id}" title="Delete Meal"><i class="ri-delete-bin-line"></i></button>
+                    </div>
+                `;
+                mealList.appendChild(li);
+            });
+
+            document.getElementById('history-daily-cals').textContent = Math.round(tCals);
+            document.getElementById('history-daily-protein').textContent = Math.round(tPro) + 'g';
+            document.getElementById('history-daily-carbs').textContent = Math.round(tCarb) + 'g';
+            document.getElementById('history-daily-fat').textContent = Math.round(tFat) + 'g';
+
+            const wGoal = 2500; // Assuming a default water goal for display
+            const tWater = waterResult.success ? waterResult.totalMl : 0;
+            document.getElementById('history-daily-water').textContent = `${tWater}/${wGoal}ml`;
+
+            // Bind Delete events
+            mealList.querySelectorAll('.btn-delete-meal').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    if (confirm("Delete this meal?")) {
+                        await dietService.deleteMeal(db, user.uid, date, id);
+                        renderDietDailyHistory(); // re-render
+                        showNotification("Meal deleted.", "info");
+                    }
+                });
+            });
+
+        } else {
+            console.error("Error loading daily history", result.error);
+            document.getElementById('history-meal-list').innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No meals logged on this date.</div>`;
+            document.getElementById('history-daily-cals').textContent = 0;
+            document.getElementById('history-daily-protein').textContent = '0g';
+            document.getElementById('history-daily-carbs').textContent = '0g';
+            document.getElementById('history-daily-fat').textContent = '0g';
+            document.getElementById('history-daily-water').textContent = '0ml';
+        }
+    };
+
+    const renderDietWeeklyHistory = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        const insightsBanner = document.getElementById('diet-weekly-insights');
+        insightsBanner.innerHTML = `<i class="ri-loader-4-line spin" style="margin-right:0.5rem;"></i> Loading analytics...`;
+
+        try {
+            const res = await dietService.getWeeklyDietData(db, user.uid);
+            if (!res.success) throw new Error(res.error);
+
+            const dataArr = res.data; // Array of 7 days, older to newer
+
+            let sumCals = 0, sumPro = 0;
+            let highestPro = -1, highestProDay = "-";
+            let lowestCal = 99999, lowestCalDay = "-";
+
+            const labels = [];
+            const calsData = [];
+            const proData = [];
+
+            dataArr.forEach(d => {
+                const dayStr = d.date.substring(5); // MM-DD
+                labels.push(dayStr);
+                calsData.push(d.calories);
+                proData.push(d.protein);
+
+                sumCals += d.calories;
+                sumPro += d.protein;
+
+                if (d.protein > highestPro) { highestPro = d.protein; highestProDay = dayStr; }
+                if (d.calories > 0 && d.calories < lowestCal) { lowestCal = d.calories; lowestCalDay = dayStr; }
+            });
+
+            if (lowestCal === 99999) lowestCalDay = "N/A"; // No data
+
+            const avgCals = Math.round(sumCals / 7);
+            const avgPro = Math.round(sumPro / 7);
+
+            document.getElementById('history-weekly-avg-cals').textContent = avgCals;
+            document.getElementById('history-weekly-avg-protein').textContent = avgPro + 'g';
+            document.getElementById('history-weekly-best-protein').textContent = highestProDay !== "-" ? `${highestPro}g (${highestProDay})` : '-';
+            document.getElementById('history-weekly-lowest-cals').textContent = lowestCalDay !== "N/A" ? `${lowestCal} (${lowestCalDay})` : '-';
+
+            const calsCtx = document.getElementById('chart-weekly-calories').getContext('2d');
+            const proCtx = document.getElementById('chart-weekly-protein').getContext('2d');
+
+            if (historyWeeklyCalsChart) historyWeeklyCalsChart.destroy();
+            historyWeeklyCalsChart = new Chart(calsCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Calories',
+                        data: calsData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
+                }
+            });
+
+            if (historyWeeklyProteinChart) historyWeeklyProteinChart.destroy();
+            historyWeeklyProteinChart = new Chart(proCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Protein (g)',
+                        data: proData,
+                        borderColor: '#f43f5e',
+                        backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#f43f5e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
+                }
+            });
+
+            // Generate Insights
+            let insightText = "You logged data consistently this week.";
+            const todayCals = calsData[6];
+            const todayPro = proData[6];
+
+            if (avgCals === 0) {
+                insightText = "Start logging your meals to see weekly insights here!";
+                insightsBanner.style.background = "rgba(255,255,255,0.1)";
+                insightsBanner.style.borderColor = "rgba(255,255,255,0.2)";
+            } else if (todayCals > 0 && todayCals > avgCals * 1.2) {
+                insightText = `You consumed ${(todayCals - avgCals)} more calories today than your weekly average.`;
+                insightsBanner.style.background = "rgba(244, 63, 94, 0.1)"; // Red tint
+                insightsBanner.style.borderColor = "rgba(244, 63, 94, 0.2)";
+            } else if (todayPro > avgPro && avgPro > 0) {
+                insightText = `Great job! Your protein intake today is higher than your weekly average.`;
+                insightsBanner.style.background = "rgba(16, 185, 129, 0.1)"; // Green tint
+                insightsBanner.style.borderColor = "rgba(16, 185, 129, 0.2)";
+            } else {
+                insightsBanner.style.background = "rgba(99, 102, 241, 0.1)"; // Default tint
+                insightsBanner.style.borderColor = "rgba(99, 102, 241, 0.2)";
+            }
+
+            insightsBanner.innerHTML = `<i class="ri-lightbulb-flash-line" style="margin-right:0.5rem;"></i> <span>${insightText}</span>`;
+
+        } catch (error) {
+            console.error("Render weekly history error:", error);
+            insightsBanner.innerHTML = `<i class="ri-error-warning-line" style="color: #f43f5e; margin-right:0.5rem;"></i> <span>Failed to load weekly analytics.</span>`;
+        }
+    };
+
+    const initDietHistory = () => {
+        const btnDaily = document.getElementById('btn-diet-daily');
+        const btnWeekly = document.getElementById('btn-diet-weekly');
+        const containerDaily = document.getElementById('diet-daily-container');
+        const containerWeekly = document.getElementById('diet-weekly-container');
+        const dateInput = document.getElementById('diet-history-date');
+        const mealList = document.getElementById('history-meal-list');
+        const insightsBanner = document.getElementById('diet-weekly-insights');
+
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        if (dateInput) dateInput.value = today;
+
+        // Toggle Handlers
+        if (btnDaily && btnWeekly) {
+            btnDaily.addEventListener('click', () => {
+                btnDaily.classList.add('active');
+                btnWeekly.classList.remove('active');
+                containerDaily.style.display = 'block';
+                containerWeekly.style.display = 'none';
+                renderDietDailyHistory();
+            });
+
+            btnWeekly.addEventListener('click', () => {
+                btnWeekly.classList.add('active');
+                btnDaily.classList.remove('active');
+                containerWeekly.style.display = 'block';
+                containerDaily.style.display = 'none';
+                renderDietWeeklyHistory();
+            });
+        }
+
+        // Date Picker Handler
+        if (dateInput) {
+            dateInput.addEventListener('change', renderDietDailyHistory);
+        }
+
+        // History Route Trigger
+        document.querySelector('.nav-item[data-target="view-diet-history"]')?.addEventListener('click', () => {
+            // Render active view
+            if (btnDaily.classList.contains('active')) {
+                renderDietDailyHistory();
+            } else {
+                renderDietWeeklyHistory();
+            }
+        });
+    };
+
+    // ==========================================
+    // 9. INIT
     // ==========================================
     const init = async () => {
         applyCustomDropdown(elements.exerciseSelect);
         if (elements.dietMealType) applyCustomDropdown(elements.dietMealType);
 
         initAIFoodScanner(); // Initialize diet analyzer listeners
+        initDietHistory();   // Initialize Diet History view and charts
 
         setupEventListeners();
         initAuth(); // New Auth Flow

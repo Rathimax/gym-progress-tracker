@@ -1104,10 +1104,100 @@
 
     <!-- DIET: History -->
     <div id="view-diet-history" class="view-section">
-      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-history-line"></i>
+      <div class="content-header">
+        <h1>Diet History</h1>
+        <p>Review your daily logs and weekly analytics.</p>
+      </div>
+
+      <!-- Segmented Toggle -->
+      <div class="diet-history-toggle">
+        <button id="btn-diet-daily" class="toggle-btn active">Daily View</button>
+        <button id="btn-diet-weekly" class="toggle-btn">Weekly View</button>
+      </div>
+
+      <!-- DAILY VIEW -->
+      <div id="diet-daily-container" class="diet-history-container">
+        <!-- Date Picker -->
+        <div class="card card-wide"
+          style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+          <h3 style="margin: 0;">Select Date</h3>
+          <input type="date" id="diet-history-date" class="workout-input" style="width: auto;">
         </div>
-        <h2>Diet History Coming Soon ✨</h2>
+
+        <!-- Daily Macro Summary -->
+        <div class="history-macro-grid">
+          <div class="macro-card">
+            <h4>Calories</h4>
+            <div class="value" id="history-daily-cals">0</div>
+          </div>
+          <div class="macro-card">
+            <h4>Protein</h4>
+            <div class="value" id="history-daily-protein">0g</div>
+          </div>
+          <div class="macro-card">
+            <h4>Carbs</h4>
+            <div class="value" id="history-daily-carbs">0g</div>
+          </div>
+          <div class="macro-card">
+            <h4>Fat</h4>
+            <div class="value" id="history-daily-fat">0g</div>
+          </div>
+          <div class="macro-card">
+            <h4>Water</h4>
+            <div class="value" id="history-daily-water">0ml</div>
+          </div>
+        </div>
+
+        <!-- Meal List -->
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Logged Meals</h3>
+        <div id="history-meal-list" class="history-list-wrapper">
+          <!-- Meals injected here -->
+          <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading meals...</div>
+        </div>
+      </div>
+
+      <!-- WEEKLY VIEW (Hidden by default) -->
+      <div id="diet-weekly-container" class="diet-history-container hidden" style="display: none;">
+        <!-- Insights Banner -->
+        <div class="insights-banner" id="diet-weekly-insights">
+          <i class="ri-lightbulb-flash-line" style="color: var(--warning-color); margin-right: 0.5rem;"></i>
+          <span>Loading weekly insights...</span>
+        </div>
+
+        <!-- Weekly Averages Grid -->
+        <div class="history-macro-grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="macro-card">
+            <h4>Avg Daily Calories</h4>
+            <div class="value" id="history-weekly-avg-cals">0</div>
+          </div>
+          <div class="macro-card">
+            <h4>Avg Daily Protein</h4>
+            <div class="value" id="history-weekly-avg-protein">0g</div>
+          </div>
+          <div class="macro-card">
+            <h4>Best Protein Day</h4>
+            <div class="value" id="history-weekly-best-protein">-</div>
+          </div>
+          <div class="macro-card">
+            <h4>Lowest Calorie Day</h4>
+            <div class="value" id="history-weekly-lowest-cals">-</div>
+          </div>
+        </div>
+
+        <!-- Charts Area -->
+        <div class="card card-wide" style="margin-top: 1.5rem;">
+          <h3>7-Day Calorie Trend</h3>
+          <div style="height: 250px; width: 100%; position: relative;">
+            <canvas id="chart-weekly-calories"></canvas>
+          </div>
+        </div>
+
+        <div class="card card-wide" style="margin-top: 1.5rem;">
+          <h3>7-Day Protein Trend</h3>
+          <div style="height: 250px; width: 100%; position: relative;">
+            <canvas id="chart-weekly-protein"></canvas>
+          </div>
+        </div>
       </div>
     </div>
 

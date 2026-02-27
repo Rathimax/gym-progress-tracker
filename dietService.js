@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 /**
  * Ensures date is strictly formatted as YYYY-MM-DD
@@ -167,4 +167,68 @@ export const observeWaterByDate = (db, uid, date, callback) => {
     });
 
     return unsubscribe;
+};
+
+// ==========================================
+// 4. HISTORY WEEKLY ANALYTICS & MANAGEMENT
+// ==========================================
+
+export const deleteMeal = async (db, uid, date, mealId) => {
+    if (!uid || !date || !mealId) throw new Error("Missing required parameters for meal deletion.");
+    try {
+        const formattedDate = formatDate(date);
+        const mealRef = doc(db, "users", uid, "meals", formattedDate, "items", mealId);
+        await deleteDoc(mealRef);
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting meal:", error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const getWeeklyDietData = async (db, uid) => {
+    if (!uid) throw new Error("Authentication required: uid is missing.");
+
+    // Generate dates for the last 7 days (including today) in chronological order
+    const dates = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        dates.push(formatDate(d));
+    }
+
+    try {
+        // Fetch daily aggregates for the week in parallel
+        const weeklyData = await Promise.all(dates.map(async (dateStr) => {
+            const [mealsRes, waterRes] = await Promise.all([
+                getMealsByDate(db, uid, dateStr),
+                getWaterByDate(db, uid, dateStr) // Fix: was missing db arg in thought
+            ]);
+
+            let cals = 0, pro = 0, car = 0, fat = 0;
+            if (mealsRes.success && mealsRes.meals) {
+                mealsRes.meals.forEach(m => {
+                    cals += Number(m.calories) || 0;
+                    pro += Number(m.protein) || 0;
+                    car += Number(m.carbs) || 0;
+                    fat += Number(m.fat) || 0;
+                });
+            }
+
+            return {
+                date: dateStr,
+                calories: cals,
+                protein: pro,
+                carbs: car,
+                fat: fat,
+                waterMl: waterRes.success ? waterRes.totalMl : 0
+            };
+        }));
+
+        return { success: true, sequence: dates, data: weeklyData };
+    } catch (error) {
+        console.error("Error fetching weekly data:", error);
+        return { success: false, error: error.message };
+    }
 };
