@@ -1787,14 +1787,15 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedFile = file;
 
             // Hide the upload text + icon, show the preview image
-            const contentDiv = elements.scanUploadZone.querySelector('.upload-content');
-            contentDiv.style.display = 'none';
+            const contentDiv = elements.scanUploadZone.querySelector('.fs-dropzone-inner');
+            if (contentDiv) contentDiv.style.display = 'none';
+
             elements.scanPreviewImg.src = URL.createObjectURL(file);
             elements.scanPreviewImg.classList.remove('hidden');
 
             // Reset States
             elements.scanResults.classList.add('hidden');
-            elements.btnAnalyzeFood.style.display = 'block';
+            elements.btnAnalyzeFood.style.display = 'inline-flex';
             elements.btnAnalyzeFood.disabled = false;
         });
 

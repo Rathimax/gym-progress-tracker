@@ -163,6 +163,16 @@ label {
   letter-spacing: 0.5px;
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Form Elements */
 input,
 select,
