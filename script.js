@@ -2232,21 +2232,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 9. AUTHENTICATION LOGIC
     // ==========================================
     const initAuth = () => {
-        const authModal = document.getElementById('auth-modal');
-        const googleBtn = document.getElementById('btn-google-login');
-        const authForm = document.getElementById('auth-form');
-        const validEmailInput = document.getElementById('auth-email');
-        const validPassInput = document.getElementById('auth-password');
-        const switchBtn = document.getElementById('auth-switch-btn');
-        const switchText = document.getElementById('auth-switch-text');
-        const authTitle = document.getElementById('auth-title');
-        let isSignUp = false;
-
         // AUTH STATE LISTENER
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in
-                authModal.style.display = 'none';
                 showNotification(`Welcome back, ${user.displayName || user.email}!`);
                 updateDataStatus();
                 // Load Data
@@ -2254,70 +2243,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateAllUI();
                 if (window.appMode === 'diet' && window.updateDietDashboard) window.updateDietDashboard();
             } else {
-                // User is signed out
-                authModal.style.display = 'flex';
-                data = [];
-                bwData = [];
-                updateAllUI();
+                // User is signed out, REDIRECT
+                window.location.replace('login.html');
             }
         });
-
-        // GOOGLE LOGIN
-        if (googleBtn) {
-            googleBtn.addEventListener('click', async () => {
-                const provider = new GoogleAuthProvider();
-                try {
-                    await signInWithPopup(auth, provider);
-                } catch (error) {
-                    console.error(error);
-                    showNotification(error.message, 'error');
-                }
-            });
-        }
-
-        // EMAIL LOGIN / SIGN UP
-        if (authForm) {
-            authForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = validEmailInput.value;
-                const password = validPassInput.value;
-
-                try {
-                    if (isSignUp) {
-                        await createUserWithEmailAndPassword(auth, email, password);
-                        showNotification("Account created successfully!");
-                    } else {
-                        await signInWithEmailAndPassword(auth, email, password);
-                    }
-                } catch (error) {
-                    console.error(error);
-                    let msg = error.message;
-                    if (error.code === 'auth/wrong-password') msg = "Incorrect password.";
-                    if (error.code === 'auth/user-not-found') msg = "No user found with this email.";
-                    if (error.code === 'auth/email-already-in-use') msg = "Email already in use.";
-                    showNotification(msg, 'error');
-                }
-            });
-        }
-
-        // TOGGLE SIGN UP MODE
-        if (switchBtn) {
-            switchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                isSignUp = !isSignUp;
-                if (isSignUp) {
-                    authTitle.textContent = "Create Account";
-                    document.getElementById('btn-auth-submit').textContent = "Sign Up";
-                    switchText.textContent = "Already have an account?";
-                    switchBtn.textContent = "Sign In";
-                } else {
-                    authTitle.textContent = "Welcome to FitTrack";
-                    document.getElementById('btn-auth-submit').textContent = "Sign In";
-                    switchText.textContent = "Don't have an account?";
-                    switchBtn.textContent = "Sign Up";
-                }
-            });
-        }
     };
 
     // LOGOUT FUNCTION
