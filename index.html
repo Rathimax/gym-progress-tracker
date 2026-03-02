@@ -168,7 +168,7 @@
       <li class="nav-item" data-target="view-diet-ai-coach"><span class="icon"><i class="ri-user-heart-line"></i></span>
         <span class="label">AI Diet Coach</span>
       </li>
-      <li class="nav-item" data-target="view-settings"><span class="icon"><i class="ri-settings-4-line"></i></span>
+      <li class="nav-item" data-target="view-diet-settings"><span class="icon"><i class="ri-settings-4-line"></i></span>
         <span class="label">Settings</span>
       </li>
     </ul>
@@ -757,28 +757,9 @@
 
     <!-- VIEW 5: SETTINGS -->
     <div id="view-settings" class="view-section">
-      <div class="card">
-        <h2><span class="icon"><i class="ri-database-2-fill"></i></span> Data Management</h2>
-        <div class="data-info-columns">
-          <div class="data-info-item">
-            <strong>Workouts</strong>
-            <span id="data-status-workouts">...</span>
-          </div>
-          <div class="data-info-item">
-            <strong>User</strong>
-            <span id="data-status-user">...</span>
-          </div>
-        </div>
-        <div class="data-management-grid">
-          <button id="export-btn"><span class="icon-btn"><i class="ri-file-pdf-fill"></i></span> Export PDF</button>
-          <button id="import-btn"><span class="icon-btn"><i class="ri-upload-2-fill"></i></span> Import</button>
-          <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All
-            Data</button>
-          <button id="logout-btn"><span class="icon-btn"><i class="ri-logout-box-r-line"></i></span> Logout</button>
-        </div>
-        <input type="file" id="import-input" accept=".json" class="hidden" />
-      </div>
-      <div class="card">
+
+      <!-- Section 1: App Preferences -->
+      <div class="card settings-card">
         <h2><span class="icon"><i class="ri-equalizer-fill"></i></span> App Preferences</h2>
 
         <div class="setting-item">
@@ -823,6 +804,14 @@
         </div>
 
         <div class="setting-item">
+          <label class="setting-label">Macro Display</label>
+          <div class="segmented-control">
+            <button class="segment-btn active" data-macro-mode="absolute">Absolute (g)</button>
+            <button class="segment-btn" data-macro-mode="percentage">Percentage (%)</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
           <label class="setting-label">Header Avatar</label>
           <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
             <img id="avatar-preview-settings"
@@ -836,16 +825,43 @@
               Emoji</button>
           </div>
         </div>
-
       </div>
-      <div class="card">
+
+
+
+      <!-- Section 4: Theme Customization -->
+      <div class="card settings-card">
         <h2><span class="icon"><i class="ri-palette-fill"></i></span> Theme Customization</h2>
-        <p style="color:var(--text-light); margin-bottom:1rem; font-size:0.9rem;">Select an accent theme for your app:
-        </p>
+        <p class="settings-desc">Select an accent theme for your app:</p>
         <div id="theme-grid" class="theme-grid">
           <!-- Themes injected by JS -->
         </div>
       </div>
+
+      <!-- Section 5: Data Management -->
+      <div class="card settings-card">
+        <h2><span class="icon"><i class="ri-database-2-fill"></i></span> Data Management</h2>
+        <div class="data-info-columns">
+          <div class="data-info-item">
+            <strong>Workouts</strong>
+            <span id="data-status-workouts">...</span>
+          </div>
+          <div class="data-info-item">
+            <strong>User</strong>
+            <span id="data-status-user">...</span>
+          </div>
+        </div>
+        <div class="data-management-grid">
+          <button id="export-btn"><span class="icon-btn"><i class="ri-file-pdf-fill"></i></span> Export PDF</button>
+          <button id="import-btn"><span class="icon-btn"><i class="ri-upload-2-fill"></i></span> Import</button>
+          <button id="clear-btn"><span class="icon-btn"><i class="ri-delete-bin-fill"></i></span> Clear All
+            Data</button>
+          <button id="logout-btn"><span class="icon-btn"><i class="ri-logout-box-r-line"></i></span> Logout</button>
+        </div>
+        <input type="file" id="import-input" accept=".json" class="hidden" />
+      </div>
+
+      <!-- Analytics (existing) -->
       <div class="card card-wide">
         <h2><span class="icon"><i class="ri-pie-chart-2-fill"></i></span> Analytics</h2>
         <div class="dropdown-wrapper"><label for="analytics-exercise-select">Filter by Exercise:</label><select
@@ -895,207 +911,329 @@
 
     <!-- DIET: Dashboard -->
     <div id="view-diet-dashboard" class="view-section active-view">
+      <div class="dd-page">
+        <!-- Hero Header -->
+        <div class="dd-hero">
+          <div class="dd-hero-icon"><i class="ri-dashboard-2-fill"></i></div>
+          <div>
+            <h2 class="dd-hero-title">Diet Dashboard</h2>
+            <p class="dd-hero-sub">Monitor your daily nutrition goals</p>
+          </div>
+        </div>
 
-      <!-- Calorie Summary Card -->
-      <div class="card card-wide diet-summary-card">
-        <h3 style="margin-bottom: 20px;">Daily Summary</h3>
-        <div class="diet-top-section">
-          <div class="calorie-ring-container">
-            <svg class="calorie-ring" viewBox="0 0 100 100">
-              <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-              <circle class="ring-progress" id="calorie-progress-ring" cx="50" cy="50" r="45"
-                style="stroke-dasharray: 283; stroke-dashoffset: 283;"></circle>
-            </svg>
-            <div class="calorie-text">
-              <span id="diet-calories-consumed" class="consumed-val">0</span>
-              <span class="goal-val">/ <span id="diet-calories-goal">2000</span> kcal</span>
+        <!-- Dashboard Grid -->
+        <div class="dd-grid">
+
+          <!-- Calories Summary Card -->
+          <div class="dd-card dd-card--calories">
+            <h3 class="dd-card-title"><i class="ri-pie-chart-2-fill" style="color:#0ea5e9;"></i> Daily Summary</h3>
+            <div class="dd-cal-display">
+              <div class="calorie-ring-container">
+                <svg class="calorie-ring" viewBox="0 0 100 100">
+                  <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+                  <circle class="ring-progress" id="calorie-progress-ring" cx="50" cy="50" r="45"
+                    style="stroke-dasharray: 283; stroke-dashoffset: 283;"></circle>
+                </svg>
+                <div class="calorie-text">
+                  <span id="diet-calories-consumed" class="consumed-val">0</span>
+                  <span class="goal-val">/ <span id="diet-calories-goal">2000</span> kcal</span>
+                </div>
+              </div>
+
+              <div class="dd-cal-details">
+                <div class="dd-cal-box">
+                  <div class="dd-cal-label">Remaining</div>
+                  <div class="dd-cal-value" id="diet-calories-remaining">2000</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="calorie-details">
-            <div class="detail-box">
-              <div class="label" style="color: var(--text-muted); font-size: 0.9rem;">Remaining</div>
-              <div class="value" id="diet-calories-remaining"
-                style="font-size: 1.5rem; font-weight: bold; color: var(--accent-start);">2000</div>
+          <!-- Right Column (Macros & Water) -->
+          <div class="dd-col">
+            <!-- Macros Card -->
+            <div class="dd-card dd-card--macros">
+              <h3 class="dd-card-title"><i class="ri-bar-chart-horizontal-fill" style="color:#8b5cf6;"></i> Macros</h3>
+              <div class="dd-macro-list">
+                <div class="macro-row">
+                  <div class="macro-label"><span>Protein</span> <span id="diet-protein-val"
+                      style="font-weight: 700;">0g</span></div>
+                  <div class="macro-bar-bg">
+                    <div class="macro-bar-fill protein-fill" id="diet-protein-bar" style="width: 0%;"></div>
+                  </div>
+                </div>
+                <div class="macro-row">
+                  <div class="macro-label"><span>Carbs</span> <span id="diet-carbs-val"
+                      style="font-weight: 700;">0g</span></div>
+                  <div class="macro-bar-bg">
+                    <div class="macro-bar-fill carbs-fill" id="diet-carbs-bar" style="width: 0%;"></div>
+                  </div>
+                </div>
+                <div class="macro-row">
+                  <div class="macro-label"><span>Fat</span> <span id="diet-fat-val" style="font-weight: 700;">0g</span>
+                  </div>
+                  <div class="macro-bar-bg">
+                    <div class="macro-bar-fill fat-fill" id="diet-fat-bar" style="width: 0%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Water Tracker Card -->
+            <div class="dd-card dd-card--water">
+              <div class="dd-water-header">
+                <h3 class="dd-card-title"><i class="ri-drop-fill" style="color:#0ea5e9;"></i> Water Intake</h3>
+                <div class="water-val" id="diet-water-val">0 / 2500 ml</div>
+              </div>
+              <div class="macro-bar-bg water-bg">
+                <div class="macro-bar-fill water-fill" id="diet-water-bar" style="width: 0%;"></div>
+              </div>
+              <div class="dd-water-actions">
+                <button class="dd-btn-sub-water" id="btn-sub-water" title="Remove 250ml">
+                  <i class="ri-subtract-line"></i> -250 ml
+                </button>
+                <button class="dd-btn-add-water" id="btn-add-water" title="Add 250ml">
+                  <i class="ri-add-line"></i> +250 ml
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+
+        </div> <!-- End Grid -->
       </div>
-
-      <!-- Macros Card -->
-      <div class="card card-wide macros-card">
-        <h3 style="margin-bottom: 1rem;">Macros</h3>
-
-        <div class="macro-row">
-          <div class="macro-label"><span>Protein</span> <span id="diet-protein-val" style="font-weight: 600;">0g</span>
-          </div>
-          <div class="macro-bar-bg">
-            <div class="macro-bar-fill protein-fill" id="diet-protein-bar" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <div class="macro-row">
-          <div class="macro-label"><span>Carbs</span> <span id="diet-carbs-val" style="font-weight: 600;">0g</span>
-          </div>
-          <div class="macro-bar-bg">
-            <div class="macro-bar-fill carbs-fill" id="diet-carbs-bar" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <div class="macro-row">
-          <div class="macro-label"><span>Fat</span> <span id="diet-fat-val" style="font-weight: 600;">0g</span></div>
-          <div class="macro-bar-bg">
-            <div class="macro-bar-fill fat-fill" id="diet-fat-bar" style="width: 0%;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Water Tracker Card -->
-      <div class="card card-wide water-card">
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:1rem;">
-          <h3>Water Intake</h3>
-          <div class="water-val" id="diet-water-val" style="color: var(--text-light); font-weight: bold;">0 / 2500 ml
-          </div>
-        </div>
-        <div class="macro-bar-bg water-bg">
-          <div class="macro-bar-fill water-fill" id="diet-water-bar" style="width: 0%;"></div>
-        </div>
-
-        <button class="btn-primary" id="btn-add-water" style="width:100%; margin-top:1.5rem;">
-          <i class="ri-drop-fill"></i> +250 ml
-        </button>
-      </div>
-
     </div>
 
     <!-- DIET: Log Meal -->
     <div id="view-diet-log-meal" class="view-section">
-      <div class="card card-wide">
-        <!-- Reusing existing gym app typography and dark form classes -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-          <h2
-            style="font-size: 1.8rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent;">
-            Log Meal</h2>
+      <div class="lm-page">
+
+        <!-- Hero Header -->
+        <div class="lm-hero">
+          <div class="lm-hero-icon"><i class="ri-restaurant-fill"></i></div>
+          <div>
+            <h2 class="lm-hero-title">Log Meal</h2>
+            <p class="lm-hero-sub">Track your nutrition — every meal counts</p>
+          </div>
         </div>
 
-        <form id="diet-log-form" class="workout-form">
-          <div class="form-group">
-            <label for="diet-meal-type">Meal Type</label>
-            <select id="diet-meal-type" required>
-              <option value="Breakfast">Breakfast</option>
-              <option value="Lunch">Lunch</option>
-              <option value="Dinner">Dinner</option>
-              <option value="Snack">Snack</option>
-            </select>
-          </div>
+        <!-- Form Card -->
+        <div class="lm-card">
+          <form id="diet-log-form" class="lm-form">
 
-          <div class="form-group">
-            <label for="diet-food-name">Food Name</label>
-            <input type="text" id="diet-food-name" placeholder="e.g., Oatmeal with Berries" required>
-          </div>
+            <!-- Meal Type Pills -->
+            <div class="lm-section">
+              <label class="lm-label"><i class="ri-time-line"></i> Meal Type</label>
+              <div class="lm-meal-pills">
+                <button type="button" class="lm-pill active" data-meal="Breakfast">
+                  <i class="ri-sun-line"></i> Breakfast
+                </button>
+                <button type="button" class="lm-pill" data-meal="Lunch">
+                  <i class="ri-sun-foggy-line"></i> Lunch
+                </button>
+                <button type="button" class="lm-pill" data-meal="Dinner">
+                  <i class="ri-moon-line"></i> Dinner
+                </button>
+                <button type="button" class="lm-pill" data-meal="Snack">
+                  <i class="ri-cake-2-line"></i> Snack
+                </button>
+              </div>
+              <select id="diet-meal-type" required class="lm-hidden-select">
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snack">Snack</option>
+              </select>
+            </div>
 
-          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group">
-              <label for="diet-calories">Calories (kcal)</label>
-              <input type="number" id="diet-calories" placeholder="0" min="0" required>
+            <!-- Food Name -->
+            <div class="lm-section">
+              <label class="lm-label" for="diet-food-name"><i class="ri-bowl-line"></i> Food Name</label>
+              <div class="lm-input-wrap">
+                <input type="text" id="diet-food-name" placeholder="e.g., Oatmeal with Berries" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="diet-protein">Protein (g)</label>
-              <input type="number" id="diet-protein" placeholder="0" min="0" step="0.1" required>
-            </div>
-          </div>
 
-          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-            <div class="form-group">
-              <label for="diet-carbs">Carbs (g)</label>
-              <input type="number" id="diet-carbs" placeholder="0" min="0" step="0.1" required>
+            <!-- Macro Inputs -->
+            <div class="lm-section">
+              <label class="lm-label"><i class="ri-bar-chart-grouped-fill"></i> Macros</label>
+              <div class="lm-macros-grid">
+                <div class="lm-macro lm-macro--cal">
+                  <div class="lm-macro-head">
+                    <i class="ri-fire-fill"></i>
+                    <span>Calories</span>
+                  </div>
+                  <div class="lm-macro-input-wrap">
+                    <input type="number" id="diet-calories" placeholder="0" min="0" required>
+                    <span class="lm-unit">kcal</span>
+                  </div>
+                </div>
+                <div class="lm-macro lm-macro--prot">
+                  <div class="lm-macro-head">
+                    <i class="ri-droplet-fill"></i>
+                    <span>Protein</span>
+                  </div>
+                  <div class="lm-macro-input-wrap">
+                    <input type="number" id="diet-protein" placeholder="0" min="0" step="0.1" required>
+                    <span class="lm-unit">g</span>
+                  </div>
+                </div>
+                <div class="lm-macro lm-macro--carb">
+                  <div class="lm-macro-head">
+                    <i class="ri-leaf-fill"></i>
+                    <span>Carbs</span>
+                  </div>
+                  <div class="lm-macro-input-wrap">
+                    <input type="number" id="diet-carbs" placeholder="0" min="0" step="0.1" required>
+                    <span class="lm-unit">g</span>
+                  </div>
+                </div>
+                <div class="lm-macro lm-macro--fat">
+                  <div class="lm-macro-head">
+                    <i class="ri-heart-fill"></i>
+                    <span>Fat</span>
+                  </div>
+                  <div class="lm-macro-input-wrap">
+                    <input type="number" id="diet-fat" placeholder="0" min="0" step="0.1" required>
+                    <span class="lm-unit">g</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="diet-fat">Fat (g)</label>
-              <input type="number" id="diet-fat" placeholder="0" min="0" step="0.1" required>
-            </div>
-          </div>
 
-          <!-- Reusing existing button styles -->
-          <button type="submit" class="btn-primary" id="btn-submit-meal" style="width: 100%; margin-top: 2rem;">
-            <i class="ri-add-line"></i> Log Meal
-          </button>
-        </form>
+            <!-- Submit -->
+            <button type="submit" class="lm-submit" id="btn-submit-meal">
+              <i class="ri-add-circle-fill"></i> Log Meal
+            </button>
+          </form>
+        </div>
+
       </div>
     </div>
 
     <!-- DIET: AI Food Scan -->
     <div id="view-diet-ai-scan" class="view-section">
-      <div class="card card-wide diet-scan-container">
-        <div class="header-with-icon">
-          <i class="ri-camera-lens-line"></i>
-          <h2>AI Food Scan</h2>
-        </div>
-        <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 2rem;">Upload a photo of your meal and let
-          our AI calculate the macros.</p>
+      <div class="fs-page">
 
-        <!-- UPLOAD ZONE -->
-        <div id="ai-scan-upload-zone" class="upload-zone">
-          <input type="file" id="ai-scan-file-input" accept="image/*" capture="environment" class="hidden-file-input">
-          <div class="upload-content">
-            <i class="ri-upload-cloud-2-line"
-              style="font-size: 3rem; color: var(--accent-start); margin-bottom: 1rem; display: block;"></i>
-            <h3>Tap to Capture or Upload</h3>
-            <p>PNG, JPG up to 5MB</p>
-          </div>
-          <!-- Preview Frame (Hidden until image selected) -->
-          <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
+        <!-- Hero Header -->
+        <div class="fs-hero">
+          <div class="fs-hero-badge"><i class="ri-sparkling-2-fill"></i> Powered by AI</div>
+          <h1 class="fs-hero-title">Scan Your <span class="fs-gradient-text">Food</span></h1>
+          <p class="fs-hero-sub">Take a photo of any meal and get instant macro breakdown</p>
         </div>
 
-        <button class="btn-primary" id="btn-analyze-food" style="width: 100%; margin-top: 2rem; display: none;">
-          <i class="ri-magic-line"></i> Analyze Meal
-        </button>
-
-        <!-- LOADING STATE -->
-        <div id="ai-scan-loader" class="scan-loader hidden">
-          <div class="loader-spinner"></div>
-          <p>Analyzing nutritional content...</p>
+        <!-- Upload Zone — The Centerpiece -->
+        <div class="fs-dropzone-wrapper">
+          <div class="fs-glow"></div>
+          <div id="ai-scan-upload-zone" class="fs-dropzone">
+            <input type="file" id="ai-scan-file-input" accept="image/*" capture="environment" class="hidden-file-input">
+            <div class="fs-dropzone-inner">
+              <div class="fs-cam-orb">
+                <i class="ri-camera-fill"></i>
+                <div class="fs-cam-pulse"></div>
+                <div class="fs-cam-pulse fs-cam-pulse--delay"></div>
+              </div>
+              <p class="fs-drop-label">Tap to capture or drag an image here</p>
+              <p class="fs-drop-formats">Supports PNG, JPG, HEIC • Max 5 MB</p>
+            </div>
+            <!-- Preview -->
+            <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
+          </div>
+          <button class="fs-analyze-btn" id="btn-analyze-food" style="display: none;">
+            <i class="ri-sparkling-2-fill"></i> Analyze with AI
+          </button>
         </div>
 
-        <!-- RESULTS / CONFIRMATION MODAL (Hidden initially) -->
-        <div id="ai-scan-results" class="scan-results-container hidden">
-          <h3>Confirm Nutritional Data</h3>
-
-          <div class="form-group" style="margin-top: 1rem;">
-            <label for="scan-food-name">Detected Food</label>
-            <input type="text" id="scan-food-name" required>
-          </div>
-
-          <div class="form-group">
-            <label for="scan-food-qty">Estimated Quantity</label>
-            <input type="text" id="scan-food-qty" required>
-          </div>
-
-          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-            <div class="form-group">
-              <label for="scan-calories">Calories (kcal)</label>
-              <input type="number" id="scan-calories" min="0" required>
-            </div>
-            <div class="form-group">
-              <label for="scan-protein">Protein (g)</label>
-              <input type="number" id="scan-protein" min="0" step="0.1" required>
+        <!-- Feature Pills -->
+        <div class="fs-features">
+          <div class="fs-feat">
+            <div class="fs-feat-icon fs-feat-icon--speed"><i class="ri-flashlight-fill"></i></div>
+            <div>
+              <span class="fs-feat-title">Instant</span>
+              <span class="fs-feat-desc">Results in seconds</span>
             </div>
           </div>
-
-          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-            <div class="form-group">
-              <label for="scan-carbs">Carbs (g)</label>
-              <input type="number" id="scan-carbs" min="0" step="0.1" required>
+          <div class="fs-feat">
+            <div class="fs-feat-icon fs-feat-icon--accuracy"><i class="ri-focus-3-fill"></i></div>
+            <div>
+              <span class="fs-feat-title">Accurate</span>
+              <span class="fs-feat-desc">AI-powered analysis</span>
             </div>
-            <div class="form-group">
-              <label for="scan-fat">Fat (g)</label>
-              <input type="number" id="scan-fat" min="0" step="0.1" required>
+          </div>
+          <div class="fs-feat">
+            <div class="fs-feat-icon fs-feat-icon--smart"><i class="ri-brain-fill"></i></div>
+            <div>
+              <span class="fs-feat-title">Smart</span>
+              <span class="fs-feat-desc">Learns your meals</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="ai-scan-loader" class="fs-loader hidden">
+          <div class="fs-loader-ring"></div>
+          <p class="fs-loader-text">Analyzing nutritional content...</p>
+          <p class="fs-loader-sub">Our AI is identifying ingredients and estimating macros</p>
+        </div>
+
+        <!-- Results -->
+        <div id="ai-scan-results" class="fs-results hidden">
+          <div class="fs-results-header">
+            <div class="fs-results-icon"><i class="ri-checkbox-circle-fill"></i></div>
+            <div>
+              <h3>Confirm Nutritional Data</h3>
+              <p class="fs-results-sub">Review and adjust the AI estimates before saving</p>
             </div>
           </div>
 
-          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-            <button class="btn-secondary" id="btn-cancel-scan" style="flex: 1;">Cancel</button>
-            <button class="btn-primary" id="btn-confirm-scan" style="flex: 1;">Save Meal</button>
+          <div class="fs-results-fields">
+            <div class="fs-result-field fs-result-field--wide">
+              <label for="scan-food-name"><i class="ri-restaurant-line"></i> Detected Food</label>
+              <input type="text" id="scan-food-name" required>
+            </div>
+
+            <div class="fs-result-field fs-result-field--wide">
+              <label for="scan-food-qty"><i class="ri-scales-3-line"></i> Estimated Quantity</label>
+              <input type="text" id="scan-food-qty" required>
+            </div>
+
+            <div class="fs-result-field fs-macro-card fs-macro-card--cal">
+              <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
+              <div class="fs-macro-input-wrap">
+                <input type="number" id="scan-calories" min="0" required>
+                <span class="fs-macro-unit">kcal</span>
+              </div>
+            </div>
+
+            <div class="fs-result-field fs-macro-card fs-macro-card--prot">
+              <label for="scan-protein"><i class="ri-droplet-fill"></i> Protein</label>
+              <div class="fs-macro-input-wrap">
+                <input type="number" id="scan-protein" min="0" step="0.1" required>
+                <span class="fs-macro-unit">g</span>
+              </div>
+            </div>
+
+            <div class="fs-result-field fs-macro-card fs-macro-card--carb">
+              <label for="scan-carbs"><i class="ri-leaf-fill"></i> Carbs</label>
+              <div class="fs-macro-input-wrap">
+                <input type="number" id="scan-carbs" min="0" step="0.1" required>
+                <span class="fs-macro-unit">g</span>
+              </div>
+            </div>
+
+            <div class="fs-result-field fs-macro-card fs-macro-card--fat">
+              <label for="scan-fat"><i class="ri-heart-fill"></i> Fat</label>
+              <div class="fs-macro-input-wrap">
+                <input type="number" id="scan-fat" min="0" step="0.1" required>
+                <span class="fs-macro-unit">g</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fs-actions">
+            <button class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">Cancel</button>
+            <button class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
+              <i class="ri-check-line"></i> Save Meal
+            </button>
           </div>
         </div>
 
@@ -1104,109 +1242,267 @@
 
     <!-- DIET: History -->
     <div id="view-diet-history" class="view-section">
-      <div class="content-header">
+      <div class="content-header" style="margin-bottom: 0.5rem;">
         <h1>Diet History</h1>
         <p>Review your daily logs and weekly analytics.</p>
       </div>
 
-      <!-- Segmented Toggle -->
-      <div class="diet-history-toggle">
-        <button id="btn-diet-daily" class="toggle-btn active">Daily View</button>
-        <button id="btn-diet-weekly" class="toggle-btn">Weekly View</button>
+      <!-- Premium Segmented Toggle -->
+      <div class="dh-segmented-toggle">
+        <div class="dh-toggle-track" id="dh-toggle-track"></div>
+        <button id="btn-diet-daily" class="dh-toggle-btn active"><i class="ri-calendar-line"></i> Daily</button>
+        <button id="btn-diet-weekly" class="dh-toggle-btn"><i class="ri-bar-chart-grouped-line"></i> Weekly</button>
       </div>
 
-      <!-- DAILY VIEW -->
+      <!-- ===== DAILY VIEW ===== -->
       <div id="diet-daily-container" class="diet-history-container">
-        <!-- Date Picker -->
-        <div class="card card-wide"
-          style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-          <h3 style="margin: 0;">Select Date</h3>
-          <input type="date" id="diet-history-date" class="workout-input" style="width: auto;">
+
+        <!-- Date Picker Row -->
+        <div class="dh-date-picker-row">
+          <div class="dh-date-label"><i class="ri-calendar-event-line"></i> Select Date</div>
+          <input type="date" id="diet-history-date" class="dh-date-input">
         </div>
 
-        <!-- Daily Macro Summary -->
-        <div class="history-macro-grid">
-          <div class="macro-card">
-            <h4>Calories</h4>
-            <div class="value" id="history-daily-cals">0</div>
+        <!-- Premium Glass Summary Card -->
+        <div class="dh-summary-card">
+          <div class="dh-summary-hero">
+            <div class="dh-hero-icon"><i class="ri-fire-fill"></i></div>
+            <div class="dh-hero-value" id="history-daily-cals">0</div>
+            <div class="dh-hero-label">Calories</div>
           </div>
-          <div class="macro-card">
-            <h4>Protein</h4>
-            <div class="value" id="history-daily-protein">0g</div>
+          <!-- Calorie Progress Bar -->
+          <div class="dh-calorie-bar-wrap">
+            <div class="dh-calorie-bar">
+              <div class="dh-calorie-bar-fill" id="dh-calorie-bar-fill" style="width: 0%"></div>
+            </div>
+            <div class="dh-calorie-bar-text" id="dh-calorie-bar-text">0 / 2000 kcal</div>
           </div>
-          <div class="macro-card">
-            <h4>Carbs</h4>
-            <div class="value" id="history-daily-carbs">0g</div>
-          </div>
-          <div class="macro-card">
-            <h4>Fat</h4>
-            <div class="value" id="history-daily-fat">0g</div>
-          </div>
-          <div class="macro-card">
-            <h4>Water</h4>
-            <div class="value" id="history-daily-water">0ml</div>
+          <div class="dh-summary-macros">
+            <div class="dh-macro" data-color="blue">
+              <i class="ri-boxing-fill"></i>
+              <span class="dh-macro-val" id="history-daily-protein">0g</span>
+              <span class="dh-macro-label">Protein</span>
+            </div>
+            <div class="dh-macro" data-color="purple">
+              <i class="ri-bread-fill"></i>
+              <span class="dh-macro-val" id="history-daily-carbs">0g</span>
+              <span class="dh-macro-label">Carbs</span>
+            </div>
+            <div class="dh-macro" data-color="pink">
+              <i class="ri-drop-fill"></i>
+              <span class="dh-macro-val" id="history-daily-fat">0g</span>
+              <span class="dh-macro-label">Fat</span>
+            </div>
+            <div class="dh-macro" data-color="cyan">
+              <i class="ri-goblet-fill"></i>
+              <span class="dh-macro-val" id="history-daily-water">0ml</span>
+              <span class="dh-macro-label">Water</span>
+            </div>
           </div>
         </div>
 
         <!-- Meal List -->
-        <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Logged Meals</h3>
-        <div id="history-meal-list" class="history-list-wrapper">
-          <!-- Meals injected here -->
-          <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading meals...</div>
+        <div class="dh-meals-header">
+          <h3><i class="ri-restaurant-line"></i> Logged Meals</h3>
+        </div>
+        <div id="history-meal-list" class="dh-meal-list">
+          <div class="dh-meal-empty">No meals logged yet. Select a date above.</div>
         </div>
       </div>
 
-      <!-- WEEKLY VIEW (Hidden by default) -->
-      <div id="diet-weekly-container" class="diet-history-container hidden" style="display: none;">
+      <!-- ===== WEEKLY VIEW (Hidden by default) ===== -->
+      <div id="diet-weekly-container" class="diet-history-container" style="display: none;">
         <!-- Insights Banner -->
-        <div class="insights-banner" id="diet-weekly-insights">
-          <i class="ri-lightbulb-flash-line" style="color: var(--warning-color); margin-right: 0.5rem;"></i>
+        <div class="dh-insights-banner" id="diet-weekly-insights">
+          <i class="ri-lightbulb-flash-line"></i>
           <span>Loading weekly insights...</span>
         </div>
 
         <!-- Weekly Averages Grid -->
-        <div class="history-macro-grid" style="grid-template-columns: repeat(2, 1fr);">
-          <div class="macro-card">
-            <h4>Avg Daily Calories</h4>
-            <div class="value" id="history-weekly-avg-cals">0</div>
+        <div class="dh-weekly-grid">
+          <div class="dh-weekly-stat" data-color="orange">
+            <i class="ri-fire-fill"></i>
+            <div class="dh-weekly-val" id="history-weekly-avg-cals">0</div>
+            <div class="dh-weekly-label">Avg Calories</div>
           </div>
-          <div class="macro-card">
-            <h4>Avg Daily Protein</h4>
-            <div class="value" id="history-weekly-avg-protein">0g</div>
+          <div class="dh-weekly-stat" data-color="blue">
+            <i class="ri-boxing-fill"></i>
+            <div class="dh-weekly-val" id="history-weekly-avg-protein">0g</div>
+            <div class="dh-weekly-label">Avg Protein</div>
           </div>
-          <div class="macro-card">
-            <h4>Best Protein Day</h4>
-            <div class="value" id="history-weekly-best-protein">-</div>
+          <div class="dh-weekly-stat" data-color="green">
+            <i class="ri-trophy-fill"></i>
+            <div class="dh-weekly-val" id="history-weekly-best-protein">-</div>
+            <div class="dh-weekly-label">Best Protein</div>
           </div>
-          <div class="macro-card">
-            <h4>Lowest Calorie Day</h4>
-            <div class="value" id="history-weekly-lowest-cals">-</div>
+          <div class="dh-weekly-stat" data-color="pink">
+            <i class="ri-arrow-down-line"></i>
+            <div class="dh-weekly-val" id="history-weekly-lowest-cals">-</div>
+            <div class="dh-weekly-label">Lowest Cal Day</div>
           </div>
         </div>
 
         <!-- Charts Area -->
-        <div class="card card-wide" style="margin-top: 1.5rem;">
-          <h3>7-Day Calorie Trend</h3>
-          <div style="height: 250px; width: 100%; position: relative;">
-            <canvas id="chart-weekly-calories"></canvas>
-          </div>
+        <div class="dh-chart-card">
+          <h3><i class="ri-bar-chart-2-line"></i> 7-Day Calorie Trend</h3>
+          <div class="dh-chart-wrap"><canvas id="chart-weekly-calories"></canvas></div>
         </div>
 
-        <div class="card card-wide" style="margin-top: 1.5rem;">
-          <h3>7-Day Protein Trend</h3>
-          <div style="height: 250px; width: 100%; position: relative;">
-            <canvas id="chart-weekly-protein"></canvas>
-          </div>
+        <div class="dh-chart-card">
+          <h3><i class="ri-line-chart-line"></i> 7-Day Protein Trend</h3>
+          <div class="dh-chart-wrap"><canvas id="chart-weekly-protein"></canvas></div>
         </div>
       </div>
     </div>
 
     <!-- DIET: AI Diet Coach -->
     <div id="view-diet-ai-coach" class="view-section">
-      <div class="card card-wide" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 4rem; color: var(--accent-end); margin-bottom: 1rem;"><i class="ri-user-heart-line"></i>
+      <div class="dc-container">
+        <!-- Coach Header -->
+        <div class="dc-header">
+          <div class="dc-header-left">
+            <div class="dc-avatar"><i class="ri-sparkling-2-fill"></i></div>
+            <div>
+              <h2 class="dc-title">Diet Coach</h2>
+              <div class="dc-status" id="dc-status">Loading context...</div>
+            </div>
+          </div>
+
         </div>
-        <h2>AI Diet Coach Coming Soon ✨</h2>
+
+        <!-- Chat Messages -->
+        <div class="dc-messages" id="dc-messages">
+          <div class="dc-welcome">
+            <div class="dc-welcome-icon"><i class="ri-sparkling-2-fill"></i></div>
+            <h3>Hi! I'm your Diet Coach 🥗</h3>
+            <p>Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your real
+              data.</p>
+          </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="dc-input-bar">
+          <input type="text" id="dc-input" placeholder="Ask about your nutrition..." autocomplete="off">
+          <button id="dc-send-btn"><i class="ri-send-plane-2-fill"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIET: Settings -->
+    <div id="view-diet-settings" class="view-section">
+
+      <!-- Page Header -->
+      <div class="ds-header">
+        <div class="ds-header-icon"><i class="ri-settings-4-fill"></i></div>
+        <div>
+          <h2 class="ds-header-title">Diet Settings</h2>
+          <p class="ds-header-sub">Configure your nutrition targets and AI coaching preferences</p>
+        </div>
+      </div>
+
+      <div class="ds-grid">
+
+        <!-- Nutrition Goals -->
+        <div class="ds-card ds-card--goals">
+          <div class="ds-card-header">
+            <div class="ds-card-icon ds-card-icon--orange"><i class="ri-heart-pulse-fill"></i></div>
+            <div>
+              <h3>Nutrition Goals</h3>
+              <p class="ds-card-sub">Daily targets used in analytics &amp; AI context</p>
+            </div>
+          </div>
+
+          <div class="ds-fields">
+            <div class="ds-field">
+              <label for="setting-calorie-target"><i class="ri-fire-fill ds-field-icon ds-field-icon--cal"></i>
+                Calories</label>
+              <div class="ds-input-wrap">
+                <input type="number" id="setting-calorie-target" value="2000" min="500" max="10000" step="50">
+                <span class="ds-unit">kcal</span>
+              </div>
+            </div>
+            <div class="ds-field">
+              <label for="setting-protein-target"><i class="ri-droplet-fill ds-field-icon ds-field-icon--prot"></i>
+                Protein</label>
+              <div class="ds-input-wrap">
+                <input type="number" id="setting-protein-target" value="120" min="10" max="500" step="5">
+                <span class="ds-unit">g</span>
+              </div>
+            </div>
+            <div class="ds-field">
+              <label for="setting-water-target"><i class="ri-cup-fill ds-field-icon ds-field-icon--water"></i>
+                Water</label>
+              <div class="ds-input-wrap">
+                <input type="number" id="setting-water-target" value="2500" min="500" max="10000" step="100">
+                <span class="ds-unit">ml</span>
+              </div>
+            </div>
+            <div class="ds-field">
+              <label for="setting-goal-type"><i class="ri-flag-fill ds-field-icon ds-field-icon--goal"></i> Goal
+                Type</label>
+              <select id="setting-goal-type">
+                <option value="Cut">🔥 Cut (Fat Loss)</option>
+                <option value="Maintain" selected>⚖️ Maintain</option>
+                <option value="Bulk">💪 Bulk (Muscle Gain)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Personalization -->
+        <div class="ds-card ds-card--ai">
+          <div class="ds-card-header">
+            <div class="ds-card-icon ds-card-icon--purple"><i class="ri-robot-2-fill"></i></div>
+            <div>
+              <h3>AI Coach</h3>
+              <p class="ds-card-sub">Customize your Diet Coach personality</p>
+            </div>
+          </div>
+
+          <div class="ds-fields">
+            <div class="ds-field ds-field--full">
+              <label><i class="ri-chat-voice-fill ds-field-icon ds-field-icon--coach"></i> Coaching Style</label>
+              <div class="ds-coaching-pills">
+                <button class="ds-pill" data-coach="Strict"><i class="ri-fire-fill"></i> Strict</button>
+                <button class="ds-pill active" data-coach="Balanced"><i class="ri-scales-3-fill"></i> Balanced</button>
+                <button class="ds-pill" data-coach="Motivational"><i class="ri-star-fill"></i> Motivational</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-toggle-row">
+            <div class="ds-toggle-info">
+              <span class="ds-toggle-label"><i class="ri-lightbulb-flash-fill"
+                  style="color:#f59e0b;margin-right:6px;"></i>Proactive Insights</span>
+              <span class="ds-toggle-desc">Coach auto-suggests tips when you open it</span>
+            </div>
+            <div class="switch"><input type="checkbox" id="setting-proactive-insights" checked /><label
+                for="setting-proactive-insights" class="form-switch"></label></div>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="ds-card ds-card--data">
+          <div class="ds-card-header">
+            <div class="ds-card-icon ds-card-icon--teal"><i class="ri-database-2-fill"></i></div>
+            <div>
+              <h3>Data Management</h3>
+              <p class="ds-card-sub">Export or manage your diet data</p>
+            </div>
+          </div>
+
+          <div class="ds-actions">
+            <button class="ds-action-btn ds-action-btn--export" id="diet-export-btn">
+              <i class="ri-file-pdf-2-fill"></i>
+              <span>Export PDF</span>
+            </button>
+            <button class="ds-action-btn ds-action-btn--logout" id="diet-logout-btn">
+              <i class="ri-logout-box-r-line"></i>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1261,6 +1557,10 @@
     <div class="nav-item" data-target="view-diet-ai-coach">
       <span class="icon"><i class="ri-user-heart-line"></i></span>
       <span class="label">Coach</span>
+    </div>
+    <div class="nav-item" data-target="view-diet-settings">
+      <span class="icon"><i class="ri-settings-4-line"></i></span>
+      <span class="label">Settings</span>
     </div>
   </nav>
 

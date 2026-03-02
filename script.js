@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dietFatBar: document.getElementById('diet-fat-bar'),
         dietWaterVal: document.getElementById('diet-water-val'),
         dietWaterBar: document.getElementById('diet-water-bar'),
+        btnSubWater: document.getElementById('btn-sub-water'),
         btnAddWater: document.getElementById('btn-add-water'),
 
         // AI Food Scan
@@ -215,9 +216,19 @@ document.addEventListener('DOMContentLoaded', () => {
         font: 'modern',
         compactMode: false,
         darkMode: false,
-        units: 'kg', // 'kg' or 'lbs'
-        avatar: null, // DataURL or null
-        avatarType: 'image' // 'image' or 'emoji'
+        units: 'kg',
+        avatar: null,
+        avatarType: 'image',
+        // Nutrition Goals
+        calorieTarget: 2000,
+        proteinTarget: 120,
+        waterTarget: 2500,
+        goalType: 'Maintain',
+        // AI Personalization
+        coachingStyle: 'Balanced',
+        proactiveInsights: true,
+        // Display
+        macroDisplayMode: 'absolute'
     };
 
     // Helper: Convert Weight
@@ -846,6 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const applyCustomDropdown = (selectElement) => {
         if (!selectElement) return;
+        if (selectElement.classList.contains('lm-hidden-select')) return; // Skip our strictly hidden selects
 
         // Hide native
         selectElement.classList.add('hidden-native');
@@ -1387,8 +1399,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     showNotification("Failed to add water.", "error");
                 }
-                elements.btnAddWater.innerHTML = '<i class="ri-drop-fill"></i> +250 ml';
+                elements.btnAddWater.innerHTML = '<i class="ri-add-line"></i> +250 ml';
                 elements.btnAddWater.disabled = false;
+            });
+        }
+
+        if (elements.btnSubWater) {
+            elements.btnSubWater.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) return showNotification("Please log in.", "error");
+
+                elements.btnSubWater.disabled = true;
+                elements.btnSubWater.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+
+                const today = new Date().toISOString().split('T')[0];
+                const result = await dietService.addWater(db, user.uid, today, -250);
+
+                if (result.success) {
+                    showNotification("Removed 250ml water.");
+                } else {
+                    showNotification("Failed to remove water.", "error");
+                }
+                elements.btnSubWater.innerHTML = '<i class="ri-subtract-line"></i> -250 ml';
+                elements.btnSubWater.disabled = false;
             });
         }
 
@@ -1927,44 +1960,62 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await dietService.getMealsByDate(db, user.uid, date);
         const waterResult = await dietService.getWaterByDate(db, user.uid, date);
 
+        const calGoal = userPreferences.calorieTarget || 2000;
+
         if (result.success) {
             let tCals = 0, tPro = 0, tCarb = 0, tFat = 0;
             const mealList = document.getElementById('history-meal-list');
             mealList.innerHTML = '';
 
-            result.meals.forEach(m => {
-                tCals += (m.calories || 0); tPro += (m.protein || 0); tCarb += (m.carbs || 0); tFat += (m.fat || 0);
-                const li = document.createElement('div');
-                li.className = 'history-meal-item';
-                li.innerHTML = `
-                    <div class="meal-info">
-                        <strong>${m.foodName}</strong>
-                        <span class="meal-type-badge">${m.mealType}</span>
-                    </div>
-                    <div class="meal-macros">
-                        <span>${m.calories || 0} kcal</span>
-                        <button class="btn-delete-meal" data-id="${m.id}" title="Delete Meal"><i class="ri-delete-bin-line"></i></button>
-                    </div>
-                `;
-                mealList.appendChild(li);
-            });
+            if (result.meals.length === 0) {
+                mealList.innerHTML = '<div class="dh-meal-empty">No meals logged on this date.</div>';
+            } else {
+                result.meals.forEach(m => {
+                    tCals += (m.calories || 0); tPro += (m.protein || 0); tCarb += (m.carbs || 0); tFat += (m.fat || 0);
+                    const card = document.createElement('div');
+                    card.className = 'dh-meal-card';
+                    card.innerHTML = `
+                        <div class="dh-meal-left">
+                            <div class="dh-meal-name">${m.foodName}</div>
+                            <div class="dh-meal-type-badge">${m.mealType}</div>
+                            <div class="dh-meal-micro-macros">
+                                <span><i class="ri-boxing-fill" style="color:#3b82f6"></i> ${m.protein || 0}g</span>
+                                <span><i class="ri-bread-fill" style="color:#a855f7"></i> ${m.carbs || 0}g</span>
+                                <span><i class="ri-drop-fill" style="color:#ec4899"></i> ${m.fat || 0}g</span>
+                            </div>
+                        </div>
+                        <div class="dh-meal-right">
+                            <div><span class="dh-meal-kcal">${m.calories || 0}</span> <span class="dh-meal-kcal-unit">kcal</span></div>
+                            <button class="dh-btn-delete" data-id="${m.id}" title="Delete Meal"><i class="ri-delete-bin-line"></i></button>
+                        </div>
+                    `;
+                    mealList.appendChild(card);
+                });
+            }
 
             document.getElementById('history-daily-cals').textContent = Math.round(tCals);
             document.getElementById('history-daily-protein').textContent = Math.round(tPro) + 'g';
             document.getElementById('history-daily-carbs').textContent = Math.round(tCarb) + 'g';
             document.getElementById('history-daily-fat').textContent = Math.round(tFat) + 'g';
 
-            const wGoal = 2500; // Assuming a default water goal for display
+            const wGoal = 2500;
             const tWater = waterResult.success ? waterResult.totalMl : 0;
             document.getElementById('history-daily-water').textContent = `${tWater}/${wGoal}ml`;
 
+            // Calorie progress bar
+            const pct = Math.min(100, Math.round((tCals / calGoal) * 100));
+            const barFill = document.getElementById('dh-calorie-bar-fill');
+            const barText = document.getElementById('dh-calorie-bar-text');
+            if (barFill) barFill.style.width = pct + '%';
+            if (barText) barText.textContent = `${Math.round(tCals)} / ${calGoal} kcal`;
+
             // Bind Delete events
-            mealList.querySelectorAll('.btn-delete-meal').forEach(btn => {
+            mealList.querySelectorAll('.dh-btn-delete').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.currentTarget.dataset.id;
                     if (confirm("Delete this meal?")) {
                         await dietService.deleteMeal(db, user.uid, date, id);
-                        renderDietDailyHistory(); // re-render
+                        renderDietDailyHistory();
                         showNotification("Meal deleted.", "info");
                     }
                 });
@@ -1972,12 +2023,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             console.error("Error loading daily history", result.error);
-            document.getElementById('history-meal-list').innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No meals logged on this date.</div>`;
+            document.getElementById('history-meal-list').innerHTML = '<div class="dh-meal-empty">No meals logged on this date.</div>';
             document.getElementById('history-daily-cals').textContent = 0;
             document.getElementById('history-daily-protein').textContent = '0g';
             document.getElementById('history-daily-carbs').textContent = '0g';
             document.getElementById('history-daily-fat').textContent = '0g';
             document.getElementById('history-daily-water').textContent = '0ml';
+            const barFill = document.getElementById('dh-calorie-bar-fill');
+            const barText = document.getElementById('dh-calorie-bar-text');
+            if (barFill) barFill.style.width = '0%';
+            if (barText) barText.textContent = `0 / ${calGoal} kcal`;
         }
     };
 
@@ -2107,18 +2162,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerDaily = document.getElementById('diet-daily-container');
         const containerWeekly = document.getElementById('diet-weekly-container');
         const dateInput = document.getElementById('diet-history-date');
-        const mealList = document.getElementById('history-meal-list');
-        const insightsBanner = document.getElementById('diet-weekly-insights');
+        const toggleTrack = document.getElementById('dh-toggle-track');
 
         // Set default date to today
         const today = new Date().toISOString().split('T')[0];
         if (dateInput) dateInput.value = today;
 
-        // Toggle Handlers
+        // Toggle Handlers with sliding track
         if (btnDaily && btnWeekly) {
             btnDaily.addEventListener('click', () => {
                 btnDaily.classList.add('active');
                 btnWeekly.classList.remove('active');
+                if (toggleTrack) toggleTrack.classList.remove('right');
                 containerDaily.style.display = 'block';
                 containerWeekly.style.display = 'none';
                 renderDietDailyHistory();
@@ -2127,6 +2182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnWeekly.addEventListener('click', () => {
                 btnWeekly.classList.add('active');
                 btnDaily.classList.remove('active');
+                if (toggleTrack) toggleTrack.classList.add('right');
                 containerWeekly.style.display = 'block';
                 containerDaily.style.display = 'none';
                 renderDietWeeklyHistory();
@@ -2140,7 +2196,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // History Route Trigger
         document.querySelector('.nav-item[data-target="view-diet-history"]')?.addEventListener('click', () => {
-            // Render active view
             if (btnDaily.classList.contains('active')) {
                 renderDietDailyHistory();
             } else {
@@ -2399,7 +2454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 
     // ==========================================
-    // 9. AI ASSISTANT LOGIC
+    // 9. AI ASSISTANT LOGIC (Exercise)
     // ==========================================
     const aiChatInput = document.getElementById('ai-chat-input');
     const aiChatSend = document.getElementById('ai-chat-send');
@@ -2439,16 +2494,10 @@ document.addEventListener('DOMContentLoaded', () => {
         aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
 
         try {
-            // Include a compressed version of recent workout history (last 30 entries) to avoid API token limits!
             const recentData = data.slice(-30);
             const historyContext = JSON.stringify(recentData.map(d => ({
-                date: d.date,
-                exercise: d.exercise,
-                reps: d.reps,
-                sets: d.sets,
-                weight: d.weight
+                date: d.date, exercise: d.exercise, reps: d.reps, sets: d.sets, weight: d.weight
             })));
-
             const fullPrompt = `User Query: ${query}\n\nUser Workout History Context (Last 30 workouts): ${historyContext}`;
 
             const response = await fetch('/api/chat', {
@@ -2459,33 +2508,325 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const typingEl = document.getElementById(typingId);
             if (typingEl) typingEl.remove();
-
-            if (!response.ok) {
-                appendMessage("Sorry, I'm having trouble connecting to the server.", 'bot');
-                return;
-            }
+            if (!response.ok) { appendMessage("Sorry, I'm having trouble connecting.", 'bot'); return; }
 
             const result = await response.json();
-
             let formattedText = result.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
             formattedText = formattedText.replace(/\n/g, '<br/>');
-
             appendMessage(formattedText, 'bot');
-
         } catch (err) {
             console.error(err);
             const typingEl = document.getElementById(typingId);
             if (typingEl) typingEl.remove();
-            appendMessage("An error occurred while communicating with the AI. Ensure you are running on a server that supports vercel functions, or using Vercel locally.", 'bot');
+            appendMessage("An error occurred. Ensure you are running on a server.", 'bot');
         }
     };
 
     if (aiChatSend && aiChatInput) {
         aiChatSend.addEventListener('click', handleSendAI);
-        aiChatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSendAI();
+        aiChatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendAI(); });
+    }
+
+    // ==========================================
+    // 10. AI DIET COACH 2.0
+    // ==========================================
+    const dcInput = document.getElementById('dc-input');
+    const dcSendBtn = document.getElementById('dc-send-btn');
+    const dcMessages = document.getElementById('dc-messages');
+    const dcClearBtn = document.getElementById('dc-clear-btn');
+    const dcStatus = document.getElementById('dc-status');
+    let dcConversationHistory = []; // Session-based memory
+    let dcContext = {};
+    let dcInitialized = false;
+
+    const dcAppendMsg = (text, sender) => {
+        // Remove welcome if present
+        const welcome = dcMessages.querySelector('.dc-welcome');
+        if (welcome) welcome.remove();
+
+        const div = document.createElement('div');
+        div.className = `dc-msg ${sender}`;
+        let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        formatted = formatted.replace(/\n/g, '<br/>');
+        div.innerHTML = formatted;
+        dcMessages.appendChild(div);
+        dcMessages.scrollTop = dcMessages.scrollHeight;
+    };
+
+    const dcShowTyping = () => {
+        const div = document.createElement('div');
+        div.className = 'dc-typing';
+        div.id = 'dc-typing';
+        div.innerHTML = '<span class="dc-typing-dot"></span><span class="dc-typing-dot"></span><span class="dc-typing-dot"></span>';
+        dcMessages.appendChild(div);
+        dcMessages.scrollTop = dcMessages.scrollHeight;
+    };
+
+    const dcRemoveTyping = () => {
+        const t = document.getElementById('dc-typing');
+        if (t) t.remove();
+    };
+
+    const dcLoadContext = async () => {
+        if (!auth.currentUser) return;
+        const uid = auth.currentUser.uid;
+        const today = new Date().toISOString().split('T')[0];
+
+        try {
+            // Get today's meals
+            const todayRes = await dietService.getMealsByDate(db, uid, today);
+            const todayMeals = (todayRes.success && todayRes.meals) ? todayRes.meals : [];
+            let tCals = 0, tProt = 0, tCarbs = 0, tFat = 0;
+            todayMeals.forEach(m => {
+                tCals += Number(m.calories) || 0;
+                tProt += Number(m.protein) || 0;
+                tCarbs += Number(m.carbs) || 0;
+                tFat += Number(m.fat) || 0;
+            });
+
+            // Get today's water
+            const waterRes = await dietService.getWaterByDate(db, uid, today);
+            const todayWater = waterRes?.totalMl || 0;
+
+            // Get weekly data for averages
+            let weeklyAvgCalories = 'N/A', weeklyAvgProtein = 'N/A', proteinConsistency = 'N/A';
+            try {
+                const weeklyRes = await dietService.getWeeklyDietData(db, uid);
+                const weekly = (weeklyRes.success && weeklyRes.data) ? weeklyRes.data : [];
+                if (weekly.length > 0) {
+                    const totalCals = weekly.reduce((s, d) => s + (d.calories || 0), 0);
+                    const totalProt = weekly.reduce((s, d) => s + (d.protein || 0), 0);
+                    weeklyAvgCalories = Math.round(totalCals / weekly.length);
+                    weeklyAvgProtein = Math.round(totalProt / weekly.length);
+                    const protTarget = userPreferences.proteinTarget || 120;
+                    const daysMetTarget = weekly.filter(d => (d.protein || 0) >= protTarget).length;
+                    proteinConsistency = Math.round((daysMetTarget / weekly.length) * 100);
+                }
+            } catch (e) { console.warn('Weekly data fetch failed:', e); }
+
+            // Calculate streak (consecutive days with logged meals)
+            let streak = todayMeals.length > 0 ? 1 : 0;
+            if (streak > 0) {
+                for (let i = 1; i <= 30; i++) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const dateStr = d.toISOString().split('T')[0];
+                    const mRes = await dietService.getMealsByDate(db, uid, dateStr);
+                    const meals = (mRes.success && mRes.meals) ? mRes.meals : [];
+                    if (meals.length > 0) streak++;
+                    else break;
+                }
+            }
+
+            dcContext = {
+                todayCalories: Math.round(tCals),
+                todayProtein: Math.round(tProt),
+                todayCarbs: Math.round(tCarbs),
+                todayFat: Math.round(tFat),
+                todayWater: todayWater,
+                calorieTarget: userPreferences.calorieTarget || 2000,
+                proteinTarget: userPreferences.proteinTarget || 120,
+                waterTarget: userPreferences.waterTarget || 2500,
+                weeklyAvgCalories,
+                weeklyAvgProtein,
+                proteinConsistency,
+                currentStreak: streak,
+                goalType: userPreferences.goalType || 'Maintain',
+                coachingStyle: userPreferences.coachingStyle || 'Balanced'
+            };
+
+            if (dcStatus) dcStatus.textContent = `${Math.round(tCals)} / ${dcContext.calorieTarget} kcal today`;
+            dcInitialized = true;
+
+            // Proactive insight on first open
+            if (userPreferences.proactiveInsights && dcConversationHistory.length === 0) {
+                dcShowTyping();
+                try {
+                    const resp = await fetch('/api/diet-coach', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: 'Give me a quick overview of my nutrition today so far. Include one actionable tip.',
+                            context: dcContext,
+                            history: []
+                        })
+                    });
+                    dcRemoveTyping();
+                    if (resp.ok) {
+                        const result = await resp.json();
+                        dcAppendMsg(result.text, 'bot');
+                        dcConversationHistory.push({ role: 'user', text: 'Give me an overview of my nutrition today.' });
+                        dcConversationHistory.push({ role: 'model', text: result.text });
+                    }
+                } catch (e) {
+                    dcRemoveTyping();
+                    console.warn('Proactive insight failed:', e);
+                }
+            }
+        } catch (err) {
+            console.error('Diet Coach context load error:', err);
+            if (dcStatus) dcStatus.textContent = 'Context unavailable';
+        }
+    };
+
+    const dcHandleSend = async () => {
+        const msg = dcInput.value.trim();
+        if (!msg) return;
+
+        dcAppendMsg(msg, 'user');
+        dcInput.value = '';
+        dcShowTyping();
+
+        try {
+            const resp = await fetch('/api/diet-coach', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: msg,
+                    context: dcContext,
+                    history: dcConversationHistory.slice(-20) // Last 10 exchanges
+                })
+            });
+
+            dcRemoveTyping();
+            if (!resp.ok) {
+                dcAppendMsg("Sorry, I'm having trouble connecting to the server.", 'bot');
+                return;
+            }
+
+            const result = await resp.json();
+            dcAppendMsg(result.text, 'bot');
+
+            // Save to session history
+            dcConversationHistory.push({ role: 'user', text: msg });
+            dcConversationHistory.push({ role: 'model', text: result.text });
+        } catch (err) {
+            dcRemoveTyping();
+            dcAppendMsg("An error occurred. Please try again.", 'bot');
+        }
+    };
+
+    // Diet Coach event listeners
+    if (dcSendBtn && dcInput) {
+        dcSendBtn.addEventListener('click', dcHandleSend);
+        dcInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') dcHandleSend(); });
+    }
+
+    if (dcClearBtn) {
+        dcClearBtn.addEventListener('click', () => {
+            dcConversationHistory = [];
+            dcMessages.innerHTML = `<div class="dc-welcome"><div class="dc-welcome-icon"><i class="ri-sparkling-2-fill"></i></div><h3>Hi! I'm your Diet Coach 🥗</h3><p>Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your real data.</p></div>`;
+            dcInitialized = false;
+            if (dcStatus) dcStatus.textContent = 'Chat cleared';
         });
     }
+
+    // Load context when Diet Coach view is activated
+    const observer = new MutationObserver(() => {
+        const coachView = document.getElementById('view-diet-ai-coach');
+        if (coachView && coachView.classList.contains('active-view') && !dcInitialized) {
+            dcLoadContext();
+        }
+    });
+    const coachView = document.getElementById('view-diet-ai-coach');
+    if (coachView) observer.observe(coachView, { attributes: true, attributeFilter: ['class'] });
+
+    // ==========================================
+    // 11. SETTINGS — NEW FIELDS LISTENERS
+    // ==========================================
+    const initNewSettings = () => {
+        // Calorie Target
+        const calInput = document.getElementById('setting-calorie-target');
+        if (calInput) {
+            calInput.value = userPreferences.calorieTarget || 2000;
+            calInput.addEventListener('change', () => {
+                userPreferences.calorieTarget = parseInt(calInput.value) || 2000;
+                savePreferences();
+            });
+        }
+
+        // Protein Target
+        const protInput = document.getElementById('setting-protein-target');
+        if (protInput) {
+            protInput.value = userPreferences.proteinTarget || 120;
+            protInput.addEventListener('change', () => {
+                userPreferences.proteinTarget = parseInt(protInput.value) || 120;
+                savePreferences();
+            });
+        }
+
+        // Water Target
+        const waterInput = document.getElementById('setting-water-target');
+        if (waterInput) {
+            waterInput.value = userPreferences.waterTarget || 2500;
+            waterInput.addEventListener('change', () => {
+                userPreferences.waterTarget = parseInt(waterInput.value) || 2500;
+                savePreferences();
+            });
+        }
+
+        // Goal Type
+        const goalSelect = document.getElementById('setting-goal-type');
+        if (goalSelect) {
+            goalSelect.value = userPreferences.goalType || 'Maintain';
+            goalSelect.addEventListener('change', () => {
+                userPreferences.goalType = goalSelect.value;
+                savePreferences();
+            });
+        }
+
+        // Coaching Style Pills
+        document.querySelectorAll('.ds-pill[data-coach]').forEach(pill => {
+            if (pill.dataset.coach === (userPreferences.coachingStyle || 'Balanced')) {
+                pill.classList.add('active');
+            } else {
+                pill.classList.remove('active');
+            }
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.ds-pill[data-coach]').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                userPreferences.coachingStyle = pill.dataset.coach;
+                savePreferences();
+            });
+        });
+
+        // Meal Type Pills (Log Meal)
+        document.querySelectorAll('.lm-pill[data-meal]').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.lm-pill[data-meal]').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                const sel = document.getElementById('diet-meal-type');
+                if (sel) sel.value = pill.dataset.meal;
+            });
+        });
+        // Proactive Insights
+        const proactiveToggle = document.getElementById('setting-proactive-insights');
+        if (proactiveToggle) {
+            proactiveToggle.checked = userPreferences.proactiveInsights !== false;
+            proactiveToggle.addEventListener('change', () => {
+                userPreferences.proactiveInsights = proactiveToggle.checked;
+                savePreferences();
+            });
+        }
+
+        // Macro Display Mode
+        document.querySelectorAll('.segment-btn[data-macro-mode]').forEach(btn => {
+            if (btn.dataset.macroMode === (userPreferences.macroDisplayMode || 'absolute')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.segment-btn[data-macro-mode]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                userPreferences.macroDisplayMode = btn.dataset.macroMode;
+                savePreferences();
+            });
+        });
+    };
+
+    initNewSettings();
 
 });
