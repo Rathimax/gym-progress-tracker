@@ -23,7 +23,7 @@ app.post('/api/chat', async (req, res) => {
         const { prompt } = req.body;
         if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         const geminiBody = {
             contents: [{ parts: [{ text: prompt }] }],
@@ -72,7 +72,7 @@ app.post('/api/diet-coach', async (req, res) => {
         const { message, context, history } = req.body;
         if (!message) return res.status(400).json({ error: 'Message is required' });
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         // Build context string from user's real nutrition data
         let contextStr = '';
@@ -165,7 +165,7 @@ app.post('/api/analyze-food', async (req, res) => {
 
         // Step 1: Query Gemini Vision
         console.log('[API] Querying Gemini Vision API...');
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         const promptText = `
 Analyze this food image and provide nutritional estimates.
