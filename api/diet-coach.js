@@ -59,11 +59,11 @@ COACHING RULES:
 7. Never invent data — only reference the numbers provided above.`;
 
         const geminiBody = {
-            contents: contents,
-            system_instruction: {
-                role: "user",
-                parts: [{ text: systemPrompt }]
-            }
+            contents: [
+                { role: "user", parts: [{ text: systemPrompt }] },
+                { role: "model", parts: [{ text: "Understood! I'm ready to be your personal diet coach." }] },
+                ...contents
+            ]
         };
 
         const response = await fetch(geminiUrl, {
