@@ -2,7 +2,7 @@
 // 1. IMPORTS & FIREBASE CONFIGURATION
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initRoutines } from "./routines.js";
@@ -2248,10 +2248,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // 9. AUTHENTICATION LOGIC
     // ==========================================
     const initAuth = () => {
+        const loginScreen = document.getElementById('login-screen');
+        const appContent = document.querySelectorAll('nav.sidebar, header, .container, #app-container-diet, .bottom-nav, #bottom-nav-exercise, #bottom-nav-diet');
+
+        const showLogin = () => {
+            loginScreen.classList.add('active');
+            appContent.forEach(el => { if (el) el.style.display = 'none'; });
+        };
+
+        const hideLogin = () => {
+            loginScreen.classList.remove('active');
+            appContent.forEach(el => { if (el) el.style.display = ''; });
+        };
+
+        // Google Sign-In Button
+        const googleSignInBtn = document.getElementById('btn-google-signin');
+        if (googleSignInBtn) {
+            googleSignInBtn.addEventListener('click', async () => {
+                const provider = new GoogleAuthProvider();
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (error) {
+                    console.error('Google sign-in error:', error);
+                    showNotification(error.message || 'Sign-in failed. Please try again.', 'error');
+                }
+            });
+        }
+
         // AUTH STATE LISTENER
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in
+                hideLogin();
                 showNotification(`Welcome back, ${user.displayName || user.email}!`);
                 updateDataStatus();
                 // Load Data
@@ -2259,8 +2287,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateAllUI();
                 if (window.appMode === 'diet' && window.updateDietDashboard) window.updateDietDashboard();
             } else {
-                // User is signed out, REDIRECT
-                window.location.replace('login.html');
+                // User is signed out, show login screen
+                showLogin();
             }
         });
     };
@@ -2271,8 +2299,6 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await signOut(auth);
                 showNotification("Logged out successfully.");
-                // Optional: Reload page to clear any in-memory state artifacts
-                window.location.reload();
             } catch (error) {
                 console.error(error);
                 showNotification("Failed to log out.", "error");
