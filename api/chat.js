@@ -15,17 +15,19 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Prompt is required' });
         }
 
-        // Call Gemini API using native fetch
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
-
-        const systemPrompt = "You are FitTrack AI, a helpful Gym AI Assistant. You have access to the user's workout history. Only answer gym, fitness, and nutrition related queries. Be concise, motivating, and helpful. Reference their history when relevant to provide personalized answers. If asked something unrelated to fitness or nutrition, politely decline.";
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         const geminiBody = {
-            contents: [
-                { role: "user", parts: [{ text: systemPrompt }] },
-                { role: "model", parts: [{ text: "Understood! I'm ready to help with your fitness journey." }] },
-                { role: "user", parts: [{ text: prompt }] }
-            ]
+            contents: [{
+                role: "user",
+                parts: [{ text: prompt }]
+            }],
+            systemInstruction: {
+                role: "user",
+                parts: [{
+                    text: "You are FitTrack AI, a helpful Gym AI Assistant. You have access to the user's workout history. Only answer gym, fitness, and nutrition related queries. Be concise, motivating, and helpful. Reference their history when relevant to provide personalized answers. If asked something unrelated to fitness or nutrition, politely decline."
+                }]
+            }
         };
 
         const response = await fetch(geminiUrl, {

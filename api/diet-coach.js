@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         const { message, context, history } = req.body;
         if (!message) return res.status(400).json({ error: 'Message is required' });
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         // Build context string from user's real nutrition data
         let contextStr = '';
@@ -59,11 +59,11 @@ COACHING RULES:
 7. Never invent data — only reference the numbers provided above.`;
 
         const geminiBody = {
-            contents: [
-                { role: "user", parts: [{ text: systemPrompt }] },
-                { role: "model", parts: [{ text: "Understood! I'm ready to be your personal diet coach." }] },
-                ...contents
-            ]
+            contents: contents,
+            systemInstruction: {
+                role: "user",
+                parts: [{ text: systemPrompt }]
+            }
         };
 
         const response = await fetch(geminiUrl, {
