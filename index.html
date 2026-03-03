@@ -1181,6 +1181,18 @@
               <input type="text" id="scan-food-qty" required>
             </div>
 
+            <div class="fs-result-field fs-result-field--wide">
+              <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong (optional)</label>
+              <div class="fs-correction-row">
+                <input type="text" id="scan-correction-text"
+                  placeholder="e.g., It's masala dosa, not plain dosa">
+                <button type="button" class="fs-correction-btn" id="btn-refine-scan">
+                  <i class="ri-magic-line"></i> Refine macros
+                </button>
+              </div>
+              <p class="fs-correction-hint">We’ll adjust the macros using this note while keeping your photo.</p>
+            </div>
+
             <div class="fs-result-field fs-macro-card fs-macro-card--cal">
               <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
               <div class="fs-macro-input-wrap">

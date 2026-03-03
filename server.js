@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import refineFoodHandler from './api/refine-food.js';
 
 dotenv.config();
 
@@ -224,6 +225,11 @@ If there are multiple foods, combine their totals. If it's not food, set default
         return res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 });
+
+// ==========================================
+// AI FOOD REFINEMENT API
+// ==========================================
+app.post('/api/refine-food', refineFoodHandler);
 
 const PORT = 3000;
 app.listen(PORT, () => {

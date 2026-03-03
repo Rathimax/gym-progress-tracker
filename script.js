@@ -102,6 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         scanProtein: document.getElementById('scan-protein'),
         scanCarbs: document.getElementById('scan-carbs'),
         scanFat: document.getElementById('scan-fat'),
+        scanCorrectionText: document.getElementById('scan-correction-text'),
+        btnRefineScan: document.getElementById('btn-refine-scan'),
         btnCancelScan: document.getElementById('btn-cancel-scan'),
         btnConfirmScan: document.getElementById('btn-confirm-scan'),
 
@@ -131,7 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
         importBtn: document.getElementById('import-btn'),
         importInput: document.getElementById('import-input'),
         clearBtn: document.getElementById('clear-btn'),
-        logoutBtn: document.getElementById('logout-btn'), // New Logout Button
+        logoutBtn: document.getElementById('logout-btn'), // Exercise Logout Button
+        // Diet Settings – Data Management
+        dietExportBtn: document.getElementById('diet-export-btn'),
+        dietLogoutBtn: document.getElementById('diet-logout-btn'),
         themeToggle: document.getElementById('theme-toggle'),
         loader: document.getElementById('loader'),
         notification: document.getElementById('notification'),
@@ -544,9 +549,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const showNotification = (msg, type = 'success') => {
         const notif = document.getElementById('notification');
         if (!notif) return;
-        notif.textContent = msg;
+
+        // Keep messages compact so they don't cover the UI
+        const MAX_LEN = 130;
+        const text = msg.length > MAX_LEN ? msg.slice(0, MAX_LEN - 1) + '…' : msg;
+
+        notif.textContent = text;
         notif.className = `notification show ${type}`;
-        setTimeout(() => notif.classList.remove('show'), 3000);
+
+        // Slightly shorter visibility so it feels lighter
+        setTimeout(() => notif.classList.remove('show'), 2200);
     };
 
     // Equipment Cycling Animation for Custom Loader
@@ -1193,6 +1205,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         elements.bwForm.addEventListener('submit', async (e) => { e.preventDefault(); const w = parseFloat(elements.bwInput.value); if (w) { const id = await addBodyWeightToServer({ weight: w, date: elements.bwDate.value }); bwData.push({ id, weight: w, date: elements.bwDate.value }); bwData.sort((a, b) => new Date(a.date) - new Date(b.date)); updateAllUI(); showNotification("Logged."); } });
+
+        // Exercise data export (workouts)
         elements.exportBtn.addEventListener('click', () => {
             if (!data.length) return showNotification("No data to export.", "error");
             const { jsPDF } = window.jspdf;
@@ -1257,6 +1271,103 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.save('fittrack-report.pdf');
             showNotification('PDF exported! 📄');
         });
+
+        // Diet data export (meals + water, last 7 days)
+        if (elements.dietExportBtn) {
+            elements.dietExportBtn.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) return showNotification("Please sign in to export diet data.", "error");
+
+                const weekly = await dietService.getWeeklyDietData(db, user.uid);
+                if (!weekly.success || !weekly.data || weekly.data.length === 0) {
+                    return showNotification("No diet data to export.", "error");
+                }
+
+                const hasAnyData = weekly.data.some(d =>
+                    (d.calories || 0) > 0 ||
+                    (d.protein || 0) > 0 ||
+                    (d.carbs || 0) > 0 ||
+                    (d.fat || 0) > 0 ||
+                    (d.waterMl || 0) > 0
+                );
+                if (!hasAnyData) return showNotification("No diet data to export.", "error");
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const accent = [94, 234, 212]; // teal for diet
+
+                // Header
+                doc.setFillColor(...accent);
+                doc.rect(0, 0, 210, 28, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.setTextColor(255, 255, 255);
+                doc.text('FitTrack Diet Report', 14, 12);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`, 14, 21);
+
+                let yDiet = 38;
+
+                // Summary
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(72, 75, 106);
+                doc.text('Weekly Summary', 14, yDiet);
+                yDiet += 6;
+
+                const totalCals = weekly.data.reduce((s, d) => s + (d.calories || 0), 0);
+                const totalProtein = weekly.data.reduce((s, d) => s + (d.protein || 0), 0);
+                const totalCarbs = weekly.data.reduce((s, d) => s + (d.carbs || 0), 0);
+                const totalFat = weekly.data.reduce((s, d) => s + (d.fat || 0), 0);
+                const totalWater = weekly.data.reduce((s, d) => s + (d.waterMl || 0), 0);
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(100, 100, 120);
+                doc.text(`Total Calories: ${Math.round(totalCals)} kcal`, 14, yDiet);
+                doc.text(`Total Protein: ${Math.round(totalProtein)} g`, 14, yDiet + 5);
+                doc.text(`Total Carbs: ${Math.round(totalCarbs)} g`, 14, yDiet + 10);
+                doc.text(`Total Fat: ${Math.round(totalFat)} g`, 14, yDiet + 15);
+                doc.text(`Total Water: ${Math.round(totalWater)} ml`, 14, yDiet + 20);
+                yDiet += 30;
+
+                // Daily table
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(72, 75, 106);
+                doc.text('Daily Breakdown (Last 7 Days)', 14, yDiet);
+                yDiet += 8;
+
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Date', 14, yDiet);
+                doc.text('Calories', 40, yDiet);
+                doc.text('Protein (g)', 70, yDiet);
+                doc.text('Carbs (g)', 100, yDiet);
+                doc.text('Fat (g)', 130, yDiet);
+                doc.text('Water (ml)', 160, yDiet);
+                yDiet += 4;
+
+                doc.setFont('helvetica', 'normal');
+                weekly.data.forEach(day => {
+                    if (yDiet > 280) {
+                        doc.addPage();
+                        yDiet = 20;
+                    }
+                    doc.text(day.date, 14, yDiet);
+                    doc.text(String(Math.round(day.calories || 0)), 40, yDiet);
+                    doc.text(String(Math.round(day.protein || 0)), 70, yDiet);
+                    doc.text(String(Math.round(day.carbs || 0)), 100, yDiet);
+                    doc.text(String(Math.round(day.fat || 0)), 130, yDiet);
+                    doc.text(String(Math.round(day.waterMl || 0)), 160, yDiet);
+                    yDiet += 5;
+                });
+
+                doc.save('fittrack-diet-report.pdf');
+                showNotification("Diet PDF exported.");
+            });
+        }
         elements.importInput.addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async (ev) => { try { const i = JSON.parse(ev.target.result); if (i.workouts) for (const w of i.workouts) await addWorkoutToServer(w); if (i.bodyweight) for (const b of i.bodyweight) await addBodyWeightToServer(b); await loadDataFromServer(); updateAllUI(); showNotification("Imported!"); } catch (err) { showNotification("Import failed", "error"); } }; r.readAsText(f); });
         elements.importBtn.addEventListener('click', () => elements.importInput.click());
         elements.clearBtn.addEventListener('click', async () => {
@@ -1587,10 +1698,9 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('appTheme', JSON.stringify(theme));
             showNotification(`Theme set to ${theme.name}`, 'success');
         }
-        // LOGOUT BTN LISTENER
-        if (elements.logoutBtn) {
-            elements.logoutBtn.addEventListener('click', handleLogout);
-        }
+        // LOGOUT BTN LISTENERS (exercise + diet)
+        if (elements.logoutBtn) elements.logoutBtn.addEventListener('click', handleLogout);
+        if (elements.dietLogoutBtn) elements.dietLogoutBtn.addEventListener('click', handleLogout);
     };
 
     // Preferences Logic ==============================
@@ -1938,6 +2048,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `${fName} (${elements.scanFoodQty.value.trim()})`
                     : fName;
 
+                // Short label for notifications so long AI descriptions don't flood the screen
+                const displayFoodName = (() => {
+                    const base = fName.split('with')[0].split(',')[0].trim() || fName;
+                    const MAX_NAME = 40;
+                    if (base.length <= MAX_NAME) return base;
+                    return base.slice(0, MAX_NAME - 1) + '…';
+                })();
+
                 const payloadObj = {
                     foodName: safeFoodName,
                     calories: cals,
@@ -1948,7 +2066,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 await dietService.addMeal(db, user.uid, today, payloadObj);
-                showNotification(`Added ${safeFoodName} via AI successfully!`, 'success');
+                showNotification(`Added ${displayFoodName} via AI successfully!`, 'success');
 
                 // Clean Up Form
                 elements.btnCancelScan.click();
@@ -1961,6 +2079,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification('Failed to save AI meal reading.', 'error');
             }
         });
+
+        // Optional: refine macros based on a user correction note
+        if (elements.btnRefineScan) {
+            elements.btnRefineScan.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) {
+                    showNotification('Please sign in to refine macros.', 'error');
+                    return;
+                }
+
+                const note = (elements.scanCorrectionText?.value || '').trim();
+                if (!note) {
+                    showNotification('Tell the AI what is wrong first.', 'error');
+                    return;
+                }
+
+                try {
+                    elements.btnRefineScan.disabled = true;
+                    elements.btnRefineScan.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+
+                    const body = {
+                        uid: user.uid,
+                        currentFood: (elements.scanFoodName.value || '').trim(),
+                        quantity: (elements.scanFoodQty.value || '').trim(),
+                        calories: Number(elements.scanCalories.value) || 0,
+                        protein: Number(elements.scanProtein.value) || 0,
+                        carbs: Number(elements.scanCarbs.value) || 0,
+                        fat: Number(elements.scanFat.value) || 0,
+                        correction: note
+                    };
+
+                    const resp = await fetch('/api/refine-food', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (!resp.ok) throw new Error('AI refinement failed.');
+
+                    const payload = await resp.json();
+                    if (!payload.success || !payload.data) throw new Error('Invalid refinement payload.');
+
+                    const ai = payload.data;
+                    if (ai.food) elements.scanFoodName.value = ai.food;
+                    if (ai.estimatedQuantity) elements.scanFoodQty.value = ai.estimatedQuantity;
+                    if (typeof ai.calories === 'number') elements.scanCalories.value = ai.calories;
+                    if (typeof ai.protein === 'number') elements.scanProtein.value = ai.protein;
+                    if (typeof ai.carbs === 'number') elements.scanCarbs.value = ai.carbs;
+                    if (typeof ai.fat === 'number') elements.scanFat.value = ai.fat;
+
+                    showNotification('Updated macros based on your correction.');
+                } catch (err) {
+                    console.error('Refine scan error:', err);
+                    showNotification('Could not refine macros. Please adjust manually.', 'error');
+                } finally {
+                    elements.btnRefineScan.disabled = false;
+                    elements.btnRefineScan.innerHTML = '<i class="ri-magic-line"></i> Refine macros';
+                }
+            });
+        }
     };
 
     // ==========================================
@@ -2354,7 +2532,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const calculate1RM = (w, r) => { if (!weight || !reps) return 0; if (reps === 1) return weight; return Math.round(weight * (1 + reps / 30)); };
+    const calculate1RM = (w, r) => {
+        const weight = parseFloat(w);
+        const reps = parseInt(r);
+
+        if (!weight || !reps || reps <= 0) return 0;
+        if (reps === 1) return Math.round(weight);
+
+        // Epley formula: 1RM = w * (1 + r/30)
+        return Math.round(weight * (1 + reps / 30));
+    };
 
     // ─────────────────────────────────────────────────────────────
     // NEW: GLOBAL MODE FEATURE
