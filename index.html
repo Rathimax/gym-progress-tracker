@@ -1183,9 +1183,9 @@
 
             <div class="fs-result-field fs-result-field--wide">
               <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong (optional)</label>
-              <div class="fs-correction-row">
-                <input type="text" id="scan-correction-text"
-                  placeholder="e.g., It's masala dosa, not plain dosa">
+              <textarea id="scan-correction-text" class="fs-correction-textarea" rows="2"
+                placeholder="e.g., It's masala dosa, not plain dosa. It's only 8 momos, no noodles."></textarea>
+              <div class="fs-correction-actions">
                 <button type="button" class="fs-correction-btn" id="btn-refine-scan">
                   <i class="ri-magic-line"></i> Refine macros
                 </button>
