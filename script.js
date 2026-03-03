@@ -1869,9 +1869,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.scanCarbs.value = aiData.carbs || 0;
                 elements.scanFat.value = aiData.fat || 0;
 
-                // Toggle Views
+                // Toggle Views — hide upload area & features, show results
                 elements.scanLoader.classList.add('hidden');
                 elements.scanResults.classList.remove('hidden');
+                const scanPage = document.querySelector('.fs-page');
+                if (scanPage) {
+                    scanPage.querySelector('.fs-hero')?.classList.add('hidden');
+                    scanPage.querySelector('.fs-dropzone-wrapper')?.classList.add('hidden');
+                    scanPage.querySelector('.fs-features')?.classList.add('hidden');
+                }
 
             } catch (e) {
                 console.error(e);
@@ -1893,7 +1899,17 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.scanPreviewImg.classList.add('hidden');
             elements.scanPreviewImg.src = '';
 
-            elements.scanUploadZone.querySelector('.upload-content').style.display = 'block';
+            // Restore upload area, hero, and features
+            const scanPage = document.querySelector('.fs-page');
+            if (scanPage) {
+                scanPage.querySelector('.fs-hero')?.classList.remove('hidden');
+                scanPage.querySelector('.fs-dropzone-wrapper')?.classList.remove('hidden');
+                scanPage.querySelector('.fs-features')?.classList.remove('hidden');
+            }
+            const uploadContent = elements.scanUploadZone.querySelector('.upload-content');
+            if (uploadContent) uploadContent.style.display = 'block';
+            const dropInner = elements.scanUploadZone.querySelector('.fs-dropzone-inner');
+            if (dropInner) dropInner.style.display = 'block';
             elements.btnAnalyzeFood.style.display = 'none';
         });
 
