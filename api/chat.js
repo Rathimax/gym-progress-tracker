@@ -15,7 +15,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Prompt is required' });
         }
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
         const geminiBody = {
             contents: [{
