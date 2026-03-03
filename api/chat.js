@@ -22,7 +22,7 @@ export default async function handler(req, res) {
             contents: [{
                 parts: [{ text: prompt }]
             }],
-            systemInstruction: {
+            system_instruction: {
                 role: "user",
                 parts: [{
                     text: "You are FitTrack AI, a helpful Gym AI Assistant. You have access to the user's workout history. Only answer gym, fitness, and nutrition related queries. Be concise, motivating, and helpful. Reference their history when relevant to provide personalized answers. If asked something unrelated to fitness or nutrition, politely decline."

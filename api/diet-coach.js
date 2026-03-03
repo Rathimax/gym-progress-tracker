@@ -60,7 +60,7 @@ COACHING RULES:
 
         const geminiBody = {
             contents: contents,
-            systemInstruction: {
+            system_instruction: {
                 role: "user",
                 parts: [{ text: systemPrompt }]
             }
