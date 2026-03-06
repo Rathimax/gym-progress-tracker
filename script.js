@@ -1962,18 +1962,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 500);
         }
 
-        // Trigger file input click when zone clicked
-        elements.scanUploadZone.addEventListener('click', (e) => {
-            if (e.target !== elements.scanFileInput) {
-                // Mark that we're about to open the camera/file picker
-                // If the tab gets killed, we'll recover on reload (above)
-                sessionStorage.setItem(SCAN_PENDING_KEY, '1');
-                elements.scanFileInput.click();
-            }
-        });
+        const scanInputCam = document.getElementById('ai-scan-file-input-cam');
+        const scanInputGal = document.getElementById('ai-scan-file-input-gal');
+        const btnScanCam = document.getElementById('btn-scan-cam');
+        const btnScanGal = document.getElementById('btn-scan-gal');
 
-        // Handle File Selection & Render Preview
-        elements.scanFileInput.addEventListener('change', (e) => {
+        if (btnScanCam && scanInputCam) {
+            btnScanCam.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sessionStorage.setItem(SCAN_PENDING_KEY, '1');
+                scanInputCam.click();
+            });
+        }
+
+        if (btnScanGal && scanInputGal) {
+            btnScanGal.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sessionStorage.setItem(SCAN_PENDING_KEY, '1');
+                scanInputGal.click();
+            });
+        }
+
+        // Handle File Selection & Render Preview for both inputs
+        const handleFileSelect = (e) => {
             // Clear pending flag — user returned successfully
             sessionStorage.removeItem(SCAN_PENDING_KEY);
 
@@ -1999,7 +2010,10 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.scanResults.classList.add('hidden');
             elements.btnAnalyzeFood.style.display = 'inline-flex';
             elements.btnAnalyzeFood.disabled = false;
-        });
+        };
+
+        if (scanInputCam) scanInputCam.addEventListener('change', handleFileSelect);
+        if (scanInputGal) scanInputGal.addEventListener('change', handleFileSelect);
 
         // Clear pending flag if user returns to browser without picking a file
         document.addEventListener('visibilitychange', () => {
@@ -2130,7 +2144,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.btnCancelScan.addEventListener('click', () => {
             // Reset state
             selectedFile = null;
-            elements.scanFileInput.value = '';
+            if (scanInputCam) scanInputCam.value = '';
+            if (scanInputGal) scanInputGal.value = '';
             elements.scanResults.classList.add('hidden');
             elements.scanPreviewImg.classList.add('hidden');
             elements.scanPreviewImg.src = '';
