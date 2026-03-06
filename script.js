@@ -993,10 +993,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // 7. LISTENERS
     // ==========================================
     const setupEventListeners = () => {
-        // REMOVED toggleMenu logic as per redesign (no hamburger)
+        // GLOBAL RIPPLE LISTENER
+        document.addEventListener('mousedown', function (e) {
+            const btn = e.target.closest('.ripple');
+            if (!btn) return;
+
+            const rect = btn.getBoundingClientRect();
+            const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+            const radius = diameter / 2;
+
+            const ripple = document.createElement('span');
+            ripple.style.width = ripple.style.height = `${diameter}px`;
+            ripple.style.left = `${e.clientX - rect.left - radius}px`;
+            ripple.style.top = `${e.clientY - rect.top - radius}px`;
+            ripple.classList.add('ripple-element');
+
+            // Remove existing ripples to prevent buildup
+            const existing = btn.querySelector('.ripple-element');
+            if (existing) existing.remove();
+
+            btn.appendChild(ripple);
+
+            // Clean up
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+
+        // VIEW NAVIGATION
         elements.navItems.forEach(item => item.addEventListener('click', () => {
+            const targetId = item.dataset.target;
+            const targetView = document.getElementById(targetId);
+
+            // 1. Remove active class from all views
             elements.views.forEach(v => v.classList.remove('active-view'));
-            document.getElementById(item.dataset.target).classList.add('active-view');
+
+            // 2. Force CSS Reflow so the animation can restart
+            void targetView.offsetWidth;
+
+            // 3. Add active class to trigger the `glassFocusIn` animation
+            targetView.classList.add('active-view');
 
             // Sync active state (Sidebar + Bottom Nav)
             const target = item.dataset.target;
@@ -1011,6 +1047,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Header Profile Click -> Open Settings
         const headerProfile = document.getElementById('header-profile');
+
+        // ADD MEAL: Sub-mode toggle (Manual Entry / AI Scan)
+        document.querySelectorAll('.add-meal-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.add-meal-toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const target = btn.dataset.subview;
+                document.querySelectorAll('.add-meal-subview').forEach(sv => sv.classList.remove('active'));
+                const targetView = document.getElementById('subview-' + target);
+                if (targetView) targetView.classList.add('active');
+            });
+        });
         if (headerProfile) {
             headerProfile.addEventListener('click', () => {
                 document.querySelector('.nav-item[data-target="view-settings"]').click();
@@ -1894,15 +1942,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const initAIFoodScanner = () => {
         let selectedFile = null;
 
+        // ── S24 Fix: Recover from Android tab discard ──
+        // If the browser killed our tab while camera was open,
+        // sessionStorage will still have the flag on page reload.
+        const SCAN_PENDING_KEY = 'fittrack_scan_pending';
+
+        if (sessionStorage.getItem(SCAN_PENDING_KEY)) {
+            sessionStorage.removeItem(SCAN_PENDING_KEY);
+            // Tab was discarded while camera was open — nudge user back to scan view
+            setTimeout(() => {
+                showNotification('Camera session was interrupted. Please try scanning again.', 'info');
+                // Auto-navigate back to AI scan view if possible
+                const addMealNav = document.querySelector('.nav-item[data-target="view-diet-add-meal"]');
+                if (addMealNav) {
+                    addMealNav.click();
+                    const scanBtn = document.querySelector('.add-meal-toggle-btn[data-subview="ai-scan"]');
+                    if (scanBtn) scanBtn.click();
+                }
+            }, 500);
+        }
+
         // Trigger file input click when zone clicked
         elements.scanUploadZone.addEventListener('click', (e) => {
             if (e.target !== elements.scanFileInput) {
+                // Mark that we're about to open the camera/file picker
+                // If the tab gets killed, we'll recover on reload (above)
+                sessionStorage.setItem(SCAN_PENDING_KEY, '1');
                 elements.scanFileInput.click();
             }
         });
 
         // Handle File Selection & Render Preview
         elements.scanFileInput.addEventListener('change', (e) => {
+            // Clear pending flag — user returned successfully
+            sessionStorage.removeItem(SCAN_PENDING_KEY);
+
             const file = e.target.files[0];
             if (!file) return;
 
@@ -1917,6 +1991,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const contentDiv = elements.scanUploadZone.querySelector('.fs-dropzone-inner');
             if (contentDiv) contentDiv.style.display = 'none';
 
+            // Use createObjectURL for preview — lightweight, no memory spike
             elements.scanPreviewImg.src = URL.createObjectURL(file);
             elements.scanPreviewImg.classList.remove('hidden');
 
@@ -1924,6 +1999,16 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.scanResults.classList.add('hidden');
             elements.btnAnalyzeFood.style.display = 'inline-flex';
             elements.btnAnalyzeFood.disabled = false;
+        });
+
+        // Clear pending flag if user returns to browser without picking a file
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                // Small delay — the 'change' event fires slightly after visibility
+                setTimeout(() => {
+                    sessionStorage.removeItem(SCAN_PENDING_KEY);
+                }, 1000);
+            }
         });
 
         // Handle Form Submission -> Firebase Storage -> Express API
@@ -1941,31 +2026,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.btnAnalyzeFood.style.display = 'none';
                 elements.scanLoader.classList.remove('hidden');
 
+                const scanPage = document.querySelector('.fs-page');
+                if (scanPage) {
+                    scanPage.querySelector('.fs-features')?.classList.add('hidden');
+                }
+
                 // 1. Compress + Encode Image Client-Side (keeps payload under Vercel's 4.5MB body limit)
-                // For files >5 MB use tighter settings; otherwise use standard settings.
+                // For files >10 MB (e.g. S24 50MP), >5 MB, and normal — tiered settings
                 const compressImage = (file) => new Promise((resolve, reject) => {
-                    const isLarge = file.size > 5 * 1024 * 1024;
-                    const MAX_DIM = isLarge ? 600 : 800;   // px — smaller box for heavy images
-                    const QUALITY = isLarge ? 0.6 : 0.7;    // JPEG quality
+                    const sizeInMB = file.size / (1024 * 1024);
+                    let MAX_DIM, QUALITY;
+                    if (sizeInMB > 10) {
+                        // S24 50MP/200MP: extreme compression to avoid OOM
+                        MAX_DIM = 400; QUALITY = 0.5;
+                    } else if (sizeInMB > 5) {
+                        MAX_DIM = 600; QUALITY = 0.6;
+                    } else {
+                        MAX_DIM = 800; QUALITY = 0.7;
+                    }
 
                     const img = new Image();
                     const objectUrl = URL.createObjectURL(file);
                     img.onload = () => {
-                        let { width, height } = img;
-                        if (width > MAX_DIM || height > MAX_DIM) {
-                            if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
-                            else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+                        try {
+                            let { width, height } = img;
+                            if (width > MAX_DIM || height > MAX_DIM) {
+                                if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
+                                else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+                            }
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+                            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                            URL.revokeObjectURL(objectUrl);
+                            // Export as JPEG — typical output: 50–400 KB regardless of original size
+                            const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
+                            // Free canvas memory immediately
+                            canvas.width = 0; canvas.height = 0;
+                            resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+                        } catch (err) {
+                            URL.revokeObjectURL(objectUrl);
+                            reject(new Error('Image too large to process. Please use a lower camera resolution or pick from gallery.'));
                         }
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                        URL.revokeObjectURL(objectUrl);
-                        // Export as JPEG — typical output: 150–500 KB regardless of original size
-                        const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
-                        resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
                     };
-                    img.onerror = reject;
+                    img.onerror = () => {
+                        URL.revokeObjectURL(objectUrl);
+                        reject(new Error('Could not read image file.'));
+                    };
                     img.src = objectUrl;
                 });
 
@@ -2003,12 +2110,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Toggle Views — hide upload area & features, show results
                 elements.scanLoader.classList.add('hidden');
                 elements.scanResults.classList.remove('hidden');
-                const scanPage = document.querySelector('.fs-page');
-                if (scanPage) {
-                    scanPage.querySelector('.fs-hero')?.classList.add('hidden');
-                    scanPage.querySelector('.fs-dropzone-wrapper')?.classList.add('hidden');
-                    scanPage.querySelector('.fs-features')?.classList.add('hidden');
-                }
 
             } catch (e) {
                 console.error(e);
@@ -2018,6 +2119,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.scanLoader.classList.add('hidden');
                 elements.btnAnalyzeFood.disabled = false;
                 elements.btnAnalyzeFood.style.display = 'block';
+                const scanPage = document.querySelector('.fs-page');
+                if (scanPage) {
+                    scanPage.querySelector('.fs-features')?.classList.remove('hidden');
+                }
             }
         });
 
@@ -2522,6 +2627,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 await loadDataFromServer();
                 updateAllUI();
                 if (window.updateDietDashboard) window.updateDietDashboard(); // Arms listeners immediately on auth — mode-agnostic
+                // Trigger an initial render of Diet History if the function is exposed or we simulate a click on the active tab
+                const activeDietBtn = document.querySelector('.dh-toggle-btn.active');
+                if (activeDietBtn) {
+                    activeDietBtn.click(); // This will force the render functions inside the closure to execute
+                }
             } else {
                 // User is signed out, show login screen
                 showLogin();

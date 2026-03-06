@@ -147,10 +147,8 @@
       <li class="nav-item active" data-target="view-diet-dashboard"><span class="icon"><i
             class="ri-dashboard-line"></i></span> <span class="label">Dashboard</span>
       </li>
-      <li class="nav-item" data-target="view-diet-log-meal"><span class="icon"><i
-            class="ri-restaurant-2-line"></i></span> <span class="label">Log Meal</span></li>
-      <li class="nav-item" data-target="view-diet-ai-scan"><span class="icon"><i class="ri-camera-lens-line"></i></span>
-        <span class="label">AI Food Scan</span>
+      <li class="nav-item" data-target="view-diet-add-meal"><span class="icon"><i class="ri-add-circle-line"></i></span>
+        <span class="label">Add Meal</span>
       </li>
       <li class="nav-item" data-target="view-diet-history"><span class="icon"><i class="ri-history-line"></i></span>
         <span class="label">History</span>
@@ -793,13 +791,6 @@
           <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.3rem;">Display weights in Pounds.</p>
         </div>
 
-        <div class="setting-item">
-          <label class="setting-label">Macro Display</label>
-          <div class="segmented-control">
-            <button class="segment-btn active" data-macro-mode="absolute">Absolute (g)</button>
-            <button class="segment-btn" data-macro-mode="percentage">Percentage (%)</button>
-          </div>
-        </div>
 
         <div class="setting-item">
           <label class="setting-label">Header Avatar</label>
@@ -993,254 +984,273 @@
       </div>
     </div>
 
-    <!-- DIET: Log Meal -->
-    <div id="view-diet-log-meal" class="view-section">
-      <div class="lm-page">
+    <!-- DIET: Add Meal (unified Log + Scan) -->
+    <div id="view-diet-add-meal" class="view-section">
 
-        <!-- Hero Header -->
-        <div class="lm-hero">
-          <div class="lm-hero-icon"><i class="ri-restaurant-fill"></i></div>
-          <div>
-            <h2 class="lm-hero-title">Log Meal</h2>
-            <p class="lm-hero-sub">Track your nutrition — every meal counts</p>
-          </div>
+      <!-- Hero Header -->
+      <div class="lm-hero" style="margin-bottom: 1.5rem;">
+        <div class="lm-hero-icon"><i class="ri-restaurant-fill"></i></div>
+        <div>
+          <h2 class="lm-hero-title">Add Meal</h2>
+          <p class="lm-hero-sub">Track your nutrition — every meal counts</p>
         </div>
-
-        <!-- Form Card -->
-        <div class="lm-card">
-          <form id="diet-log-form" class="lm-form">
-
-            <!-- Meal Type Pills -->
-            <div class="lm-section">
-              <label class="lm-label"><i class="ri-time-line"></i> Meal Type</label>
-              <div class="lm-meal-pills">
-                <button type="button" class="lm-pill active" data-meal="Breakfast">
-                  <i class="ri-sun-line"></i> Breakfast
-                </button>
-                <button type="button" class="lm-pill" data-meal="Lunch">
-                  <i class="ri-sun-foggy-line"></i> Lunch
-                </button>
-                <button type="button" class="lm-pill" data-meal="Dinner">
-                  <i class="ri-moon-line"></i> Dinner
-                </button>
-                <button type="button" class="lm-pill" data-meal="Snack">
-                  <i class="ri-cake-2-line"></i> Snack
-                </button>
-              </div>
-              <select id="diet-meal-type" required class="lm-hidden-select">
-                <option value="Breakfast">Breakfast</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Dinner">Dinner</option>
-                <option value="Snack">Snack</option>
-              </select>
-            </div>
-
-            <!-- Food Name -->
-            <div class="lm-section">
-              <label class="lm-label" for="diet-food-name"><i class="ri-bowl-line"></i> Food Name</label>
-              <div class="lm-input-wrap">
-                <input type="text" id="diet-food-name" placeholder="e.g., Oatmeal with Berries" required>
-              </div>
-            </div>
-
-            <!-- Macro Inputs -->
-            <div class="lm-section">
-              <label class="lm-label"><i class="ri-bar-chart-grouped-fill"></i> Macros</label>
-              <div class="lm-macros-grid">
-                <div class="lm-macro lm-macro--cal">
-                  <div class="lm-macro-head">
-                    <i class="ri-fire-fill"></i>
-                    <span>Calories</span>
-                  </div>
-                  <div class="lm-macro-input-wrap">
-                    <input type="number" id="diet-calories" placeholder="0" min="0" required>
-                    <span class="lm-unit">kcal</span>
-                  </div>
-                </div>
-                <div class="lm-macro lm-macro--prot">
-                  <div class="lm-macro-head">
-                    <i class="ri-droplet-fill"></i>
-                    <span>Protein</span>
-                  </div>
-                  <div class="lm-macro-input-wrap">
-                    <input type="number" id="diet-protein" placeholder="0" min="0" step="0.1" required>
-                    <span class="lm-unit">g</span>
-                  </div>
-                </div>
-                <div class="lm-macro lm-macro--carb">
-                  <div class="lm-macro-head">
-                    <i class="ri-leaf-fill"></i>
-                    <span>Carbs</span>
-                  </div>
-                  <div class="lm-macro-input-wrap">
-                    <input type="number" id="diet-carbs" placeholder="0" min="0" step="0.1" required>
-                    <span class="lm-unit">g</span>
-                  </div>
-                </div>
-                <div class="lm-macro lm-macro--fat">
-                  <div class="lm-macro-head">
-                    <i class="ri-heart-fill"></i>
-                    <span>Fat</span>
-                  </div>
-                  <div class="lm-macro-input-wrap">
-                    <input type="number" id="diet-fat" placeholder="0" min="0" step="0.1" required>
-                    <span class="lm-unit">g</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Submit -->
-            <button type="submit" class="lm-submit" id="btn-submit-meal">
-              <i class="ri-add-circle-fill"></i> Log Meal
-            </button>
-          </form>
-        </div>
-
       </div>
-    </div>
 
-    <!-- DIET: AI Food Scan -->
-    <div id="view-diet-ai-scan" class="view-section">
-      <div class="fs-page">
+      <!-- Sub-mode Toggle -->
+      <div class="add-meal-toggle">
+        <button class="add-meal-toggle-btn active" data-subview="manual">
+          <i class="ri-edit-line"></i> Manual Entry
+        </button>
+        <button class="add-meal-toggle-btn" data-subview="ai-scan">
+          <i class="ri-camera-lens-line"></i> AI Scan
+        </button>
+      </div>
 
-        <!-- Hero Header -->
-        <div class="fs-hero">
-          <div class="fs-hero-badge"><i class="ri-sparkling-2-fill"></i> Powered by AI</div>
-          <h1 class="fs-hero-title">Scan Your <span class="fs-gradient-text">Food</span></h1>
-          <p class="fs-hero-sub">Take a photo of any meal and get instant macro breakdown</p>
+      <!-- SUB-VIEW: Manual Log -->
+      <div id="subview-manual" class="add-meal-subview active">
+
+        <!-- (original Log Meal content starts here) -->
+        <div id="view-diet-log-meal" class="view-section-inner">
+          <div class="lm-page">
+
+            <!-- Form Card -->
+            <div class="lm-card">
+              <form id="diet-log-form" class="lm-form">
+
+                <!-- Meal Type Pills -->
+                <div class="lm-section">
+                  <label class="lm-label"><i class="ri-time-line"></i> Meal Type</label>
+                  <div class="lm-meal-pills">
+                    <button type="button" class="lm-pill active" data-meal="Breakfast">
+                      <i class="ri-sun-line"></i> Breakfast
+                    </button>
+                    <button type="button" class="lm-pill" data-meal="Lunch">
+                      <i class="ri-sun-foggy-line"></i> Lunch
+                    </button>
+                    <button type="button" class="lm-pill" data-meal="Dinner">
+                      <i class="ri-moon-line"></i> Dinner
+                    </button>
+                    <button type="button" class="lm-pill" data-meal="Snack">
+                      <i class="ri-cake-2-line"></i> Snack
+                    </button>
+                  </div>
+                  <select id="diet-meal-type" required class="lm-hidden-select">
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                  </select>
+                </div>
+
+                <!-- Food Name -->
+                <div class="lm-section">
+                  <label class="lm-label" for="diet-food-name"><i class="ri-bowl-line"></i> Food Name</label>
+                  <div class="lm-input-wrap">
+                    <input type="text" id="diet-food-name" placeholder="e.g., Oatmeal with Berries" required>
+                  </div>
+                </div>
+
+                <!-- Macro Inputs -->
+                <div class="lm-section">
+                  <label class="lm-label"><i class="ri-bar-chart-grouped-fill"></i> Macros</label>
+                  <div class="lm-macros-grid">
+                    <div class="lm-macro lm-macro--cal">
+                      <div class="lm-macro-head">
+                        <i class="ri-fire-fill"></i>
+                        <span>Calories</span>
+                      </div>
+                      <div class="lm-macro-input-wrap">
+                        <input type="number" id="diet-calories" placeholder="0" min="0" required>
+                        <span class="lm-unit">kcal</span>
+                      </div>
+                    </div>
+                    <div class="lm-macro lm-macro--prot">
+                      <div class="lm-macro-head">
+                        <i class="ri-droplet-fill"></i>
+                        <span>Protein</span>
+                      </div>
+                      <div class="lm-macro-input-wrap">
+                        <input type="number" id="diet-protein" placeholder="0" min="0" step="0.1" required>
+                        <span class="lm-unit">g</span>
+                      </div>
+                    </div>
+                    <div class="lm-macro lm-macro--carb">
+                      <div class="lm-macro-head">
+                        <i class="ri-leaf-fill"></i>
+                        <span>Carbs</span>
+                      </div>
+                      <div class="lm-macro-input-wrap">
+                        <input type="number" id="diet-carbs" placeholder="0" min="0" step="0.1" required>
+                        <span class="lm-unit">g</span>
+                      </div>
+                    </div>
+                    <div class="lm-macro lm-macro--fat">
+                      <div class="lm-macro-head">
+                        <i class="ri-heart-fill"></i>
+                        <span>Fat</span>
+                      </div>
+                      <div class="lm-macro-input-wrap">
+                        <input type="number" id="diet-fat" placeholder="0" min="0" step="0.1" required>
+                        <span class="lm-unit">g</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="lm-submit" id="btn-submit-meal">
+                  <i class="ri-add-circle-fill"></i> Log Meal
+                </button>
+              </form>
+            </div>
+
+          </div>
         </div>
 
-        <!-- Upload Zone — The Centerpiece -->
-        <div class="fs-dropzone-wrapper">
-          <div class="fs-glow"></div>
-          <div id="ai-scan-upload-zone" class="fs-dropzone">
-            <input type="file" id="ai-scan-file-input" accept="image/*" capture="environment" class="hidden-file-input">
-            <div class="fs-dropzone-inner">
-              <div class="fs-cam-orb">
-                <i class="ri-camera-fill"></i>
-                <div class="fs-cam-pulse"></div>
-                <div class="fs-cam-pulse fs-cam-pulse--delay"></div>
+      </div> <!-- end subview-manual -->
+
+      <!-- SUB-VIEW: AI Scan -->
+      <div id="subview-ai-scan" class="add-meal-subview">
+
+        <!-- DIET: AI Food Scan -->
+        <div id="view-diet-ai-scan">
+          <div class="fs-page">
+
+            <!-- Upload Zone — The Centerpiece -->
+            <div class="fs-dropzone-wrapper">
+              <div class="fs-glow"></div>
+              <div id="ai-scan-upload-zone" class="fs-dropzone">
+                <input type="file" id="ai-scan-file-input" accept="image/*" class="hidden-file-input">
+                <div class="fs-dropzone-inner">
+                  <div class="fs-cam-orb">
+                    <i class="ri-camera-fill"></i>
+                    <div class="fs-cam-pulse"></div>
+                    <div class="fs-cam-pulse fs-cam-pulse--delay"></div>
+                  </div>
+                  <p class="fs-drop-label">Tap to capture or drag an image here</p>
+                  <p class="fs-drop-formats">Supports PNG, JPG, HEIC • Max 5 MB</p>
+                </div>
+                <!-- Preview -->
+                <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
               </div>
-              <p class="fs-drop-label">Tap to capture or drag an image here</p>
-              <p class="fs-drop-formats">Supports PNG, JPG, HEIC • Max 5 MB</p>
-            </div>
-            <!-- Preview -->
-            <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
-          </div>
-          <button class="fs-analyze-btn" id="btn-analyze-food" style="display: none;">
-            <i class="ri-sparkling-2-fill"></i> Analyze with AI
-          </button>
-        </div>
-
-        <!-- Feature Pills -->
-        <div class="fs-features">
-          <div class="fs-feat">
-            <div class="fs-feat-icon fs-feat-icon--speed"><i class="ri-flashlight-fill"></i></div>
-            <div>
-              <span class="fs-feat-title">Instant</span>
-              <span class="fs-feat-desc">Results in seconds</span>
-            </div>
-          </div>
-          <div class="fs-feat">
-            <div class="fs-feat-icon fs-feat-icon--accuracy"><i class="ri-focus-3-fill"></i></div>
-            <div>
-              <span class="fs-feat-title">Accurate</span>
-              <span class="fs-feat-desc">AI-powered analysis</span>
-            </div>
-          </div>
-          <div class="fs-feat">
-            <div class="fs-feat-icon fs-feat-icon--smart"><i class="ri-brain-fill"></i></div>
-            <div>
-              <span class="fs-feat-title">Smart</span>
-              <span class="fs-feat-desc">Learns your meals</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div id="ai-scan-loader" class="fs-loader hidden">
-          <div class="fs-loader-ring"></div>
-          <p class="fs-loader-text">Analyzing nutritional content...</p>
-          <p class="fs-loader-sub">Our AI is identifying ingredients and estimating macros</p>
-        </div>
-
-        <!-- Results -->
-        <div id="ai-scan-results" class="fs-results hidden">
-          <div class="fs-results-header">
-            <div class="fs-results-icon"><i class="ri-checkbox-circle-fill"></i></div>
-            <div>
-              <h3>Confirm Nutritional Data</h3>
-              <p class="fs-results-sub">Review and adjust the AI estimates before saving</p>
-            </div>
-          </div>
-
-          <div class="fs-results-fields">
-            <div class="fs-result-field fs-result-field--wide">
-              <label for="scan-food-name"><i class="ri-restaurant-line"></i> Detected Food</label>
-              <input type="text" id="scan-food-name" required>
+              <button class="fs-analyze-btn" id="btn-analyze-food" style="display: none;">
+                <i class="ri-sparkling-2-fill"></i> Analyze with AI
+              </button>
             </div>
 
-            <div class="fs-result-field fs-result-field--wide">
-              <label for="scan-food-qty"><i class="ri-scales-3-line"></i> Estimated Quantity</label>
-              <input type="text" id="scan-food-qty" required>
+            <!-- Feature Pills -->
+            <div class="fs-features">
+              <div class="fs-feat">
+                <div class="fs-feat-icon fs-feat-icon--speed"><i class="ri-flashlight-fill"></i></div>
+                <div>
+                  <span class="fs-feat-title">Instant</span>
+                  <span class="fs-feat-desc">Results in seconds</span>
+                </div>
+              </div>
+              <div class="fs-feat">
+                <div class="fs-feat-icon fs-feat-icon--accuracy"><i class="ri-focus-3-fill"></i></div>
+                <div>
+                  <span class="fs-feat-title">Accurate</span>
+                  <span class="fs-feat-desc">AI-powered analysis</span>
+                </div>
+              </div>
+              <div class="fs-feat">
+                <div class="fs-feat-icon fs-feat-icon--smart"><i class="ri-brain-fill"></i></div>
+                <div>
+                  <span class="fs-feat-title">Smart</span>
+                  <span class="fs-feat-desc">Learns your meals</span>
+                </div>
+              </div>
             </div>
 
-            <div class="fs-result-field fs-result-field--wide">
-              <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong (optional)</label>
-              <textarea id="scan-correction-text" class="fs-correction-textarea" rows="2"
-                placeholder="e.g., It's masala dosa, not plain dosa. It's only 8 momos, no noodles."></textarea>
-              <div class="fs-correction-actions">
-                <button type="button" class="fs-correction-btn" id="btn-refine-scan">
-                  <i class="ri-magic-line"></i> Refine macros
+            <!-- Loading State -->
+            <div id="ai-scan-loader" class="fs-loader hidden">
+              <div class="fs-loader-ring"></div>
+              <p class="fs-loader-text">Analyzing nutritional content...</p>
+              <p class="fs-loader-sub">Our AI is identifying ingredients and estimating macros</p>
+            </div>
+
+            <!-- Results -->
+            <div id="ai-scan-results" class="fs-results hidden">
+              <div class="fs-results-header">
+                <div class="fs-results-icon"><i class="ri-checkbox-circle-fill"></i></div>
+                <div>
+                  <h3>Confirm Nutritional Data</h3>
+                  <p class="fs-results-sub">Review and adjust the AI estimates before saving</p>
+                </div>
+              </div>
+
+              <div class="fs-results-fields">
+                <div class="fs-result-field fs-result-field--wide">
+                  <label for="scan-food-name"><i class="ri-restaurant-line"></i> Detected Food</label>
+                  <input type="text" id="scan-food-name" required>
+                </div>
+
+                <div class="fs-result-field fs-result-field--wide">
+                  <label for="scan-food-qty"><i class="ri-scales-3-line"></i> Estimated Quantity</label>
+                  <input type="text" id="scan-food-qty" required>
+                </div>
+
+                <div class="fs-result-field fs-result-field--wide">
+                  <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong
+                    (optional)</label>
+                  <textarea id="scan-correction-text" class="fs-correction-textarea" rows="2"
+                    placeholder="e.g., It's masala dosa, not plain dosa. It's only 8 momos, no noodles."></textarea>
+                  <div class="fs-correction-actions">
+                    <button type="button" class="fs-correction-btn" id="btn-refine-scan">
+                      <i class="ri-magic-line"></i> Refine macros
+                    </button>
+                  </div>
+                  <p class="fs-correction-hint">We’ll adjust the macros using this note while keeping your photo.</p>
+                </div>
+
+                <div class="fs-result-field fs-macro-card fs-macro-card--cal">
+                  <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
+                  <div class="fs-macro-input-wrap">
+                    <input type="number" id="scan-calories" min="0" required>
+                    <span class="fs-macro-unit">kcal</span>
+                  </div>
+                </div>
+
+                <div class="fs-result-field fs-macro-card fs-macro-card--prot">
+                  <label for="scan-protein"><i class="ri-droplet-fill"></i> Protein</label>
+                  <div class="fs-macro-input-wrap">
+                    <input type="number" id="scan-protein" min="0" step="0.1" required>
+                    <span class="fs-macro-unit">g</span>
+                  </div>
+                </div>
+
+                <div class="fs-result-field fs-macro-card fs-macro-card--carb">
+                  <label for="scan-carbs"><i class="ri-leaf-fill"></i> Carbs</label>
+                  <div class="fs-macro-input-wrap">
+                    <input type="number" id="scan-carbs" min="0" step="0.1" required>
+                    <span class="fs-macro-unit">g</span>
+                  </div>
+                </div>
+
+                <div class="fs-result-field fs-macro-card fs-macro-card--fat">
+                  <label for="scan-fat"><i class="ri-heart-fill"></i> Fat</label>
+                  <div class="fs-macro-input-wrap">
+                    <input type="number" id="scan-fat" min="0" step="0.1" required>
+                    <span class="fs-macro-unit">g</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fs-actions">
+                <button class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">Cancel</button>
+                <button class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
+                  <i class="ri-check-line"></i> Save Meal
                 </button>
               </div>
-              <p class="fs-correction-hint">We’ll adjust the macros using this note while keeping your photo.</p>
             </div>
 
-            <div class="fs-result-field fs-macro-card fs-macro-card--cal">
-              <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
-              <div class="fs-macro-input-wrap">
-                <input type="number" id="scan-calories" min="0" required>
-                <span class="fs-macro-unit">kcal</span>
-              </div>
-            </div>
-
-            <div class="fs-result-field fs-macro-card fs-macro-card--prot">
-              <label for="scan-protein"><i class="ri-droplet-fill"></i> Protein</label>
-              <div class="fs-macro-input-wrap">
-                <input type="number" id="scan-protein" min="0" step="0.1" required>
-                <span class="fs-macro-unit">g</span>
-              </div>
-            </div>
-
-            <div class="fs-result-field fs-macro-card fs-macro-card--carb">
-              <label for="scan-carbs"><i class="ri-leaf-fill"></i> Carbs</label>
-              <div class="fs-macro-input-wrap">
-                <input type="number" id="scan-carbs" min="0" step="0.1" required>
-                <span class="fs-macro-unit">g</span>
-              </div>
-            </div>
-
-            <div class="fs-result-field fs-macro-card fs-macro-card--fat">
-              <label for="scan-fat"><i class="ri-heart-fill"></i> Fat</label>
-              <div class="fs-macro-input-wrap">
-                <input type="number" id="scan-fat" min="0" step="0.1" required>
-                <span class="fs-macro-unit">g</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="fs-actions">
-            <button class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">Cancel</button>
-            <button class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
-              <i class="ri-check-line"></i> Save Meal
-            </button>
           </div>
         </div>
 
-      </div>
-    </div>
+      </div> <!-- end subview-ai-scan -->
+
+    </div> <!-- end view-diet-add-meal -->
 
     <!-- DIET: History -->
     <div id="view-diet-history" class="view-section">
@@ -1387,7 +1397,8 @@
           <div class="dc-welcome">
             <div class="dc-welcome-icon"><i class="ri-sparkling-2-fill"></i></div>
             <h3>Hi! I'm your Diet Coach 🥗</h3>
-            <p>Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your real
+            <p>Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your
+              real
               data.</p>
           </div>
         </div>
@@ -1459,6 +1470,15 @@
               </select>
             </div>
           </div>
+
+          <div class="ds-field ds-field--full">
+            <label class="setting-label"><i class="ri-pie-chart-fill ds-field-icon"
+                style="color:var(--accent-end);margin-right:6px;"></i>Macro Display</label>
+            <div class="segmented-control">
+              <button class="segment-btn active" data-macro-mode="absolute">Absolute (g)</button>
+              <button class="segment-btn" data-macro-mode="percentage">Percentage (%)</button>
+            </div>
+          </div>
         </div>
 
         <!-- AI Personalization -->
@@ -1476,7 +1496,8 @@
               <label><i class="ri-chat-voice-fill ds-field-icon ds-field-icon--coach"></i> Coaching Style</label>
               <div class="ds-coaching-pills">
                 <button class="ds-pill" data-coach="Strict"><i class="ri-fire-fill"></i> Strict</button>
-                <button class="ds-pill active" data-coach="Balanced"><i class="ri-scales-3-fill"></i> Balanced</button>
+                <button class="ds-pill active" data-coach="Balanced"><i class="ri-scales-3-fill"></i>
+                  Balanced</button>
                 <button class="ds-pill" data-coach="Motivational"><i class="ri-star-fill"></i> Motivational</button>
               </div>
             </div>
@@ -1522,27 +1543,27 @@
 
   <!-- Mobile Bottom Navigation (Exercise) -->
   <nav id="nav-exercise" class="bottom-nav">
-    <div class="nav-item active" data-target="view-home">
+    <div class="nav-item ripple active" data-target="view-home">
       <span class="icon"><i class="ri-home-4-line"></i></span>
       <span class="label">Home</span>
     </div>
-    <div class="nav-item" data-target="view-ai">
+    <div class="nav-item ripple" data-target="view-ai">
       <span class="icon"><i class="ri-robot-2-fill"></i></span>
       <span class="label">AI</span>
     </div>
-    <div class="nav-item" data-target="view-history">
+    <div class="nav-item ripple" data-target="view-history">
       <span class="icon"><i class="ri-calendar-todo-line"></i></span>
       <span class="label">History</span>
     </div>
-    <div class="nav-item" data-target="view-achievements">
+    <div class="nav-item ripple" data-target="view-achievements">
       <span class="icon"><i class="ri-trophy-line"></i></span>
       <span class="label">Awards</span>
     </div>
-    <div class="nav-item" data-target="view-tools">
+    <div class="nav-item ripple" data-target="view-tools">
       <span class="icon"><i class="ri-tools-line"></i></span>
       <span class="label">Tools</span>
     </div>
-    <div class="nav-item" data-target="view-settings">
+    <div class="nav-item ripple" data-target="view-settings">
       <span class="icon"><i class="ri-settings-4-line"></i></span>
       <span class="label">Settings</span>
     </div>
@@ -1550,27 +1571,23 @@
 
   <!-- Mobile Bottom Navigation (Diet) -->
   <nav id="nav-diet" class="bottom-nav hidden-mode">
-    <div class="nav-item active" data-target="view-diet-dashboard">
+    <div class="nav-item ripple active" data-target="view-diet-dashboard">
       <span class="icon"><i class="ri-dashboard-line"></i></span>
       <span class="label">Hub</span>
     </div>
-    <div class="nav-item" data-target="view-diet-log-meal">
-      <span class="icon"><i class="ri-restaurant-2-line"></i></span>
-      <span class="label">Log</span>
+    <div class="nav-item ripple" data-target="view-diet-add-meal">
+      <span class="icon"><i class="ri-add-circle-line"></i></span>
+      <span class="label">Add</span>
     </div>
-    <div class="nav-item" data-target="view-diet-ai-scan">
-      <span class="icon"><i class="ri-camera-lens-line"></i></span>
-      <span class="label">Scan</span>
-    </div>
-    <div class="nav-item" data-target="view-diet-history">
+    <div class="nav-item ripple" data-target="view-diet-history">
       <span class="icon"><i class="ri-history-line"></i></span>
       <span class="label">History</span>
     </div>
-    <div class="nav-item" data-target="view-diet-ai-coach">
+    <div class="nav-item ripple" data-target="view-diet-ai-coach">
       <span class="icon"><i class="ri-user-heart-line"></i></span>
       <span class="label">Coach</span>
     </div>
-    <div class="nav-item" data-target="view-diet-settings">
+    <div class="nav-item ripple" data-target="view-diet-settings">
       <span class="icon"><i class="ri-settings-4-line"></i></span>
       <span class="label">Settings</span>
     </div>
@@ -1641,7 +1658,8 @@
       <h2 style="color: var(--accent-end); margin-bottom: 1rem;">Navy Method</h2>
       <p style="color: var(--text); line-height: 1.6; margin-bottom: 1.5rem;">
         The U.S. Navy Method is a widely used, tape-measure-based formula for estimating body fat percentage.
-        It is valued for its practicality and has a reported accuracy within about 3% to 4% of professional DEXA scans.
+        It is valued for its practicality and has a reported accuracy within about 3% to 4% of professional DEXA
+        scans.
       </p>
       <button class="btn-primary" id="btn-close-bf-info-modal">Got it</button>
     </div>
