@@ -1975,7 +1975,9 @@ select:focus {
 /* Active State in Bottom Nav */
 .bottom-nav .nav-item.active {
   color: var(--accent-end, #f97316);
-  background: transparent;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0;
 }
 
 .bottom-nav .nav-item.active .icon {
