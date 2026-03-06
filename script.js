@@ -1414,6 +1414,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         elements.dietForm.reset();
                         elements.dietMealType.value = "Breakfast"; // Reset selected opt
                         if (typeof applyCustomDropdown === 'function') applyCustomDropdown(elements.dietMealType);
+                        // Re-arm realtime listeners so Dashboard reflects the new meal instantly
+                        if (window.updateDietDashboard) window.updateDietDashboard();
                     } else {
                         throw new Error(result.error);
                     }
@@ -1432,10 +1434,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // ==========================================
         let unsubscribeMeals = null;
         let unsubscribeWater = null;
+        let currentWaterMl = 0; // Tracks today's water total for button guards
 
         window.updateDietDashboard = () => {
             const user = auth.currentUser;
-            if (!user || appMode !== 'diet') return;
+            if (!user) return; // Safe to call regardless of current appMode — just arms realtime listeners
 
             if (unsubscribeMeals) unsubscribeMeals();
             if (unsubscribeWater) unsubscribeWater();
@@ -1462,7 +1465,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalCarbs += (m.carbs || 0); totalFat += (m.fat || 0);
             });
 
-            const goal = 2000;
+            const goal = userPreferences.calorieTarget || 2000;
             const remaining = Math.max(0, goal - totalCals);
 
             if (elements.dietCaloriesConsumed) elements.dietCaloriesConsumed.textContent = Math.round(totalCals);
@@ -1488,9 +1491,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const renderDietWater = (totalMl) => {
+            currentWaterMl = Math.max(0, totalMl); // Keep state in sync with Firestore
             const waterGoal = 2500;
-            if (elements.dietWaterVal) elements.dietWaterVal.textContent = `${totalMl} / ${waterGoal} ml`;
-            const pct = Math.min(100, (totalMl / waterGoal) * 100);
+            if (elements.dietWaterVal) elements.dietWaterVal.textContent = `${currentWaterMl} / ${waterGoal} ml`;
+            const pct = Math.min(100, (currentWaterMl / waterGoal) * 100);
             if (elements.dietWaterBar) elements.dietWaterBar.style.width = `${pct}%`;
         };
 
@@ -1506,7 +1510,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await dietService.addWater(db, user.uid, today, 250);
 
                 if (result.success) {
-                    showNotification("Added 250ml water! 💧");
+                    const newTotal = currentWaterMl + 250;
+                    if (newTotal >= 4000) {
+                        // Water intoxication warning — 4L+ in a single day is dangerous
+                        showNotification(`⚠️ Water intoxication risk! You've logged ${newTotal}ml today. Drinking too much water too fast can be dangerous.`, 'error');
+                    } else if (newTotal >= 3000) {
+                        showNotification(`💧 Added 250ml — you're at ${newTotal}ml today. Stay mindful of your limits!`, 'info');
+                    } else {
+                        showNotification("Added 250ml water! 💧");
+                    }
                 } else {
                     showNotification("Failed to add water.", "error");
                 }
@@ -1519,6 +1531,12 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.btnSubWater.addEventListener('click', async () => {
                 const user = auth.currentUser;
                 if (!user) return showNotification("Please log in.", "error");
+
+                // Prevent going below zero
+                if (currentWaterMl <= 0) {
+                    showNotification("Water intake is already at 0 ml.", "info");
+                    return;
+                }
 
                 elements.btnSubWater.disabled = true;
                 elements.btnSubWater.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
@@ -1888,10 +1906,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = e.target.files[0];
             if (!file) return;
 
-            // Validate Size (5MB limit)
+            // Accept any size — large images are auto-compressed before upload
             if (file.size > 5 * 1024 * 1024) {
-                showNotification('Image size must be under 5MB.', 'error');
-                return;
+                showNotification('Large image detected — it will be auto-compressed before scanning.', 'info');
             }
 
             selectedFile = file;
@@ -1925,11 +1942,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.scanLoader.classList.remove('hidden');
 
                 // 1. Compress + Encode Image Client-Side (keeps payload under Vercel's 4.5MB body limit)
+                // For files >5 MB use tighter settings; otherwise use standard settings.
                 const compressImage = (file) => new Promise((resolve, reject) => {
+                    const isLarge = file.size > 5 * 1024 * 1024;
+                    const MAX_DIM = isLarge ? 600 : 800;   // px — smaller box for heavy images
+                    const QUALITY = isLarge ? 0.6 : 0.7;    // JPEG quality
+
                     const img = new Image();
                     const objectUrl = URL.createObjectURL(file);
                     img.onload = () => {
-                        const MAX_DIM = 800;
                         let { width, height } = img;
                         if (width > MAX_DIM || height > MAX_DIM) {
                             if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
@@ -1940,8 +1961,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         canvas.height = height;
                         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                         URL.revokeObjectURL(objectUrl);
-                        // Export as JPEG at 70% quality (~300–600KB for typical food photos)
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        // Export as JPEG — typical output: 150–500 KB regardless of original size
+                        const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
                         resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
                     };
                     img.onerror = reject;
@@ -2358,10 +2379,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerWeekly = document.getElementById('diet-weekly-container');
         const dateInput = document.getElementById('diet-history-date');
         const toggleTrack = document.getElementById('dh-toggle-track');
+        const btnDatePrev = document.getElementById('btn-date-prev');
+        const btnDateNext = document.getElementById('btn-date-next');
+        const dhDateText = document.getElementById('dh-date-text');
+
+        // Format date as "Fri, 6 Mar 2026" or "Today" / "Yesterday"
+        const formatDateLabel = (dateStr) => {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            // Compare with today (local time, no timezone shift)
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            const yestDate = new Date(); yestDate.setDate(yestDate.getDate() - 1);
+            const yestStr = yestDate.toLocaleDateString('en-CA');
+            if (dateStr === todayStr) return 'Today';
+            if (dateStr === yestStr) return 'Yesterday';
+            const dateObj = new Date(y, m - 1, d);
+            return dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+        };
+
+        // Shift date by N days, clamp to today
+        const shiftDate = (days) => {
+            if (!dateInput) return;
+            const cur = new Date(dateInput.value + 'T00:00:00');
+            cur.setDate(cur.getDate() + days);
+            const todayDate = new Date();
+            if (cur > todayDate) return; // don't allow future dates
+            const newVal = cur.toLocaleDateString('en-CA');
+            dateInput.value = newVal;
+            if (dhDateText) dhDateText.textContent = formatDateLabel(newVal);
+            dateInput.dispatchEvent(new Event('change'));
+        };
 
         // Set default date to today
         const today = new Date().toISOString().split('T')[0];
-        if (dateInput) dateInput.value = today;
+        if (dateInput) {
+            dateInput.value = today;
+            if (dhDateText) dhDateText.textContent = 'Today';
+        }
+
+        // Arrow button handlers
+        if (btnDatePrev) btnDatePrev.addEventListener('click', () => shiftDate(-1));
+        if (btnDateNext) btnDateNext.addEventListener('click', () => shiftDate(+1));
 
         // Toggle Handlers with sliding track
         if (btnDaily && btnWeekly) {
@@ -2398,6 +2455,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+
 
     // ==========================================
     // 9. INIT
@@ -2463,7 +2521,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Load Data
                 await loadDataFromServer();
                 updateAllUI();
-                if (window.appMode === 'diet' && window.updateDietDashboard) window.updateDietDashboard();
+                if (window.updateDietDashboard) window.updateDietDashboard(); // Arms listeners immediately on auth — mode-agnostic
             } else {
                 // User is signed out, show login screen
                 showLogin();
