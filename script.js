@@ -875,14 +875,14 @@ document.addEventListener('DOMContentLoaded', () => {
         selectElement.classList.add('hidden-native');
 
         // Remove old wrapper
-        let existingWrapper = selectElement.parentNode.querySelector('.custom-select-container');
+        let existingWrapper = selectElement.parentNode.querySelector('.custom-select-wrapper');
         if (existingWrapper) existingWrapper.remove();
 
         // Build Container
-        const container = document.createElement('div'); container.className = 'custom-select-container';
+        const container = document.createElement('div'); container.className = 'custom-select-wrapper';
         const trigger = document.createElement('div'); trigger.className = 'custom-select-trigger';
         const selected = selectElement.options[selectElement.selectedIndex];
-        trigger.textContent = selected ? selected.textContent : 'Select...';
+        trigger.innerHTML = `<span class="trigger-text">${selected ? selected.textContent : 'Select...'}</span><i class="ri-arrow-down-s-line"></i>`;
 
         const optionsDiv = document.createElement('div'); optionsDiv.className = 'custom-options';
 
@@ -907,7 +907,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const div = document.createElement('div'); div.className = 'custom-option'; div.textContent = opt.textContent;
                     div.addEventListener('click', () => {
                         selectElement.value = opt.value; selectElement.dispatchEvent(new Event('change'));
-                        trigger.textContent = opt.textContent; container.classList.remove('open');
+                        const textSpan = trigger.querySelector('.trigger-text');
+                        if (textSpan) textSpan.textContent = opt.textContent; 
+                        container.classList.remove('open');
+                        optionsDiv.classList.remove('open');
 
                         // Specific Logic for Main Log Form
                         if (selectElement.id === 'exercise-select') {
@@ -928,15 +931,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 const div = document.createElement('div'); div.className = 'custom-option'; div.textContent = child.textContent;
                 div.addEventListener('click', () => {
                     selectElement.value = child.value; selectElement.dispatchEvent(new Event('change'));
-                    trigger.textContent = child.textContent; container.classList.remove('open');
+                    const textSpan = trigger.querySelector('.trigger-text');
+                    if (textSpan) textSpan.textContent = child.textContent; 
+                    container.classList.remove('open');
+                    optionsDiv.classList.remove('open');
                     if (selectElement.id === 'exercise-select') handleAutoFill(child.value);
                 });
                 optionsDiv.appendChild(div);
             }
         });
 
-        trigger.addEventListener('click', e => { e.stopPropagation(); document.querySelectorAll('.custom-select-container.open').forEach(c => c !== container && c.classList.remove('open')); container.classList.toggle('open'); if (container.classList.contains('open')) { const inp = container.querySelector('input'); if (inp) setTimeout(() => inp.focus(), 100); } });
-        document.addEventListener('click', e => { if (!container.contains(e.target)) container.classList.remove('open'); });
+        trigger.addEventListener('click', e => { 
+            e.stopPropagation(); 
+            // Close other open placeholders
+            document.querySelectorAll('.custom-select-wrapper.open').forEach(c => {
+                if (c !== container) {
+                    c.classList.remove('open');
+                    const opts = c.querySelector('.custom-options');
+                    if (opts) opts.classList.remove('open');
+                }
+            }); 
+            container.classList.toggle('open'); 
+            optionsDiv.classList.toggle('open');
+            if (container.classList.contains('open')) { 
+                const inp = container.querySelector('input'); 
+                if (inp) setTimeout(() => inp.focus(), 100); 
+            } 
+        });
+        document.addEventListener('click', e => { 
+            if (!container.contains(e.target)) {
+                container.classList.remove('open'); 
+                optionsDiv.classList.remove('open');
+            }
+        });
 
         container.appendChild(trigger); container.appendChild(optionsDiv);
         selectElement.parentNode.insertBefore(container, selectElement);
@@ -1066,6 +1093,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         elements.themeToggle.addEventListener('change', (e) => {
+            document.documentElement.classList.toggle('dark-mode', e.target.checked);
             document.body.classList.toggle('dark-mode', e.target.checked);
             userPreferences.darkMode = e.target.checked;
             savePreferences();
@@ -1076,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Custom Text Input Toggle
         elements.toggleInputBtn.addEventListener('click', () => {
             isCustomInput = !isCustomInput; elements.toggleInputBtn.classList.toggle('active');
-            const customContainer = elements.exerciseSelect.parentNode.querySelector('.custom-select-container');
+            const customContainer = elements.exerciseSelect.parentNode.querySelector('.custom-select-wrapper');
             if (isCustomInput) {
                 if (customContainer) customContainer.style.display = 'none';
                 elements.exerciseSelect.removeAttribute('required'); elements.exerciseText.classList.remove('hidden'); elements.exerciseText.setAttribute('required', 'true'); elements.exerciseText.focus();
@@ -1780,6 +1808,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyCompactMode(userPreferences.compactMode || false);
         // Apply Dark Mode
         if (userPreferences.darkMode) {
+            document.documentElement.classList.add('dark-mode');
             document.body.classList.add('dark-mode');
             if (elements.themeToggle) elements.themeToggle.checked = true;
         }
@@ -3171,4 +3200,322 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initNewSettings();
 
+    // ==========================================
+    // CALORIE INTAKE QUESTIONNAIRE
+    // ==========================================
+    const initCalorieQuestionnaire = () => {
+        const modal = document.getElementById('modal-calorie-quest');
+        const form = document.getElementById('calorie-quest-form');
+        const btnSkip = document.getElementById('btn-skip-quest');
+        const btnCalculate = document.getElementById('btn-calculate-quest');
+        const ageInput = document.getElementById('cq-age');
+        const genderSelect = document.getElementById('cq-gender');
+        const heightInputCm = document.getElementById('cq-height-cm');
+        const heightInputFt = document.getElementById('cq-height-ft');
+        const heightInputIn = document.getElementById('cq-height-in');
+        const heightUnitRadios = document.querySelectorAll('input[name="cq-height-unit"]');
+        const weightInput = document.getElementById('cq-weight');
+        const activitySelect = document.getElementById('cq-activity');
+        const goalTypeSelect = document.getElementById('cq-goal-type');
+        const resultsArea = document.getElementById('cq-results-area');
+        const resultMacros = document.getElementById('cq-result-macros');
+
+        if (!modal || !form) return;
+
+        // ── Custom Dropdown Initialization Logic ──
+        const initCustomSelect = (wrapperId) => {
+            const wrapper = document.getElementById(wrapperId);
+            if (!wrapper) return;
+
+            const trigger = wrapper.querySelector('.custom-select-trigger');
+            const options = wrapper.querySelectorAll('.custom-option');
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const triggerText = trigger.querySelector('span');
+
+            trigger.addEventListener('click', (e) => {
+                // Close other open dropdowns first
+                document.querySelectorAll('.custom-select-wrapper').forEach(other => {
+                    if (other !== wrapper) {
+                        other.classList.remove('open');
+                        const otherOptions = other.querySelector('.custom-options');
+                        if (otherOptions) otherOptions.classList.remove('open');
+                    }
+                });
+
+                wrapper.classList.toggle('open');
+                const menu = wrapper.querySelector('.custom-options');
+                if (menu) menu.classList.toggle('open');
+                e.stopPropagation();
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const val = option.getAttribute('data-value');
+                    const text = option.textContent;
+
+                    hiddenInput.value = val;
+                    triggerText.textContent = text;
+                    
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+
+                    wrapper.classList.remove('open');
+                    const menu = wrapper.querySelector('.custom-options');
+                    if (menu) menu.classList.remove('open');
+                });
+            });
+        };
+
+        // Initialize all three custom dropdowns
+        initCustomSelect('cq-gender-wrapper');
+        initCustomSelect('cq-activity-wrapper');
+        initCustomSelect('cq-goal-type-wrapper');
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                w.classList.remove('open');
+                const menu = w.querySelector('.custom-options');
+                if (menu) menu.classList.remove('open');
+            });
+        });
+
+        // ── Height Unit Toggle Handler ──
+        heightUnitRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isCm = e.target.value === 'cm';
+                const cmWrapper = document.getElementById('cq-height-cm-wrapper');
+                const ftWrapper = document.getElementById('cq-height-ft-wrapper');
+
+                if (isCm) {
+                    if (cmWrapper) cmWrapper.classList.remove('hidden');
+                    if (ftWrapper) ftWrapper.classList.add('hidden');
+                    heightInputCm.setAttribute('required', 'true');
+                    heightInputFt.removeAttribute('required');
+                    heightInputIn.removeAttribute('required');
+                } else {
+                    if (cmWrapper) cmWrapper.classList.add('hidden');
+                    if (ftWrapper) ftWrapper.classList.remove('hidden');
+                    heightInputCm.removeAttribute('required');
+                    heightInputFt.setAttribute('required', 'true');
+                    heightInputIn.setAttribute('required', 'true');
+                }
+            });
+        });
+
+        // Get height in CM regardless of unit
+        const getHeightInCm = () => {
+            const unitRadio = document.querySelector('input[name="cq-height-unit"]:checked');
+            if (!unitRadio) return 0;
+
+            if (unitRadio.value === 'cm') {
+                return parseInt(heightInputCm.value) || 0;
+            } else {
+                const ft = parseInt(heightInputFt.value) || 0;
+                const inches = parseInt(heightInputIn.value) || 0;
+                return Math.round((ft * 30.48) + (inches * 2.54));
+            }
+        };
+
+        // Calculate maintenance calories using Mifflin-St Jeor equation
+        const calculateMaintenanceCalories = (age, gender, heightCm, weight, activity) => {
+            // Mifflin-St Jeor BMR
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * heightCm - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * heightCm - 5 * age - 161;
+            }
+
+            // Activity multipliers - Fixed mapping to match custom dropdown values
+            const activityMultipliers = {
+                'sedentary': 1.2,
+                'lightly': 1.375,
+                'moderately': 1.55,
+                'very': 1.725,
+                'extremely': 1.9
+            };
+
+            const multiplier = activityMultipliers[activity] || 1.2;
+            return Math.round(bmr * multiplier);
+        };
+
+        // Calculate macros based on goal type and scientific formulas
+        const calculateMacrosForGoal = (tdee, goalType, weight) => {
+            let targetCalories, proteinG, fatG, carbG;
+            const type = (goalType || 'Maintain').toUpperCase();
+
+            // 1. Calculate target calories and protein based on goal
+            switch (type) {
+                case 'CUT':
+                    targetCalories = Math.round(tdee * 0.85); // 15% deficit
+                    proteinG = Math.round(weight * 2.0);      // 2.0g per kg
+                    break;
+                case 'BULK':
+                    targetCalories = Math.round(tdee * 1.10); // 10% surplus
+                    proteinG = Math.round(weight * 1.8);      // 1.8g per kg
+                    break;
+                case 'RECOMP':
+                case 'MAINTAIN':
+                default:
+                    targetCalories = tdee;                    // Maintenance
+                    proteinG = Math.round(weight * 1.7);      // 1.7g per kg
+                    break;
+            }
+
+            // 2. Calculate fat intake (standard for all goals: 0.8g per kg)
+            fatG = Math.round(weight * 0.8);
+
+            // 3. Calculate carbs from remaining calories
+            const proteinCalories = proteinG * 4;
+            const fatCalories = fatG * 9;
+            const remainingCalories = targetCalories - (proteinCalories + fatCalories);
+            
+            carbG = Math.round(remainingCalories / 4);
+
+            return { targetCalories, proteinG, carbG, fatG };
+        };
+
+        // Form submission with goal type
+        if (btnCalculate) {
+            btnCalculate.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const age = parseInt(ageInput.value);
+                const gender = genderSelect.value;
+                const height = getHeightInCm();
+                const weight = parseFloat(weightInput.value);
+                const activity = activitySelect.value;
+                const goalType = goalTypeSelect.value || 'Maintain';
+
+                if (!age || !gender || !height || !weight || !activity) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+
+                if (height < 100 || height > 250) {
+                    showNotification('Please enter a valid height', 'error');
+                    return;
+                }
+
+                if (weight < 30 || weight > 300) {
+                    showNotification('Please enter a valid weight', 'error');
+                    return;
+                }
+
+                // Calculate maintenance (TDEE)
+                const tdee = calculateMaintenanceCalories(age, gender, height, weight, activity);
+
+                // Calculate macros based on goal
+                const macros = calculateMacrosForGoal(tdee, goalType, weight);
+
+                // Update preferences
+                userPreferences.calorieTarget = macros.targetCalories;
+                userPreferences.proteinTarget = macros.proteinG;
+                userPreferences.carbTarget = macros.carbG;
+                userPreferences.fatTarget = macros.fatG;
+                userPreferences.goalType = goalType;
+                savePreferences();
+
+                // Update UI settings values immediately
+                const calInput = document.getElementById('setting-calorie-target');
+                const protInput = document.getElementById('setting-protein-target');
+                const dietGoalText = document.getElementById('diet-calories-goal');
+                const goalTypeTrigger = document.querySelector('#cq-goal-type-wrapper .custom-select-trigger span');
+
+                if (calInput) calInput.value = macros.targetCalories;
+                if (protInput) protInput.value = macros.proteinG;
+                if (dietGoalText) dietGoalText.textContent = macros.targetCalories;
+                
+                // Update persistent Goal Type UI if it exists in settings view
+                const settingGoalType = document.getElementById('setting-goal-type');
+                if (settingGoalType) settingGoalType.value = goalType;
+
+                // Display results in modal
+                resultMacros.innerHTML = `
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                        <div style="background: var(--input-bg); padding: 1.5rem; border-radius: 16px; text-align: center;">
+                            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.5rem;">Daily Calories</div>
+                            <div style="font-size: 2rem; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${macros.targetCalories}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">${goalType} Mode</div>
+                        </div>
+                        <div style="display: grid; grid-template-rows: repeat(3, 1fr); gap: 0.6rem;">
+                            <div style="background: rgba(247, 121, 125, 0.15); padding: 0.8rem; border-radius: 12px; border-left: 3px solid #f7797d;">
+                                <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-light); text-transform: uppercase;">Protein</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #f7797d;">${macros.proteinG}g</div>
+                            </div>
+                            <div style="background: rgba(251, 215, 134, 0.15); padding: 0.8rem; border-radius: 12px; border-left: 3px solid #fbd786;">
+                                <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-light); text-transform: uppercase;">Carbs</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #fbd786;">${macros.carbG}g</div>
+                            </div>
+                            <div style="background: rgba(198, 255, 221, 0.15); padding: 0.8rem; border-radius: 12px; border-left: 3px solid #c6ffdd;">
+                                <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-light); text-transform: uppercase;">Fat</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #c6ffdd;">${macros.fatG}g</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                resultsArea.classList.remove('hidden');
+
+                // Show success notification
+                showNotification(
+                    `✅ Goals Set!\nCalories: ${macros.targetCalories} | Protein: ${macros.proteinG}g | Carbs: ${macros.carbG}g | Fat: ${macros.fatG}g`,
+                    'success'
+                );
+
+                // Mark as completed
+                localStorage.setItem('calorieQuestCompleted', 'true');
+
+                // Close modal after delay
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    // Refresh dashboard to reflect new goals
+                    if (window.updateDietDashboard) window.updateDietDashboard();
+                }, 1500);
+            });
+        }
+
+        // Check if user has completed questionnaire
+        const hasCompletedQuest = localStorage.getItem('calorieQuestCompleted');
+
+        // Show questionnaire on first diet visit if not completed
+        const dietDashboard = document.getElementById('view-diet-dashboard');
+        if (dietDashboard && !hasCompletedQuest) {
+            const showQuestOnce = () => {
+                if (!localStorage.getItem('calorieQuestCompleted')) {
+                    modal.classList.remove('hidden');
+                }
+                // Remove this listener after first trigger
+                document.removeEventListener('dietDashboardShown', showQuestOnce);
+            };
+            document.addEventListener('dietDashboardShown', showQuestOnce);
+        }
+
+        // Manual trigger for settings
+        const btnRecalculate = document.getElementById('btn-recalculate-main');
+        if (btnRecalculate) {
+            btnRecalculate.addEventListener('click', () => {
+                localStorage.removeItem('calorieQuestCompleted');
+                resultsArea.classList.add('hidden');
+                modal.classList.remove('hidden');
+            });
+        }
+
+        // Skip button
+        btnSkip.addEventListener('click', () => {
+            localStorage.setItem('calorieQuestCompleted', 'true');
+            modal.classList.add('hidden');
+            showNotification('You can recalculate anytime from Settings', 'info');
+        });
+
+        // Close on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    };
+
+    initCalorieQuestionnaire();
 });
