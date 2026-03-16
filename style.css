@@ -60,7 +60,7 @@ input[type="number"] {
   --shadow-btn: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-body.dark-mode {
+html.dark-mode {
   --bg: #0f172a;
   --card-bg: #1e293b;
   --text: #f8fafc;
@@ -88,7 +88,8 @@ body.dark-mode {
 
 html {
   background-color: var(--bg);
-  height: 100%;
+  min-height: 100%;
+  background-attachment: fixed;
 }
 
 body {
@@ -110,7 +111,7 @@ img {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 8rem;
+  padding: 2rem 1.5rem 3rem;
   display: grid;
   gap: 2rem;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -651,62 +652,7 @@ td:first-child {
   box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
 }
 
-/* Custom Dropdown */
-.custom-select-container {
-  position: relative;
-  width: 100%;
-  z-index: 100;
-}
 
-.custom-select-trigger {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text);
-  background-color: var(--input-bg);
-  border: 2px solid transparent;
-  border-radius: 20px;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.3s;
-}
-
-.custom-select-trigger::after {
-  content: '▼';
-  font-size: 0.8rem;
-  opacity: 0.5;
-  transform: translateY(2px);
-}
-
-.custom-options {
-  position: absolute;
-  top: calc(100% + 5px);
-  left: 0;
-  right: 0;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  z-index: 9999;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.custom-select-container.open .custom-options {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: all;
-  transform: translateY(0);
-}
 
 .dropdown-search-container {
   position: sticky;
@@ -779,12 +725,23 @@ select.hidden-native,
   gap: 0.8rem;
 }
 
+.exercise-input-wrapper .custom-select-wrapper {
+  flex: 1;
+}
+
+#exercise-text {
+  flex: 1;
+}
+
 #toggle-input-btn {
   width: auto;
   padding: 0 1.5rem;
   background-color: var(--input-bg);
   font-size: 1.5rem;
-  border-radius: 20px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #toggle-input-btn.active {
@@ -1303,20 +1260,30 @@ header {
   height: 44px;
   padding: 0 1.4rem;
   border-radius: 50px;
-  background: var(--accent-end);
-  color: var(--accent-text, white);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px) saturate(160%);
+  -webkit-backdrop-filter: blur(15px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
   font-size: 1.5rem;
-  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.15),
+    inset 0 0 12px rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
 #timer-toggle-icon:hover {
-  transform: scale(1.1);
+  transform: scale(1.05) translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 #timer-controls {
@@ -2087,6 +2054,95 @@ body.dark-mode .ripple-element {
   box-shadow: var(--shadow-lg);
   overflow-y: auto;
   position: relative;
+}
+
+/* --- CUSTOM SELECT DROPDOWN --- */
+.custom-select-wrapper {
+  position: relative;
+  display: block;
+  user-select: none;
+}
+
+/* Ensure open dropdown stays on top of subsequent fields */
+.custom-select-wrapper.open {
+  z-index: 1000;
+}
+
+.custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.2rem;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.custom-select-trigger:hover {
+  border-color: var(--accent-start);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.custom-select-trigger i {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  color: var(--text-light);
+}
+
+.custom-select-wrapper.open .custom-select-trigger i {
+  transform: rotate(180deg);
+}
+
+.custom-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  opacity: 0;
+  display: none;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.custom-options.open {
+  opacity: 1;
+  display: block;
+  pointer-events: auto; /* Enable clicks when visible */
+  transform: translateY(0);
+}
+
+.custom-option {
+  display: block;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.custom-option:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent-start);
+  padding-left: 1.2rem;
+}
+
+.custom-option.selected {
+  background: var(--accent-gradient);
+  color: white;
 }
 
 .close-modal {
