@@ -1,0 +1,109 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide number input spinners globally */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+:root {
+  /* Modern Purple Palette */
+  --bg: #F5F6FA;
+  --card-bg: #FFFFFF;
+
+  /* Text Colors */
+  --text: #484b6a;
+  --text-light: #9395b0;
+
+  /* Semantic Text Hierarchy (Light Mode) */
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-accent: #f97316;
+
+  /* Glass Card Tokens (Light Mode) */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-subtle: rgba(0, 0, 0, 0.03);
+  --glass-hover: rgba(0, 0, 0, 0.06);
+
+  /* Brand Gradient */
+  --accent-start: #c6ffdd;
+  --accent-end: #f7797d;
+  --accent-gradient: linear-gradient(135deg, #c6ffdd, #fbd786, #f7797d);
+
+  /* Inputs & Borders */
+  --input-bg: #F3F4F9;
+  --card-border: rgba(139, 92, 246, 0.08);
+
+  /* Status Colors */
+  --danger: #FF6B6B;
+  --danger-hover: #EE5253;
+  --info: #48DBFB;
+  --info-hover: #0ABDE3;
+
+  /* Shadows */
+  --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-btn: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+html.dark-mode {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --text: #f8fafc;
+  --text-light: #94a3b8;
+  --input-bg: #334155;
+  --card-border: rgba(255, 255, 255, 0.06);
+
+  /* Semantic Text Hierarchy (Dark Mode) */
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-accent: #fb923c;
+
+  /* Glass Card Tokens (Dark Mode) */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-subtle: rgba(255, 255, 255, 0.02);
+  --glass-hover: rgba(255, 255, 255, 0.05);
+
+  /* Shadows */
+  --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-btn: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+html {
+  background-color: var(--bg);
+  min-height: 100%;
+  background-attachment: fixed;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color 0.4s, color 0.4s;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+

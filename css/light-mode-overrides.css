@@ -1,0 +1,392 @@
+/* =========================================
+   LIGHT MODE OVERRIDES — Diet History
+   Ensures WCAG AA contrast on light bg
+========================================= */
+body:not(.dark-mode) .dh-segmented-toggle {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body:not(.dark-mode) .dh-toggle-btn {
+  color: var(--text-secondary);
+}
+
+body:not(.dark-mode) .dh-toggle-btn.active {
+  color: #fff;
+}
+
+/* Date Picker */
+body:not(.dark-mode) .dh-date-picker-row {
+  background: var(--card-bg);
+  border-color: var(--glass-border);
+  box-shadow: var(--shadow-sm);
+}
+
+body:not(.dark-mode) .dh-date-arrow {
+  background: var(--input-bg);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text);
+}
+
+body:not(.dark-mode) .dh-date-arrow:hover {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #ea580c;
+}
+
+body:not(.dark-mode) .dh-date-display {
+  background: var(--input-bg);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text);
+}
+
+body:not(.dark-mode) .dh-date-display i {
+  color: #ea580c;
+}
+
+/* Glass Summary Card */
+body:not(.dark-mode) .dh-summary-card {
+  background: var(--card-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+body:not(.dark-mode) .dh-hero-icon {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(244, 63, 94, 0.08));
+}
+
+body:not(.dark-mode) .dh-hero-icon i {
+  color: #ea580c;
+}
+
+body:not(.dark-mode) .dh-hero-value {
+  background: linear-gradient(135deg, #ea580c, #dc2626);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+body:not(.dark-mode) .dh-hero-label {
+  color: var(--text-muted);
+}
+
+/* Calorie Bar */
+body:not(.dark-mode) .dh-calorie-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body:not(.dark-mode) .dh-calorie-bar-fill {
+  background: linear-gradient(90deg, #ea580c, #dc2626);
+  box-shadow: 0 0 8px rgba(234, 88, 12, 0.25);
+}
+
+body:not(.dark-mode) .dh-calorie-bar-text {
+  color: var(--text-muted);
+}
+
+/* Macro Row */
+body:not(.dark-mode) .dh-summary-macros {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+body:not(.dark-mode) .dh-macro {
+  background: var(--glass-subtle);
+}
+
+body:not(.dark-mode) .dh-macro:hover {
+  background: var(--glass-hover);
+}
+
+body:not(.dark-mode) .dh-macro-val {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dh-macro-label {
+  color: var(--text-muted);
+}
+
+/* Darker accent icons for light mode (avoid neon on white) */
+body:not(.dark-mode) .dh-macro[data-color="blue"] i {
+  color: #2563eb;
+}
+
+body:not(.dark-mode) .dh-macro[data-color="purple"] i {
+  color: #7c3aed;
+}
+
+body:not(.dark-mode) .dh-macro[data-color="pink"] i {
+  color: #db2777;
+}
+
+body:not(.dark-mode) .dh-macro[data-color="cyan"] i {
+  color: #0891b2;
+}
+
+/* Meals Header */
+body:not(.dark-mode) .dh-meals-header h3 {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dh-meals-header h3 i {
+  color: #ea580c;
+}
+
+body:not(.dark-mode) .dh-meal-empty {
+  color: var(--text-muted);
+}
+
+/* Meal Cards */
+body:not(.dark-mode) .dh-meal-card {
+  background: var(--card-bg);
+  border-color: var(--glass-border);
+  border-left-color: #6366f1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body:not(.dark-mode) .dh-meal-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  background: var(--card-bg);
+}
+
+body:not(.dark-mode) .dh-meal-name {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dh-meal-type-badge {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+}
+
+body:not(.dark-mode) .dh-meal-micro-macros {
+  color: var(--text-muted);
+}
+
+body:not(.dark-mode) .dh-meal-kcal {
+  color: #ea580c;
+}
+
+body:not(.dark-mode) .dh-meal-kcal-unit {
+  color: var(--text-muted);
+}
+
+body:not(.dark-mode) .dh-btn-delete {
+  background: rgba(244, 63, 94, 0.08);
+}
+
+/* Weekly View */
+body:not(.dark-mode) .dh-insights-banner {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.05));
+  border-color: rgba(99, 102, 241, 0.12);
+  color: var(--text-secondary);
+}
+
+body:not(.dark-mode) .dh-insights-banner i {
+  color: #d97706;
+}
+
+body:not(.dark-mode) .dh-weekly-stat {
+  background: var(--card-bg);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body:not(.dark-mode) .dh-weekly-val {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dh-weekly-label {
+  color: var(--text-muted);
+}
+
+/* Darker weekly accent icons for light mode */
+body:not(.dark-mode) .dh-weekly-stat[data-color="orange"] i {
+  color: #ea580c;
+}
+
+body:not(.dark-mode) .dh-weekly-stat[data-color="blue"] i {
+  color: #2563eb;
+}
+
+body:not(.dark-mode) .dh-weekly-stat[data-color="green"] i {
+  color: #059669;
+}
+
+body:not(.dark-mode) .dh-weekly-stat[data-color="pink"] i {
+  color: #db2777;
+}
+
+/* Chart Cards */
+body:not(.dark-mode) .dh-chart-card {
+  background: var(--card-bg);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body:not(.dark-mode) .dh-chart-card h3 {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dh-chart-card h3 i {
+  color: #4f46e5;
+}
+
+/* Light Mode — Diet Coach */
+body:not(.dark-mode) .dc-container {
+  background: var(--card-bg);
+  border-color: var(--glass-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+body:not(.dark-mode) .dc-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.015);
+}
+
+body:not(.dark-mode) .dc-title {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dc-msg.bot {
+  background: var(--input-bg);
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dc-msg.bot strong {
+  color: #7c3aed;
+}
+
+body:not(.dark-mode) .dc-welcome h3 {
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dc-welcome p {
+  color: var(--text-muted);
+}
+
+body:not(.dark-mode) .dc-input-bar {
+  border-top-color: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.015);
+}
+
+body:not(.dark-mode) .dc-input-bar input {
+  background: var(--input-bg);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+body:not(.dark-mode) .dc-input-bar input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Light Mode — Settings Fields */
+body:not(.dark-mode) .setting-field input,
+body:not(.dark-mode) .setting-field select {
+  background: var(--input-bg);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+/* Light Mode — Diet Settings */
+body:not(.dark-mode) .ds-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+}
+
+body:not(.dark-mode) .ds-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+body:not(.dark-mode) .ds-header-title {
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .ds-header-sub,
+body:not(.dark-mode) .ds-card-sub {
+  color: var(--text-muted, #64748b);
+}
+
+body:not(.dark-mode) .ds-card-header h3 {
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .ds-field label {
+  color: var(--text-muted, #64748b);
+}
+
+body:not(.dark-mode) .ds-field input,
+body:not(.dark-mode) .ds-field select {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .ds-field input:focus,
+body:not(.dark-mode) .ds-field select:focus {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(241, 245, 249, 1);
+}
+
+body:not(.dark-mode) .ds-unit {
+  color: var(--text-muted, #64748b);
+}
+
+body:not(.dark-mode) .ds-pill {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary, #475569);
+}
+
+body:not(.dark-mode) .ds-pill:hover {
+  background: rgba(139, 92, 246, 0.06);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .ds-pill.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.12));
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #6d28d9;
+}
+
+body:not(.dark-mode) .ds-pill.active i {
+  color: #7c3aed;
+}
+
+body:not(.dark-mode) .ds-toggle-row {
+  background: rgba(241, 245, 249, 0.6);
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+body:not(.dark-mode) .ds-toggle-label {
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .ds-toggle-desc {
+  color: var(--text-muted, #64748b);
+}
+
+body:not(.dark-mode) .ds-action-btn--export {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(99, 102, 241, 0.08));
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+body:not(.dark-mode) .ds-action-btn--export:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+body:not(.dark-mode) .ds-action-btn--logout {
+  background: rgba(239, 68, 68, 0.05);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.1);
+}
+
+body:not(.dark-mode) .ds-action-btn--logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+

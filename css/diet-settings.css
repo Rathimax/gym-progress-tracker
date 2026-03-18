@@ -1,0 +1,441 @@
+/* =========================================
+   DIET SETTINGS — PREMIUM LAYOUT
+========================================= */
+
+/* Override view-section grid for diet settings */
+#view-diet-settings.view-section.active-view {
+  display: flex !important;
+  flex-direction: column;
+  gap: 0;
+  grid-template-columns: unset;
+}
+
+/* Page Header */
+.ds-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0;
+  width: 100%;
+}
+
+.ds-header-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-start, #6366f1), var(--accent-end, #a855f7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.ds-header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+  margin: 0;
+}
+
+.ds-header-sub {
+  font-size: 0.85rem;
+  color: var(--text-light, #9395b0);
+  margin: 2px 0 0;
+}
+
+/* Grid */
+.ds-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Cards */
+.ds-card {
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 20px 0 0 20px;
+}
+
+.ds-card--goals::before {
+  background: linear-gradient(180deg, #f97316, #fb923c);
+}
+
+.ds-card--ai::before {
+  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+}
+
+.ds-card--data::before {
+  background: linear-gradient(180deg, #14b8a6, #5eead4);
+}
+
+.ds-card--goals {
+  grid-column: 1;
+}
+
+.ds-card--ai {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.ds-card--data {
+  grid-column: 1;
+}
+
+.ds-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Header */
+.ds-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.ds-card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+  margin: 0;
+}
+
+.ds-card-sub {
+  font-size: 0.78rem;
+  color: var(--text-light, #9395b0);
+  margin: 2px 0 0;
+}
+
+.ds-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.ds-card-icon--orange {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.ds-card-icon--purple {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.ds-card-icon--teal {
+  background: rgba(20, 184, 166, 0.15);
+  color: #14b8a6;
+}
+
+/* Fields */
+.ds-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.ds-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ds-field--full {
+  grid-column: 1 / -1;
+}
+
+.ds-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-light, #9395b0);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ds-field-icon {
+  font-size: 0.85rem;
+}
+
+.ds-field-icon--cal {
+  color: #f97316;
+}
+
+.ds-field-icon--prot {
+  color: #3b82f6;
+}
+
+.ds-field-icon--water {
+  color: #06b6d4;
+}
+
+.ds-field-icon--goal {
+  color: #10b981;
+}
+
+.ds-field-icon--coach {
+  color: #8b5cf6;
+}
+
+/* Input Wrap */
+.ds-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ds-input-wrap input {
+  width: 100%;
+  padding-right: 3.5rem;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.ds-input-wrap input::-webkit-outer-spin-button,
+.ds-input-wrap input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ds-unit {
+  position: absolute;
+  right: 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-light, #9395b0);
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ds-field input,
+.ds-field select {
+  background: var(--input-bg, rgba(51, 65, 85, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text, #f8fafc);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ds-field input:focus,
+.ds-field select:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: var(--input-bg, rgba(51, 65, 85, 0.8));
+}
+
+.ds-field select {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239395b0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 2rem;
+}
+
+/* Coaching Pills */
+.ds-coaching-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ds-pill {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--input-bg, rgba(51, 65, 85, 0.5));
+  color: var(--text-light, #9395b0);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.ds-pill:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--text, #f8fafc);
+}
+
+.ds-pill.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.15);
+}
+
+.ds-pill.active i {
+  color: #a78bfa;
+}
+
+/* Toggle Row */
+.ds-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.ds-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ds-toggle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text, #f8fafc);
+  display: flex;
+  align-items: center;
+}
+
+.ds-toggle-desc {
+  font-size: 0.75rem;
+  color: var(--text-light, #9395b0);
+}
+
+/* Action Buttons */
+.ds-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ds-action-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.ds-action-btn--export {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.ds-action-btn--export:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(99, 102, 241, 0.25));
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+.ds-action-btn--logout {
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.15);
+}
+
+.ds-action-btn--logout:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.12);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ds-header-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+
+  .ds-header-title {
+    font-size: 1.15rem;
+  }
+
+  .ds-header-sub {
+    font-size: 0.75rem;
+  }
+
+  .ds-card-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .ds-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ds-card--goals,
+  .ds-card--ai,
+  .ds-card--data {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 500px) {
+  .ds-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .ds-coaching-pills {
+    flex-direction: column;
+  }
+}
+

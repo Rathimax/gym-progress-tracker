@@ -1,0 +1,270 @@
+/* Navigation & Sidebar */
+/* --- NAVIGATION REDESIGN (Insta-Style) --- */
+
+/* 1. Global Reset for Body */
+body {
+  /* Default Desktop Padding */
+  padding-left: 250px;
+  padding-bottom: 0;
+}
+
+/* 2. Desktop Sidebar (Left) */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background: var(--card-bg);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 5000;
+  padding: 1.5rem;
+  box-shadow: none;
+  /* Clean look */
+}
+
+.sidebar-header {
+  padding: 1rem 0 2rem 0;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.sidebar-header h2 {
+  font-size: 1.8rem;
+  font-family: 'Outfit', sans-serif;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  border: none;
+}
+
+/* Desktop Nav Items */
+.nav-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 0;
+}
+
+.nav-item .icon {
+  font-size: 1.5rem;
+  min-width: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-item .label {
+  font-size: 1rem;
+}
+
+/* Hover & Active States */
+.nav-item:hover {
+  background-color: var(--input-bg);
+  transform: translateX(5px);
+}
+
+.nav-item.active {
+  background: var(--accent-gradient);
+  color: var(--accent-text, #fff);
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+/* 3. Header Adjustment */
+header {
+  padding: 1rem 2rem;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+  position: relative;
+  border-bottom: none;
+  display: flex;
+  /* FLEX LAYOUT */
+  justify-content: flex-end;
+  /* Push content (toggle) to right */
+  align-items: center;
+  height: 80px;
+}
+
+.header-left {
+  display: none;
+}
+
+.switch {
+  position: static;
+  margin-left: auto;
+}
+
+/* --- MOBILE RESPONSIVE NAVIGATION --- */
+@media (max-width: 768px) {
+
+  /* 1. Body Padding Shift */
+  body {
+    padding-left: 0;
+    padding-bottom: 80px;
+    /* Space for bottom bar */
+  }
+
+  /* 2. Mobile Bottom Bar */
+  .sidebar {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    border-right: none;
+    border-top: 1px solid var(--card-border);
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.95);
+    /* Glass-ish */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Dark mode support for sidebar bg */
+  body.dark-mode .sidebar {
+    background: rgba(36, 40, 59, 0.95);
+  }
+
+  .sidebar-header {
+    display: none;
+    /* No logo in bottom bar */
+  }
+
+  .nav-links {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 0;
+  }
+
+  .nav-item {
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 0;
+    background: transparent !important;
+    /* Remove active bg shape */
+    box-shadow: none !important;
+    color: var(--text-light);
+    /* Default color */
+    transform: none !important;
+  }
+
+  .nav-item .icon {
+    font-size: 1.4rem;
+  }
+
+  .nav-item .label {
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .nav-item:hover {
+    background: transparent;
+  }
+
+  /* Active State for Mobile (Icon Color change only) */
+  .nav-item.active {
+    color: var(--accent-end);
+    background: transparent;
+  }
+
+  /* 3. Header Returns for Mobile */
+  header {
+    display: flex;
+    justify-content: space-between;
+    background: var(--card-bg);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+  }
+
+  .header-left {
+    display: flex;
+    /* Show Logo */
+  }
+
+  .switch {
+    position: static;
+  }
+
+  /* Hide Hamburger */
+  .hamburger-btn {
+    display: none !important;
+  }
+
+  /* Lift Timer above Bottom Bar */
+  .timer-widget {
+    bottom: 95px !important;
+    /* 70px nav + 25px margin */
+    right: 20px;
+  }
+}
+
+/* Page View Logic & Glass Focus Animations */
+@keyframes glassFocusIn {
+  0% {
+    opacity: 0;
+    transform: scale(1.02) translateY(10px);
+    filter: blur(12px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.view-section:not(.active-view) {
+  display: none !important;
+}
+
+.view-section.active-view {
+  display: grid !important;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  width: 100%;
+  animation: glassFocusIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform, filter;
+}
+

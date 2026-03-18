@@ -1,0 +1,266 @@
+/* --- MEDAL CASE --- */
+.medal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.medal-card {
+  background: var(--input-bg);
+  border-radius: 16px;
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.medal-card:hover {
+  transform: translateY(-3px);
+  background: var(--card-bg);
+  border-color: var(--accent-start);
+  box-shadow: var(--shadow-sm);
+}
+
+.medal-card.locked {
+  opacity: 0.5;
+  filter: grayscale(100%);
+  background: var(--input-bg);
+  cursor: not-allowed;
+}
+
+.medal-card.locked:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.medal-card .icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.medal-card .name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.medal-card .status {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  margin-top: 0.2rem;
+}
+
+/* --- THEME CUSTOMIZATION --- */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 16px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.theme-option:hover {
+  background: var(--input-bg);
+  transform: translateY(-2px);
+}
+
+.theme-option.active {
+  background: var(--input-bg);
+  box-shadow: 0 0 0 2px var(--accent-start);
+}
+
+.theme-preview {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid #fff;
+}
+
+.theme-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
+/* --- ADVANCED CUSTOMIZATION --- */
+
+/* 1. Font Styles */
+body.font-tech,
+body.font-tech button,
+body.font-tech input,
+body.font-tech select,
+body.font-tech textarea {
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+body.font-classic,
+body.font-classic button,
+body.font-classic input,
+body.font-classic select,
+body.font-classic textarea {
+  font-family: 'Merriweather', serif;
+}
+
+/* 2. Compact Mode */
+body.mode-compact .container {
+  gap: 1rem;
+  padding-bottom: 5rem;
+}
+
+body.mode-compact .card {
+  padding: 1rem;
+}
+
+body.mode-compact .inline-form input,
+body.mode-compact .inline-form button {
+  padding: 0.8rem;
+}
+
+body.mode-compact .nav-item {
+  padding: 0.8rem;
+}
+
+body.mode-compact h1 {
+  font-size: 1.5rem;
+}
+
+body.mode-compact .history-date table td,
+body.mode-compact .history-date table th {
+  padding: 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* 3. Settings UI Components */
+.setting-item {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.setting-label {
+  display: block;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: flex;
+  background: var(--input-bg);
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+}
+
+.segment-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.segment-btn.active {
+  background: #fff;
+  color: var(--accent-end);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Unit Toggle */
+.unit-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unit-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-light);
+  opacity: 0.5;
+  transition: 0.3s;
+}
+
+.unit-label.active {
+  color: var(--accent-end);
+  opacity: 1;
+}
+
+/* Generic Form Switch */
+.switch {
+  display: flex;
+  align-items: center;
+}
+
+.switch input[type="checkbox"] {
+  display: none;
+}
+
+.form-switch {
+  display: block;
+  width: 50px;
+  height: 28px;
+  background-color: var(--input-bg);
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  transition: 0.3s;
+}
+
+.form-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.switch input:checked+.form-switch {
+  background-color: var(--accent-start);
+  border-color: var(--accent-start);
+}
+
+.switch input:checked+.form-switch::after {
+  transform: translateX(22px);
+  background-color: #fff;
+}
+

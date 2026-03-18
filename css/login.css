@@ -1,0 +1,98 @@
+/* ==========================================
+   INLINE LOGIN SCREEN
+   ========================================== */
+.login-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg);
+  justify-content: center;
+  align-items: center;
+}
+
+.login-screen.active {
+  display: flex;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 3rem 2.5rem;
+  background: var(--card-bg);
+  border-radius: 30px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--card-border);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: loginFadeIn 0.5s ease;
+}
+
+@keyframes loginFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-logo-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.login-subtitle {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin: -0.5rem 0 0.5rem;
+}
+
+.login-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: var(--input-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 50px;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+.login-google-btn:hover {
+  background: var(--card-bg);
+  border-color: var(--accent-start);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.login-google-btn .google-icon {
+  flex-shrink: 0;
+}
+
