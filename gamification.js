@@ -215,6 +215,19 @@ export const initGamification = () => {
             const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
             const monthCount = history.filter(h => h.date.startsWith(currentMonth)).length;
             if (monthCount >= 20) unlock('month_strong');
+
+            // 12. Personal Best (Requires PR tracking, simplified here)
+            const prHistory = history.filter(h => h.exercise === currentWorkout.exercise);
+            const maxWeight = Math.max(...prHistory.map(h => h.weight));
+            if (currentWorkout.weight > maxWeight) unlock('personal_best');
+
+            // 13. Routine Complete (Requires routine tracking, simplified here)
+                if (currentWorkout.routineComplete) unlock('routine_complete');
+
+            // 14. Volume Hunter (Requires total volume tracking, simplified here)
+                const totalVolume = history.reduce((s, w) => s + (w.weight * w.reps * w.sets), 0);
+                if (totalVolume >= 10000) unlock('volume_10k');
+
         }
     };
 };
