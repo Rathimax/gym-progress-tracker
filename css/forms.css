@@ -1,0 +1,90 @@
+/* Form Elements */
+input,
+select,
+button {
+  font-family: 'Outfit', sans-serif;
+  border: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 1.1rem 1.2rem;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 2px solid transparent;
+  border-radius: 20px;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23f7797d" class="bi bi-chevron-down" viewBox="0 0 16 16"%3e%3cpath fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/%3e%3c/svg%3e');
+  background-repeat: no-repeat;
+  background-position: right 1.2rem center;
+  background-size: 1em;
+  cursor: pointer;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  background-color: var(--card-bg);
+  border-color: var(--accent-start);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+input[type="file"] {
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px dashed var(--card-border);
+}
+
+.duration-input {
+  display: flex;
+  gap: 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 1.1rem;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--accent-text, #fff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 50px;
+}
+
+button[type="submit"] {
+  background: var(--accent-gradient);
+  margin-top: 2rem;
+  box-shadow: var(--shadow-btn);
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-2px) scale(1.01);
+}
+
+.button-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+#clear-btn {
+  background-color: var(--danger);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+#export-btn,
+#import-btn {
+  background-color: var(--info);
+  box-shadow: 0 8px 20px rgba(72, 219, 251, 0.3);
+}
+

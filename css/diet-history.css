@@ -1,0 +1,599 @@
+/* =========================================
+   DIET: HISTORY & WEEKLY ANALYTICS — PREMIUM
+========================================= */
+
+#view-diet-history.active-view {
+  display: block !important;
+}
+
+/* ── Segmented Toggle ── */
+.dh-segmented-toggle {
+  position: relative;
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 4px;
+  width: fit-content;
+  margin: 0 auto 1.75rem auto;
+  overflow: hidden;
+}
+
+.dh-toggle-track {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, #f97316, #f43f5e);
+  border-radius: 11px;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.35);
+}
+
+.dh-toggle-track.right {
+  transform: translateX(100%);
+}
+
+.dh-toggle-btn {
+  position: relative;
+  z-index: 1;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 10px 24px;
+  border-radius: 11px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dh-toggle-btn.active {
+  color: #fff;
+}
+
+.dh-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+/* ── Date Picker Row ── */
+.dh-date-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 10px 16px;
+  margin-bottom: 1.25rem;
+}
+
+/* Hidden native date input — stay invisible, keeps JS working */
+.dh-date-input-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* Arrow nav buttons */
+.dh-date-arrow {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-light, #94a3b8);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dh-date-arrow:hover {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #f97316;
+  transform: scale(1.05);
+}
+
+.dh-date-arrow:active {
+  transform: scale(0.95);
+}
+
+/* Formatted date display */
+.dh-date-display {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  min-width: 180px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: default;
+}
+
+.dh-date-display i {
+  color: #f97316;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+#dh-date-text {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* ── Premium Glass Summary Card ── */
+.dh-summary-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 2rem 1.5rem 1.5rem;
+  margin-bottom: 1.75rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Hero Calorie Display */
+.dh-summary-hero {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.dh-hero-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(244, 63, 94, 0.15));
+  border-radius: 14px;
+  margin-bottom: 0.5rem;
+}
+
+.dh-hero-icon i {
+  font-size: 1.5rem;
+  color: #f97316;
+}
+
+.dh-hero-value {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f97316, #f43f5e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.dh-hero-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Calorie Progress Bar */
+.dh-calorie-bar-wrap {
+  margin: 1rem 0 1.5rem;
+}
+
+.dh-calorie-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.dh-calorie-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f97316, #f43f5e);
+  border-radius: 100px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+}
+
+.dh-calorie-bar-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* Macro Row */
+.dh-summary-macros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 1.25rem;
+}
+
+.dh-macro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.dh-macro:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dh-macro i {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.dh-macro-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.dh-macro-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Color Coding */
+.dh-macro[data-color="blue"] i {
+  color: #3b82f6;
+}
+
+.dh-macro[data-color="purple"] i {
+  color: #a855f7;
+}
+
+.dh-macro[data-color="pink"] i {
+  color: #ec4899;
+}
+
+.dh-macro[data-color="cyan"] i {
+  color: #06b6d4;
+}
+
+/* ── Meals Section ── */
+.dh-meals-header {
+  margin-bottom: 1rem;
+}
+
+.dh-meals-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dh-meals-header h3 i {
+  color: #f97316;
+}
+
+.dh-meal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dh-meal-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 2.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* Individual Meal Card */
+.dh-meal-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #6366f1;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  position: relative;
+}
+
+.dh-meal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dh-meal-card:active {
+  transform: scale(0.99);
+}
+
+.dh-meal-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.dh-meal-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary, #e2e8f0);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.dh-meal-type-badge {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.dh-meal-micro-macros {
+  display: flex;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+.dh-meal-micro-macros span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dh-meal-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.dh-meal-kcal {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #f97316;
+  white-space: nowrap;
+}
+
+.dh-meal-kcal-unit {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dh-btn-delete {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.dh-btn-delete:hover {
+  background: #f43f5e;
+  color: white;
+  transform: scale(1.05);
+}
+
+.dh-btn-delete:active {
+  transform: scale(0.95);
+}
+
+/* ── Weekly View ── */
+.dh-insights-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  padding: 14px 20px;
+  border-radius: 14px;
+  margin-bottom: 1.5rem;
+  color: #c7d2fe;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.dh-insights-banner i {
+  color: #fbbf24;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.dh-weekly-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.dh-weekly-stat {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dh-weekly-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.dh-weekly-stat i {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.dh-weekly-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary, #e2e8f0);
+  margin-bottom: 2px;
+}
+
+.dh-weekly-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Weekly Color Coding */
+.dh-weekly-stat[data-color="orange"] i {
+  color: #f97316;
+}
+
+.dh-weekly-stat[data-color="blue"] i {
+  color: #3b82f6;
+}
+
+.dh-weekly-stat[data-color="green"] i {
+  color: #10b981;
+}
+
+.dh-weekly-stat[data-color="pink"] i {
+  color: #ec4899;
+}
+
+/* ── Chart Cards ── */
+.dh-chart-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.dh-chart-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dh-chart-card h3 i {
+  color: #6366f1;
+}
+
+.dh-chart-wrap {
+  height: 220px;
+  width: 100%;
+  position: relative;
+}
+
+/* ── Animation ── */
+.diet-history-container {
+  animation: dhFadeUp 0.4s ease forwards;
+}
+
+@keyframes dhFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .dh-summary-macros {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dh-hero-value {
+    font-size: 2.4rem;
+  }
+
+  .dh-meal-card {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .dh-meal-right {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dh-weekly-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dh-segmented-toggle {
+    width: calc(100% - 2rem);
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .dh-toggle-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .dh-toggle-track {
+    width: calc(50% - 4px);
+  }
+}
+

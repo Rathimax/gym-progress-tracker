@@ -1,0 +1,77 @@
+/* =========================================
+   ADD MEAL - Unified Toggle
+   ========================================= */
+#view-diet-add-meal.active-view {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.add-meal-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
+  border-radius: 14px;
+  padding: 4px;
+  margin: 0 auto 1.5rem auto;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 400px;
+}
+
+.add-meal-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.7rem 1rem;
+  border-radius: 11px;
+  border: none;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: transparent;
+  color: var(--text-light, #9395b0);
+}
+
+.add-meal-toggle-btn:hover {
+  color: var(--text, #f8fafc);
+}
+
+.add-meal-toggle-btn.active {
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  color: white;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-start) 30%, transparent);
+}
+
+.add-meal-toggle-btn i {
+  font-size: 1.05rem;
+}
+
+/* Sub-view visibility */
+.add-meal-subview {
+  display: none;
+  width: 100%;
+}
+
+.add-meal-subview.active {
+  display: block;
+  width: 100%;
+}
+
+/* Light mode overrides */
+body:not(.dark-mode) .add-meal-toggle {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body:not(.dark-mode) .add-meal-toggle-btn {
+  color: var(--text-secondary, #475569);
+}
+

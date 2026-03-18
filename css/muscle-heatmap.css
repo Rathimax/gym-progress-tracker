@@ -1,0 +1,399 @@
+/* --- MUSCLE HEATMAP (DETAILED) --- */
+.heatmap-container {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  padding: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.heatmap-body {
+  position: relative;
+  width: 220px;
+  height: 480px;
+  margin-bottom: 2rem;
+}
+
+.muscle-label-top {
+  position: absolute;
+  top: -40px;
+  width: 100%;
+  text-align: center;
+  font-weight: 800;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+
+.body-part {
+  position: absolute;
+  background: var(--input-bg);
+  border-radius: 4px;
+  transition: 0.4s;
+  /* border: 1px solid rgba(0,0,0,0.02); */
+}
+
+/* --- COMMON HEAD / NECK --- */
+.head {
+  width: 40px;
+  height: 50px;
+  left: 90px;
+  top: 0;
+  border-radius: 16px;
+  z-index: 10;
+}
+
+.neck {
+  width: 24px;
+  height: 20px;
+  left: 98px;
+  top: 45px;
+  z-index: 5;
+}
+
+/* --- FRONT VIEW --- */
+/* Traps */
+.front .trap-left {
+  width: 30px;
+  height: 20px;
+  left: 75px;
+  top: 48px;
+  transform: skewY(20deg);
+  border-radius: 5px;
+}
+
+.front .trap-right {
+  width: 30px;
+  height: 20px;
+  right: 75px;
+  top: 48px;
+  transform: skewY(-20deg);
+  border-radius: 5px;
+}
+
+/* Delts (Front) */
+.front .delt-front-left {
+  width: 35px;
+  height: 35px;
+  left: 45px;
+  top: 55px;
+  border-radius: 15px;
+}
+
+.front .delt-front-right {
+  width: 35px;
+  height: 35px;
+  right: 45px;
+  top: 55px;
+  border-radius: 15px;
+}
+
+/* Chest (Pecs) */
+.front .chest-left {
+  width: 42px;
+  height: 40px;
+  left: 68px;
+  top: 60px;
+  border-radius: 5px 15px 10px 5px;
+}
+
+.front .chest-right {
+  width: 42px;
+  height: 40px;
+  right: 68px;
+  top: 60px;
+  border-radius: 15px 5px 5px 10px;
+}
+
+/* Arms */
+.front .bicep-left {
+  width: 28px;
+  height: 50px;
+  left: 42px;
+  top: 85px;
+  border-radius: 10px;
+  transform: rotate(5deg);
+}
+
+.front .bicep-right {
+  width: 28px;
+  height: 50px;
+  right: 42px;
+  top: 85px;
+  border-radius: 10px;
+  transform: rotate(-5deg);
+}
+
+.front .forearm-front-left {
+  width: 24px;
+  height: 60px;
+  left: 35px;
+  top: 138px;
+  border-radius: 8px;
+  transform: rotate(8deg);
+}
+
+.front .forearm-front-right {
+  width: 24px;
+  height: 60px;
+  right: 35px;
+  top: 138px;
+  border-radius: 8px;
+  transform: rotate(-8deg);
+}
+
+/* Abs / Core */
+.front .abs {
+  width: 40px;
+  height: 75px;
+  left: 90px;
+  top: 102px;
+  border-radius: 6px;
+}
+
+.front .oblique-left {
+  width: 20px;
+  height: 65px;
+  left: 68px;
+  top: 105px;
+  border-radius: 5px 0 0 10px;
+}
+
+.front .oblique-right {
+  width: 20px;
+  height: 65px;
+  right: 68px;
+  top: 105px;
+  border-radius: 0 5px 10px 0;
+}
+
+/* Legs */
+.front .quad-left {
+  width: 45px;
+  height: 100px;
+  left: 64px;
+  top: 180px;
+  border-radius: 10px;
+  transform: rotate(2deg);
+}
+
+.front .quad-right {
+  width: 45px;
+  height: 100px;
+  right: 64px;
+  top: 180px;
+  border-radius: 10px;
+  transform: rotate(-2deg);
+}
+
+.front .calf-front-left {
+  width: 35px;
+  height: 90px;
+  left: 66px;
+  top: 285px;
+  border-radius: 10px;
+  transform: rotate(1deg);
+}
+
+.front .calf-front-right {
+  width: 35px;
+  height: 90px;
+  right: 66px;
+  top: 285px;
+  border-radius: 10px;
+  transform: rotate(-1deg);
+}
+
+/* --- BACK VIEW --- */
+/* Traps */
+.back .trap-back-left {
+  width: 35px;
+  height: 40px;
+  left: 78px;
+  top: 50px;
+  transform: skewY(15deg);
+  border-radius: 5px;
+}
+
+.back .trap-back-right {
+  width: 35px;
+  height: 40px;
+  right: 78px;
+  top: 50px;
+  transform: skewY(-15deg);
+  border-radius: 5px;
+}
+
+/* Delts (Rear) */
+.back .delt-rear-left {
+  width: 38px;
+  height: 35px;
+  left: 42px;
+  top: 58px;
+  border-radius: 15px;
+}
+
+.back .delt-rear-right {
+  width: 38px;
+  height: 35px;
+  right: 42px;
+  top: 58px;
+  border-radius: 15px;
+}
+
+/* Lats */
+.back .lats-left {
+  width: 30px;
+  height: 70px;
+  left: 55px;
+  top: 85px;
+  border-radius: 20px 0 0 10px;
+  transform: rotate(10deg);
+}
+
+.back .lats-right {
+  width: 30px;
+  height: 70px;
+  right: 55px;
+  top: 85px;
+  border-radius: 0 20px 10px 0;
+  transform: rotate(-10deg);
+}
+
+.back .lower-back {
+  width: 40px;
+  height: 40px;
+  left: 90px;
+  top: 140px;
+  border-radius: 5px;
+}
+
+/* Arms (Triceps) */
+.back .tricep-left {
+  width: 30px;
+  height: 50px;
+  left: 40px;
+  top: 88px;
+  border-radius: 10px;
+  transform: rotate(5deg);
+}
+
+.back .tricep-right {
+  width: 30px;
+  height: 50px;
+  right: 40px;
+  top: 88px;
+  border-radius: 10px;
+  transform: rotate(-5deg);
+}
+
+.back .forearm-back-left {
+  width: 26px;
+  height: 60px;
+  left: 32px;
+  top: 140px;
+  border-radius: 8px;
+  transform: rotate(8deg);
+}
+
+.back .forearm-back-right {
+  width: 26px;
+  height: 60px;
+  right: 32px;
+  top: 140px;
+  border-radius: 8px;
+  transform: rotate(-8deg);
+}
+
+/* Glutes */
+.back .glute-left {
+  width: 44px;
+  height: 45px;
+  left: 66px;
+  top: 180px;
+  border-radius: 10px;
+}
+
+.back .glute-right {
+  width: 44px;
+  height: 45px;
+  right: 66px;
+  top: 180px;
+  border-radius: 10px;
+}
+
+/* Legs (Hamstrings) */
+.back .hamstring-left {
+  width: 42px;
+  height: 80px;
+  left: 67px;
+  top: 228px;
+  border-radius: 10px;
+  transform: rotate(1deg);
+}
+
+.back .hamstring-right {
+  width: 42px;
+  height: 80px;
+  right: 67px;
+  top: 228px;
+  border-radius: 10px;
+  transform: rotate(-1deg);
+}
+
+.back .calf-back-left {
+  width: 36px;
+  height: 80px;
+  left: 68px;
+  top: 312px;
+  border-radius: 12px;
+  transform: rotate(1deg);
+}
+
+.back .calf-back-right {
+  width: 36px;
+  height: 80px;
+  right: 68px;
+  top: 312px;
+  border-radius: 12px;
+  transform: rotate(-1deg);
+}
+
+
+.heatmap-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .heatmap-body {
+    transform: scale(0.7);
+    height: 380px;
+    margin-bottom: 0;
+  }
+
+
+  .heatmap-container {
+    gap: 0;
+  }
+}
+
