@@ -36,61 +36,64 @@ window.uploadBytes = uploadBytes;
 window.getDownloadURL = getDownloadURL;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle back button / back swipe to prevent instant exit
+    // Handle back button / back swipe to prevent instant exit using hash routing
     const initHistoryTrap = () => {
-        if (!window.history.state || !window.history.state.noBack) {
-            window.history.pushState({ noBack: true }, '');
+        if (window.location.hash !== '#app') {
+            window.history.replaceState({ backTrap: 'base' }, '', window.location.pathname + window.location.search);
+            window.history.pushState({ backTrap: 'active' }, '', '#app');
         }
     };
+    // Initialize trap on load and basic interactions for maximal compatibility
     initHistoryTrap();
-    // Add interaction listeners as mobile browsers often block pushState on load
     document.addEventListener('click', initHistoryTrap, { once: true, capture: true });
     document.addEventListener('touchstart', initHistoryTrap, { once: true, capture: true });
 
     window.addEventListener('popstate', function(event) {
-        // Use custom confirm overlay instead of native confirm
-        const overlay = document.getElementById('custom-confirm-overlay');
-        const title = document.getElementById('confirm-title');
-        const message = document.getElementById('confirm-message');
-        const btnCancel = document.getElementById('btn-confirm-cancel');
-        const btnOk = document.getElementById('btn-confirm-ok');
+        if (window.location.hash !== '#app') {
+            // Use custom confirm overlay instead of native confirm
+            const overlay = document.getElementById('custom-confirm-overlay');
+            const title = document.getElementById('confirm-title');
+            const message = document.getElementById('confirm-message');
+            const btnCancel = document.getElementById('btn-confirm-cancel');
+            const btnOk = document.getElementById('btn-confirm-ok');
 
-        if (overlay) {
-            title.textContent = "Exit FitTrack?";
-            message.textContent = "Are you sure to exit?";
-            btnCancel.textContent = "No";
-            btnOk.textContent = "Yes";
-            overlay.classList.remove('hidden');
+            if (overlay) {
+                title.textContent = "Exit FitTrack?";
+                message.textContent = "Are you sure to exit?";
+                btnCancel.textContent = "No";
+                btnOk.textContent = "Yes";
+                overlay.classList.remove('hidden');
 
-            const handleCancel = () => {
-                overlay.classList.add('hidden');
-                btnCancel.textContent = "Cancel"; 
-                btnOk.textContent = "Confirm";
-                initHistoryTrap();
-                cleanup();
-            };
+                const handleCancel = () => {
+                    overlay.classList.add('hidden');
+                    btnCancel.textContent = "Cancel"; 
+                    btnOk.textContent = "Confirm";
+                    initHistoryTrap();
+                    cleanup();
+                };
 
-            const handleOk = () => {
-                overlay.classList.add('hidden');
-                btnCancel.textContent = "Cancel";
-                btnOk.textContent = "Confirm";
-                window.history.back();
-                cleanup();
-            };
+                const handleOk = () => {
+                    overlay.classList.add('hidden');
+                    btnCancel.textContent = "Cancel";
+                    btnOk.textContent = "Confirm";
+                    window.history.back();
+                    cleanup();
+                };
 
-            const cleanup = () => {
-                btnCancel.removeEventListener('click', handleCancel);
-                btnOk.removeEventListener('click', handleOk);
-            };
+                const cleanup = () => {
+                    btnCancel.removeEventListener('click', handleCancel);
+                    btnOk.removeEventListener('click', handleOk);
+                };
 
-            btnCancel.addEventListener('click', handleCancel);
-            btnOk.addEventListener('click', handleOk);
-        } else {
-            // Fallback if overlay not found
-            if (confirm("Are you sure to exit?")) {
-                window.history.back();
+                btnCancel.addEventListener('click', handleCancel);
+                btnOk.addEventListener('click', handleOk);
             } else {
-                initHistoryTrap();
+                // Fallback if overlay not found
+                if (confirm("Are you sure to exit?")) {
+                    window.history.back();
+                } else {
+                    initHistoryTrap();
+                }
             }
         }
     });
