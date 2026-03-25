@@ -36,6 +36,49 @@ window.uploadBytes = uploadBytes;
 window.getDownloadURL = getDownloadURL;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Handle back button / back swipe to prevent instant exit
+    window.history.pushState({ noBack: true }, '');
+    window.addEventListener('popstate', function(event) {
+        // Use custom confirm overlay instead of native confirm
+        const overlay = document.getElementById('custom-confirm-overlay');
+        const title = document.getElementById('confirm-title');
+        const message = document.getElementById('confirm-message');
+        const btnCancel = document.getElementById('btn-confirm-cancel');
+        const btnOk = document.getElementById('btn-confirm-ok');
+
+        if (overlay) {
+            title.textContent = "Exit FitTrack?";
+            message.textContent = "Are you sure you want to leave the app?";
+            overlay.classList.remove('hidden');
+
+            const handleCancel = () => {
+                overlay.classList.add('hidden');
+                window.history.pushState({ noBack: true }, '');
+                cleanup();
+            };
+
+            const handleOk = () => {
+                overlay.classList.add('hidden');
+                window.history.back();
+                cleanup();
+            };
+
+            const cleanup = () => {
+                btnCancel.removeEventListener('click', handleCancel);
+                btnOk.removeEventListener('click', handleOk);
+            };
+
+            btnCancel.addEventListener('click', handleCancel);
+            btnOk.addEventListener('click', handleOk);
+        } else {
+            // Fallback if overlay not found
+            if (confirm("Are you sure you want to exit?")) {
+                window.history.back();
+            } else {
+                window.history.pushState({ noBack: true }, '');
+            }
+        }
+    });
 
     // ==========================================
     // 2. DOM ELEMENTS
