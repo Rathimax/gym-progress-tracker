@@ -37,12 +37,13 @@ window.getDownloadURL = getDownloadURL;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Handle back button / back swipe to prevent instant exit
+    let historyPushed = false;
     const initHistoryTrap = () => {
-        if (!window.history.state || !window.history.state.noBack) {
+        if (!historyPushed) {
             window.history.pushState({ noBack: true }, '');
+            historyPushed = true;
         }
     };
-    initHistoryTrap();
     // Add interaction listeners as mobile browsers often block pushState on load
     document.addEventListener('click', initHistoryTrap, { once: true, capture: true });
     document.addEventListener('touchstart', initHistoryTrap, { once: true, capture: true });
@@ -66,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.classList.add('hidden');
                 btnCancel.textContent = "Cancel"; 
                 btnOk.textContent = "Confirm";
+                historyPushed = false;
                 initHistoryTrap();
                 cleanup();
             };
@@ -90,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirm("Are you sure to exit?")) {
                 window.history.back();
             } else {
+                historyPushed = false;
                 initHistoryTrap();
             }
         }
