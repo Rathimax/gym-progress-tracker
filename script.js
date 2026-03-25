@@ -37,7 +37,16 @@ window.getDownloadURL = getDownloadURL;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Handle back button / back swipe to prevent instant exit
-    window.history.pushState({ noBack: true }, '');
+    const initHistoryTrap = () => {
+        if (!window.history.state || !window.history.state.noBack) {
+            window.history.pushState({ noBack: true }, '');
+        }
+    };
+    initHistoryTrap();
+    // Add interaction listeners as mobile browsers often block pushState on load
+    document.addEventListener('click', initHistoryTrap, { once: true, capture: true });
+    document.addEventListener('touchstart', initHistoryTrap, { once: true, capture: true });
+
     window.addEventListener('popstate', function(event) {
         // Use custom confirm overlay instead of native confirm
         const overlay = document.getElementById('custom-confirm-overlay');
@@ -48,17 +57,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (overlay) {
             title.textContent = "Exit FitTrack?";
-            message.textContent = "Are you sure you want to leave the app?";
+            message.textContent = "Are you sure to exit?";
+            btnCancel.textContent = "No";
+            btnOk.textContent = "Yes";
             overlay.classList.remove('hidden');
 
             const handleCancel = () => {
                 overlay.classList.add('hidden');
-                window.history.pushState({ noBack: true }, '');
+                btnCancel.textContent = "Cancel"; 
+                btnOk.textContent = "Confirm";
+                initHistoryTrap();
                 cleanup();
             };
 
             const handleOk = () => {
                 overlay.classList.add('hidden');
+                btnCancel.textContent = "Cancel";
+                btnOk.textContent = "Confirm";
                 window.history.back();
                 cleanup();
             };
@@ -72,10 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btnOk.addEventListener('click', handleOk);
         } else {
             // Fallback if overlay not found
-            if (confirm("Are you sure you want to exit?")) {
+            if (confirm("Are you sure to exit?")) {
                 window.history.back();
             } else {
-                window.history.pushState({ noBack: true }, '');
+                initHistoryTrap();
             }
         }
     });
@@ -584,6 +599,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('confirm-message').textContent = message;
         const btnOk = document.getElementById('btn-confirm-ok');
         const btnCancel = document.getElementById('btn-confirm-cancel');
+        
+        btnCancel.textContent = "Cancel";
+        btnOk.textContent = "Confirm";
+
         const closeModal = () => overlay.classList.add('hidden');
         btnCancel.onclick = closeModal;
         btnOk.onclick = () => { closeModal(); if (onOk) onOk(); };
