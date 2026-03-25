@@ -364,15 +364,15 @@ button.refresh-btn:hover {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   z-index: 100000;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
 .confirm-overlay:not(.hidden) {
+  display: flex !important;
   opacity: 1;
   pointer-events: auto;
 }
