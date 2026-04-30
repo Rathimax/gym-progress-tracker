@@ -889,23 +889,127 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.prList.innerHTML = Object.entries(prMap).sort(([exA], [exB]) => exA.localeCompare(exB)).map(([ex, wt]) => `<li class="pr-item"><span class="pr-name"><i class="ri-trophy-fill pr-icon"></i>${ex}</span><span class="pr-weight">${formatWeight(wt)} ${getUnitLabel()}</span></li>`).join('');
     };
 
-    // --- HISTORY SECTION (WITH CUSTOM DROPDOWN FIX) ---
+    // --- HISTORY SECTION (REFINED WITH SCROLL DATE FILTER) ---
     const updateHistory = () => {
-        const filter = document.getElementById('history-filter-exercise')?.value || '';
-        const filtered = filter ? data.filter(d => d.exercise === filter) : data;
+        const filterEx = document.getElementById('history-filter-exercise')?.value || '';
+        const filterDate = document.getElementById('history-filter-date-input')?.value || '';
 
-        // 1. Rebuild the Select HTML
+        // 1. Filtering Logic
+        let filtered = data;
+        let statusMessage = "";
+        let isFiltered = false;
+
+        if (filterEx) {
+            filtered = filtered.filter(d => d.exercise === filterEx);
+            isFiltered = true;
+            statusMessage = `Showing all <strong>${filterEx}</strong>`;
+        }
+
+        if (filterDate) {
+            filtered = filtered.filter(d => d.date.split('T')[0] === filterDate);
+            isFiltered = true;
+            const dateObj = new Date(filterDate);
+            statusMessage = filterEx 
+                ? `Showing <strong>${filterEx}</strong> on <strong>${dateObj.toLocaleDateString()}</strong>`
+                : `Showing workouts on <strong>${dateObj.toLocaleDateString()}</strong>`;
+        }
+
+        if (!isFiltered) {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setHours(0, 0, 0, 0);
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            filtered = filtered.filter(d => new Date(d.date) >= sevenDaysAgo);
+            statusMessage = "Showing history for the <strong>past 7 days</strong>";
+        }
+
+        // 2. Generate Dates for Scroller (Last 14 days)
+        const dateItems = [];
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        for (let i = 0; i < 14; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const iso = d.toISOString().split('T')[0];
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayNum = d.getDate();
+            dateItems.push({ iso, dayName, dayNum });
+        }
+
+        // 3. Rebuild the Controls HTML
         const exercises = [...new Set(data.map(d => d.exercise))].sort();
-        elements.historyControls.innerHTML = ` <label for="history-filter-exercise">Filter by Exercise:</label> <select id="history-filter-exercise"> <option value="">All Exercises</option> ${exercises.map(ex => `<option value="${ex}" ${ex === filter ? 'selected' : ''}>${ex}</option>`).join('')} </select>`;
+        elements.historyControls.innerHTML = `
+            <div class="filter-group">
+                <label for="history-filter-exercise">Filter by Exercise</label>
+                <select id="history-filter-exercise">
+                    <option value="">All Exercises</option>
+                    ${exercises.map(ex => `<option value="${ex}" ${ex === filterEx ? 'selected' : ''}>${ex}</option>`).join('')}
+                </select>
+            </div>
 
-        // 2. APPLY CUSTOM DROPDOWN STYLE IMMEDIATELY
+            <div class="date-scroller-container">
+                <div class="date-scroller" id="history-date-scroller">
+                    ${dateItems.map(item => `
+                        <div class="date-item ${item.iso === filterDate ? 'active' : ''}" data-date="${item.iso}">
+                            <span class="day-name">${item.dayName}</span>
+                            <span class="day-number">${item.dayNum}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="calendar-picker-wrapper">
+                    <button class="btn-open-calendar" id="btn-history-calendar" title="Pick specific date">
+                        <i class="ri-calendar-line"></i>
+                    </button>
+                    <input type="date" id="history-filter-date-input" value="${filterDate}" style="position:absolute; opacity:0; pointer-events:none; right:0; bottom:0;">
+                </div>
+            </div>
+
+            <div class="history-status-bar">
+                <span class="history-status-text">${statusMessage}</span>
+                ${isFiltered ? `<button class="btn-clear-filters" id="btn-clear-history-filters"><i class="ri-close-line"></i> Clear</button>` : ''}
+            </div>
+        `;
+
+        // 4. APPLY CUSTOM DROPDOWN STYLE
         const historySelect = document.getElementById('history-filter-exercise');
         applyCustomDropdown(historySelect);
 
-        // 3. Re-attach listener to the NATIVE select (which the custom dropdown triggers)
+        // 5. Re-attach listeners
         historySelect.addEventListener('change', updateFilteredHistory);
+        
+        // Date Scroller Clicks
+        document.querySelectorAll('.date-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const selectedDate = item.getAttribute('data-date');
+                const dateInput = document.getElementById('history-filter-date-input');
+                // If clicking an already active date, clear it
+                dateInput.value = (dateInput.value === selectedDate) ? "" : selectedDate;
+                updateHistory();
+            });
+        });
 
-        if (!filtered.length) { elements.historyList.innerHTML = `<div class="empty-state" style="padding:2rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width:80px; display:block; margin:0 auto 1rem; opacity:0.6;"><p style="opacity:0.7;">No workouts yet. Go lift! 💪</p></div>`; return; }
+        // Calendar Button
+        const calBtn = document.getElementById('btn-history-calendar');
+        const dateInput = document.getElementById('history-filter-date-input');
+        if (calBtn) {
+            calBtn.addEventListener('click', () => dateInput.showPicker());
+        }
+        dateInput.addEventListener('change', updateHistory);
+        
+        // Clear Filters
+        const clearBtn = document.getElementById('btn-clear-history-filters');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                document.getElementById('history-filter-exercise').value = "";
+                document.getElementById('history-filter-date-input').value = "";
+                updateHistory();
+            });
+        }
+
+        if (!filtered.length) {
+            elements.historyList.innerHTML = `<div class="empty-state" style="padding:2rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width:80px; display:block; margin:0 auto 1rem; opacity:0.6;"><p style="opacity:0.7;">No workouts found for this selection. 💪</p></div>`;
+            return;
+        }
 
         const grouped = filtered.reduce((acc, d) => { const date = d.date.split('T')[0]; (acc[date] = acc[date] || []).push(d); return acc; }, {});
         const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
@@ -1840,12 +1944,6 @@ document.addEventListener('DOMContentLoaded', () => {
         root.style.setProperty('--accent-end', theme.end);
         root.style.setProperty('--accent-gradient', gradient);
         root.style.setProperty('--accent-text', theme.text || '#ffffff');
-
-        // Update Ambient Background (Opacity variations)
-        document.body.style.backgroundImage = `
-            radial-gradient(circle at 0% 0%, ${hexToRgba(theme.start, 0.15)} 0%, transparent 50%),
-            radial-gradient(circle at 100% 100%, ${hexToRgba(theme.end, 0.15)} 0%, transparent 50%)
-        `;
 
         // Update Mobile Status Bar (meta theme-color)
         const metaThemeColor = document.querySelector("meta[name=theme-color]");
