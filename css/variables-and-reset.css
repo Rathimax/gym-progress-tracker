@@ -22,6 +22,8 @@ input[type="number"] {
   /* Modern Purple Palette */
   --bg: #F5F6FA;
   --card-bg: #FFFFFF;
+  --card-hover-bg: #fbfaf7;
+  /* Bone White */
 
   /* Text Colors */
   --text: #484b6a;
@@ -58,11 +60,16 @@ input[type="number"] {
   --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
   --shadow-btn: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+  /* Background Grid */
+  --grid-color: rgba(0, 0, 0, 0.02);
 }
 
 html.dark-mode {
   --bg: #0f172a;
   --card-bg: #1e293b;
+  --card-hover-bg: #2d3748;
+  /* Subtle lighter grey for dark mode */
   --text: #f8fafc;
   --text-light: #94a3b8;
   --input-bg: #334155;
@@ -84,6 +91,9 @@ html.dark-mode {
   --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
   --shadow-btn: 0 8px 20px rgba(0, 0, 0, 0.4);
+
+  /* Background Grid */
+  --grid-color: rgba(255, 255, 255, 0.03);
 }
 
 html {
@@ -106,4 +116,3 @@ img {
   height: auto;
   display: block;
 }
-

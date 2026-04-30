@@ -1,6 +1,6 @@
 # 🚀 FitTrack: The Intelligent Gym & Diet Ecosystem
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Rathimax/gym-progress-tracker)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Rathimax/gym-progress-tracker)
 [![License: ISC](https://img.shields.io/badge/License-ISC-brightgreen.svg)](https://opensource.org/licenses/ISC)
 [![Framework: Express](https://img.shields.io/badge/Backend-Express-black.svg)](https://expressjs.com/)
 [![AI: Gemini 2.5 Flash](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-orange.svg)](https://ai.google.dev/)

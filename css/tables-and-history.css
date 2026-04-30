@@ -41,8 +41,202 @@ td:first-child {
   color: var(--text-light);
 }
 
+/* History Controls */
+#history-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--input-bg);
+  border-radius: 24px;
+  border: 1px solid var(--card-border);
+}
+
+.history-filters-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group input[type="date"] {
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filter-group input[type="date"]:focus {
+  border-color: var(--accent-start);
+}
+
+.history-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.history-status-text {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.history-status-text strong {
+  color: var(--accent-end);
+}
+
+.btn-clear-filters {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-light);
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-clear-filters:hover {
+  background: var(--card-bg);
+  color: var(--accent-end);
+  border-color: var(--accent-end);
+}
+
+/* Date Scroller */
+.date-scroller-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.date-scroller {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.8rem;
+  padding: 0.5rem 0.2rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  flex: 1;
+}
+
+.date-scroller::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.date-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 75px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.date-item .day-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.date-item .day-number {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.date-item:hover {
+  border-color: var(--accent-start);
+  background: var(--card-hover-bg);
+  transform: translateY(-2px);
+}
+
+.date-item.active {
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  border: none;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.date-item.active .day-name,
+.date-item.active .day-number {
+  color: white;
+}
+
+.calendar-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.btn-open-calendar {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  color: var(--text-light);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-open-calendar:hover {
+  color: var(--accent-end);
+  border-color: var(--accent-end);
+  background: var(--card-bg);
+}
+
+#hidden-date-picker {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+}
+
 /* Mobile Card View */
 @media (max-width: 768px) {
+  .history-filters-grid {
+    grid-template-columns: 1fr;
+  }
+
   #history-list thead {
     display: none;
   }
@@ -78,7 +272,6 @@ td:first-child {
     margin-bottom: 0.5rem;
     padding-left: 0;
     padding-right: 3rem;
-    /* Leave space for delete button */
   }
 
   #history-list td {
@@ -129,8 +322,6 @@ td:first-child {
     border: 1px solid var(--card-border);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     color: #ef4444;
-    /* Make icon red for delete action */
     border-radius: 12px;
   }
 }
-
