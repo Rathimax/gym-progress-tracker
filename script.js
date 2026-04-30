@@ -268,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let bwData = [];
     let prMap = {};
     let prDates = {};
+    let showAllPRs = false;
     let currentChartType = 'weight';
     let analyticsChart = null;
     let isCustomInput = false;
@@ -885,8 +886,49 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updatePRSection = () => {
-        if (Object.keys(prMap).length === 0) { elements.prList.innerHTML = `<div class="empty-state" style="padding:1rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486803.png" style="width:60px; display:block; margin:0 auto 0.5rem; opacity:0.6;"><p style="opacity:0.7;">Log a workout to earn your trophy! <i class="ri-trophy-line"></i></p></div>`; return; }
-        elements.prList.innerHTML = Object.entries(prMap).sort(([exA], [exB]) => exA.localeCompare(exB)).map(([ex, wt]) => `<li class="pr-item"><span class="pr-name"><i class="ri-trophy-fill pr-icon"></i>${ex}</span><span class="pr-weight">${formatWeight(wt)} ${getUnitLabel()}</span></li>`).join('');
+        if (Object.keys(prMap).length === 0) {
+            elements.prList.innerHTML = `<div class="empty-state" style="padding:1rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486803.png" style="width:60px; display:block; margin:0 auto 0.5rem; opacity:0.6;"><p style="opacity:0.7;">Log a workout to earn your trophy! <i class="ri-trophy-line"></i></p></div>`;
+            return;
+        }
+
+        // Sort by date achieved (descending) to show "recent" PRs
+        const sortedPRs = Object.entries(prMap).sort((a, b) => {
+            const dateA = new Date(prDates[a[0]] || 0);
+            const dateB = new Date(prDates[b[0]] || 0);
+            return dateB - dateA;
+        });
+
+        const initialCount = 5;
+        const needsPagination = sortedPRs.length > initialCount;
+        const displayedPRs = showAllPRs ? sortedPRs : sortedPRs.slice(0, initialCount);
+
+        elements.prList.innerHTML = displayedPRs.map(([ex, wt]) => `
+            <li class="pr-item">
+                <span class="pr-name"><i class="ri-trophy-fill pr-icon"></i>${ex}</span>
+                <span class="pr-weight">${formatWeight(wt)} ${getUnitLabel()}</span>
+            </li>
+        `).join('');
+
+        // Add Toggle Button if needed
+        const existingBtn = document.getElementById('btn-toggle-prs');
+        if (existingBtn) existingBtn.remove();
+
+        if (needsPagination) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.id = 'btn-toggle-prs';
+            toggleBtn.className = 'pr-toggle-btn';
+            toggleBtn.innerHTML = showAllPRs ? 
+                `Show Less <i class="ri-arrow-up-s-line"></i>` : 
+                `Show All PRs (${sortedPRs.length}) <i class="ri-arrow-down-s-line"></i>`;
+            
+            toggleBtn.onclick = () => {
+                showAllPRs = !showAllPRs;
+                updatePRSection();
+            };
+            
+            // Append after the list
+            elements.prList.after(toggleBtn);
+        }
     };
 
     // --- HISTORY SECTION (REFINED WITH SCROLL DATE FILTER) ---
