@@ -88,3 +88,19 @@ button[type="submit"]:hover {
   box-shadow: 0 8px 20px rgba(72, 219, 251, 0.3);
 }
 
+@media (max-width: 768px) {
+  input,
+  select {
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+  }
+
+  button {
+    padding: 0.9rem;
+  }
+
+  button[type="submit"] {
+    margin-top: 1.5rem;
+  }
+}
+

@@ -3,11 +3,12 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
 import * as dietService from "./dietService.js"; // New Diet Service
+import { getLiftTier } from './js/services/strengthLeague.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyD0hdb9-NZ3Et3owriYW5d6iEl6JIdqvV4",
@@ -295,7 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
         coachingStyle: 'Balanced',
         proactiveInsights: true,
         // Display
-        macroDisplayMode: 'absolute'
+        macroDisplayMode: 'absolute',
+        // Strength League
+        strengthStandard: 'average'
     };
 
     // Helper: Convert Weight
@@ -885,10 +888,92 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const renderTierBadge = (tierInfo) => {
+        if (!tierInfo || tierInfo.currentTier === 'unranked') return '';
+        const icons = {
+            wood: 'ri-medal-fill', iron: 'ri-medal-fill', gold: 'ri-medal-fill',
+            diamond: 'ri-vip-diamond-fill', netherite: 'ri-meteor-fill',
+            olympian: 'ri-shield-star-fill', inhuman: 'ri-fire-fill'
+        };
+        const icon = icons[tierInfo.currentTier] || 'ri-medal-fill';
+        return `<span class="tier-badge ${tierInfo.currentTier}" title="${tierInfo.isFallback ? 'Beta: Estimated from Bench Press' : ''}"><i class="${icon}"></i> ${tierInfo.currentTier}</span>`;
+    };
+
+    const renderTierProgressBar = (tierInfo) => {
+        if (!tierInfo || tierInfo.currentTier === 'inhuman') return '';
+        return `
+            <div class="tier-progress-container">
+                <div class="tier-progress-label">
+                    <span>${tierInfo.currentTier.toUpperCase()}</span>
+                    <span>NEXT: ${tierInfo.nextTier.toUpperCase()}</span>
+                </div>
+                <div class="tier-progress-bg">
+                    <div class="tier-progress-fill" style="width: ${tierInfo.progressPct}%;"></div>
+                </div>
+            </div>
+        `;
+    };
+
+    const triggerTierUpCelebration = (tier, exercise) => {
+        const overlay = document.createElement('div');
+        overlay.className = `tier-up-celebration ${tier}`;
+        const titles = {
+            wood: 'WOOD TIER', iron: 'IRON TIER', gold: 'GOLD TIER',
+            diamond: 'DIAMOND TIER', netherite: 'NETHERITE TIER',
+            olympian: 'OLYMPIAN!', inhuman: 'INHUMAN STRENGTH!'
+        };
+        overlay.innerHTML = `
+            <h1>${titles[tier] || tier.toUpperCase()}</h1>
+            <p style="color:#aaa; font-size:1.2rem;">You've reached a new rank in ${exercise}!</p>
+        `;
+        document.body.appendChild(overlay);
+        
+        // Use confetti if available
+        if (window.confetti) {
+            const colors = {
+                wood: ['#8B6F47', '#a38253'], iron: ['#A8A9AD', '#ffffff'], gold: ['#FFD700', '#FFA500'],
+                diamond: ['#4FD8FF', '#ffffff'], netherite: ['#2B1B33', '#8a2be2'],
+                olympian: ['#D4AF37', '#ffffff'], inhuman: ['#FF1744', '#000000']
+            };
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: colors[tier] || ['#bbbbbb']
+            });
+        }
+
+        setTimeout(() => {
+            overlay.classList.add('fade-out');
+            setTimeout(() => overlay.remove(), 500);
+        }, 3000);
+    };
+
+    let previousTiers = {}; // To detect new PR tier ups
+
     const updatePRSection = () => {
+        const dashboardContainer = document.getElementById('league-dashboard-container');
+        const emptyState = document.getElementById('league-empty-state');
+
         if (Object.keys(prMap).length === 0) {
             elements.prList.innerHTML = `<div class="empty-state" style="padding:1rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486803.png" style="width:60px; display:block; margin:0 auto 0.5rem; opacity:0.6;"><p style="opacity:0.7;">Log a workout to earn your trophy! <i class="ri-trophy-line"></i></p></div>`;
+            if (emptyState) emptyState.style.display = 'block';
             return;
+        }
+
+        // Determine Bodyweight
+        let userBw = null;
+        if (bwData && bwData.length > 0) {
+            userBw = bwData[bwData.length - 1].weight; // Most recent bodyweight
+        }
+
+        if (emptyState) {
+            if (!userBw) {
+                emptyState.innerHTML = 'Log your bodyweight to unlock Strength League rankings!';
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
         }
 
         // Sort by date achieved (descending) to show "recent" PRs
@@ -901,13 +986,60 @@ document.addEventListener('DOMContentLoaded', () => {
         const initialCount = 5;
         const needsPagination = sortedPRs.length > initialCount;
         const displayedPRs = showAllPRs ? sortedPRs : sortedPRs.slice(0, initialCount);
+        
+        let leaguesHtml = '';
+        
+        if (userBw) {
+            sortedPRs.forEach(([ex, wt]) => {
+                const tierInfo = getLiftTier(ex, wt, userBw, userPreferences.strengthStandard || 'average');
+                if (tierInfo && tierInfo.currentTier !== 'unranked') {
+                    const prevTier = previousTiers[ex];
+                    if (prevTier && prevTier !== tierInfo.currentTier) {
+                        const tierOrder = ["wood", "iron", "gold", "diamond", "netherite", "olympian", "inhuman"];
+                        if (tierOrder.indexOf(tierInfo.currentTier) > tierOrder.indexOf(prevTier)) {
+                            triggerTierUpCelebration(tierInfo.currentTier, ex);
+                            // Also update firebase document
+                            if (auth.currentUser) {
+                                setDoc(doc(db, `users/${auth.currentUser.uid}/exerciseTiers`, ex.replace(/\//g, '-')), {
+                                    currentTier: tierInfo.currentTier,
+                                    achievedAt: Date.now(),
+                                    bestLiftKg: wt
+                                }, { merge: true });
+                            }
+                        }
+                    }
+                    previousTiers[ex] = tierInfo.currentTier;
 
-        elements.prList.innerHTML = displayedPRs.map(([ex, wt]) => `
-            <li class="pr-item">
-                <span class="pr-name"><i class="ri-trophy-fill pr-icon"></i>${ex}</span>
-                <span class="pr-weight">${formatWeight(wt)} ${getUnitLabel()}</span>
-            </li>
-        `).join('');
+                    leaguesHtml += `
+                        <div class="league-card">
+                            <div class="league-card-header">
+                                <span class="league-card-exercise">${ex}</span>
+                                ${renderTierBadge(tierInfo)}
+                            </div>
+                            <div class="league-card-pr">Current PR: ${wt} kg</div>
+                            ${renderTierProgressBar(tierInfo)}
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        elements.prList.innerHTML = displayedPRs.map(([ex, wt]) => {
+            return `
+                <li class="pr-item">
+                    <span class="pr-name"><i class="ri-trophy-fill pr-icon"></i>${ex}</span>
+                    <span class="pr-weight">${formatWeight(wt)} ${getUnitLabel()}</span>
+                </li>
+            `;
+        }).join('');
+
+        if (dashboardContainer && userBw) {
+            if (leaguesHtml) {
+                dashboardContainer.innerHTML = leaguesHtml;
+            } else {
+                dashboardContainer.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-light);">Log more compound lifts to see your strength tiers.</div>';
+            }
+        }
 
         // Add Toggle Button if needed
         const existingBtn = document.getElementById('btn-toggle-prs');
@@ -2055,6 +2187,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 userPreferences.units = e.target.checked ? 'lbs' : 'kg';
                 applyUnits(userPreferences.units);
                 savePreferences();
+            });
+        }
+
+        // Strength Standard
+        const strengthStandardSelect = document.getElementById('strength-standard-select');
+        if (strengthStandardSelect) {
+            strengthStandardSelect.value = userPreferences.strengthStandard || 'average';
+            strengthStandardSelect.addEventListener('change', (e) => {
+                userPreferences.strengthStandard = e.target.value;
+                savePreferences();
+                updatePRSection(); // Re-render PR badges on change
             });
         }
 

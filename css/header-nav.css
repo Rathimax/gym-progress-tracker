@@ -103,7 +103,7 @@ header {
 @media (max-width: 768px) {
   .mode-toggle .toggle-btn {
     padding: 6px 10px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 }
 

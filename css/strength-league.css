@@ -1,0 +1,181 @@
+/* Strength League Badges */
+.tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    margin-left: auto;
+}
+
+.tier-badge.wood {
+    background: #8B6F47;
+    border: 1px solid #a38253;
+}
+
+.tier-badge.iron {
+    background: #A8A9AD;
+    color: #333;
+    border: 1px solid #c8c8cc;
+}
+
+.tier-badge.gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    border: 1px solid #ffea00;
+}
+
+.tier-badge.diamond {
+    background: linear-gradient(135deg, #4FD8FF, #00b4d8);
+    border: 1px solid #bdf1ff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.tier-badge.netherite {
+    background: #2B1B33;
+    border: 1px solid #5d3a6e;
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+}
+
+.tier-badge.olympian {
+    background: linear-gradient(135deg, #D4AF37, #AA8A2A);
+    border: 1px solid #f7df8f;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+    color: #000;
+}
+
+.tier-badge.inhuman {
+    background: #111;
+    color: #FF1744;
+    border: 1px solid #FF1744;
+    box-shadow: 0 0 12px rgba(255, 23, 68, 0.8);
+    text-shadow: 0 0 5px rgba(255, 23, 68, 0.8);
+}
+
+.tier-badge i {
+    font-size: 1rem;
+}
+
+/* Tier Progress Bar */
+.tier-progress-container {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.tier-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-bottom: 0.2rem;
+}
+
+.tier-progress-bg {
+    width: 100%;
+    height: 6px;
+    background: var(--input-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.tier-progress-fill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+/* Leagues Dashboard Grid */
+.leagues-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.league-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.league-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.league-card-exercise {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.league-card-pr {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Celebration Animation Styles */
+.tier-up-celebration {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 9999;
+    text-align: center;
+    background: rgba(0,0,0,0.9);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid var(--accent-end);
+    animation: popIn 0.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tier-up-celebration h1 {
+    font-size: 3rem;
+    margin: 0 0 1rem 0;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tier-up-celebration.olympian {
+    border-color: #D4AF37;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+}
+
+.tier-up-celebration.inhuman {
+    border-color: #FF1744;
+    box-shadow: 0 0 40px rgba(255, 23, 68, 0.8);
+    background: #000;
+}
+
+.tier-up-celebration.inhuman h1 {
+    background: linear-gradient(135deg, #FF1744, #ff5252);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.fade-out {
+    animation: fadeOut 0.5s forwards ease-in-out;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}

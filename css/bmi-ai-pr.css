@@ -239,10 +239,43 @@ button.refresh-btn:hover {
     flex-direction: column;
   }
 
+  #view-ai .card {
+    padding: 0.8rem; /* smaller padding for AI card to maximize space */
+  }
+
   #view-ai .card-wide {
     flex: 1;
     height: calc(100dvh - 65px - 65px - 2rem) !important;
-    /* 65px header + 65px bottom-nav + container top padding */
+  }
+
+  .ai-chat-container {
+    padding: 0 !important;
+  }
+
+  .ai-message {
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  #ai-chat-input {
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  #ai-chat-send {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  .ai-input-area {
+    padding-top: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  #ai-chat-messages {
+    padding: 0.5rem;
+    gap: 0.8rem;
   }
 }
 
@@ -258,8 +291,9 @@ button.refresh-btn:hover {
 
 .pr-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.85rem 1.1rem;
   background: var(--input-bg);
   border-radius: 16px;
@@ -279,6 +313,7 @@ button.refresh-btn:hover {
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--text);
+  word-break: break-word;
 }
 
 .pr-icon {
@@ -295,6 +330,7 @@ button.refresh-btn:hover {
   padding: 0.3rem 0.8rem;
   border-radius: 50px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── Weekly Summary Card ── */
@@ -306,16 +342,38 @@ button.refresh-btn:hover {
 
 @media (max-width: 600px) {
   .weekly-grid {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
+    gap: 0.8rem;
   }
-
+  
   .weekly-stat {
-    padding: 0.9rem 0.6rem;
+    padding: 1rem 0.5rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .weekly-stat-value {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  .weekly-stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    margin-top: 0.4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
   }
 }
 

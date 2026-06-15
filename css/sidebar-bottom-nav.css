@@ -134,7 +134,7 @@ header {
   /* 1. Body Padding Shift */
   body {
     padding-left: 0;
-    padding-bottom: 80px;
+    padding-bottom: 70px;
     /* Space for bottom bar */
   }
 
@@ -144,7 +144,7 @@ header {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 70px;
+    height: 60px;
     border-right: none;
     border-top: 1px solid var(--card-border);
     flex-direction: row;
@@ -175,9 +175,9 @@ header {
   }
 
   .nav-item {
-    padding: 0.5rem;
+    padding: 0.3rem;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     border-radius: 0;
     background: transparent !important;
     /* Remove active bg shape */
@@ -188,11 +188,11 @@ header {
   }
 
   .nav-item .icon {
-    font-size: 1.4rem;
+    font-size: 1.15rem;
   }
 
   .nav-item .label {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     font-weight: 600;
   }
 
@@ -234,8 +234,8 @@ header {
 
   /* Lift Timer above Bottom Bar */
   .timer-widget {
-    bottom: 95px !important;
-    /* 70px nav + 25px margin */
+    bottom: 80px !important;
+    /* 60px nav + 20px margin */
     right: 20px;
   }
 }

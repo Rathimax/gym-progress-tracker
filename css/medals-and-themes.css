@@ -264,3 +264,64 @@ body.mode-compact .history-date table th {
   background-color: #fff;
 }
 
+@media (max-width: 768px) {
+  /* Settings Tightening */
+  .setting-item {
+    margin-bottom: 1.2rem;
+    padding-bottom: 1rem;
+  }
+
+  .setting-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .segmented-control {
+    padding: 3px;
+  }
+
+  .segment-btn {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  /* Theme Grid Compression */
+  .theme-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .theme-option {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .theme-preview {
+    width: 35px;
+    height: 35px;
+  }
+
+  .theme-name {
+    font-size: 0.65rem;
+  }
+
+  /* Medals (Existing) */
+  .medal-card {
+    min-height: 90px;
+    padding: 0.6rem;
+  }
+
+  .medal-card .icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .medal-card .name {
+    font-size: 0.7rem;
+  }
+
+  .medal-card .status {
+    font-size: 0.6rem;
+  }
+}
+
