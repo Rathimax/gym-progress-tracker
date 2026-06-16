@@ -1449,6 +1449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elements.themeToggle.addEventListener('change', (e) => {
             document.documentElement.classList.toggle('dark-mode', e.target.checked);
+            document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
             document.body.classList.toggle('dark-mode', e.target.checked);
             userPreferences.darkMode = e.target.checked;
             savePreferences();
@@ -2158,8 +2159,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Apply Dark Mode
         if (userPreferences.darkMode) {
             document.documentElement.classList.add('dark-mode');
+            document.documentElement.setAttribute('data-theme', 'dark');
             document.body.classList.add('dark-mode');
             if (elements.themeToggle) elements.themeToggle.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
         }
         // Apply Units
         applyUnits(userPreferences.units || 'kg');
