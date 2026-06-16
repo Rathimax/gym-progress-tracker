@@ -325,3 +325,68 @@ body.mode-compact .history-date table th {
   }
 }
 
+/* --- CUSTOM THEME TOGGLE (SUN/MOON) --- */
+.theme-toggle-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 64px;
+  height: 32px;
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  padding: 0 7px;
+  transition: 0.3s;
+  box-sizing: border-box;
+  background-color: #111111;
+  border: 2px solid #2b2b2b;
+}
+
+.theme-toggle-label i {
+  font-size: 0.9rem;
+  z-index: 1;
+  transition: 0.3s;
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #333333;
+  transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Light mode specific */
+body:not(.dark-mode) .theme-toggle-label {
+  background-color: #ffffff;
+  border-color: #f0f0f0;
+}
+body:not(.dark-mode) .theme-toggle-thumb {
+  background-color: #f3f4f6;
+  transform: translateX(32px); /* 64 - 4 (borders) - 4 (padding) - 24 = 32 */
+}
+body:not(.dark-mode) .theme-toggle-label .sun-icon {
+  color: #1f2937;
+}
+body:not(.dark-mode) .theme-toggle-label .moon-icon {
+  color: #000000;
+}
+
+/* Dark mode specific */
+body.dark-mode .theme-toggle-label {
+  background-color: #000000;
+  border-color: #374151;
+}
+body.dark-mode .theme-toggle-thumb {
+  background-color: #1f2937;
+  transform: translateX(0px); /* Stays on left */
+}
+body.dark-mode .theme-toggle-label .sun-icon {
+  color: #6b7280;
+}
+body.dark-mode .theme-toggle-label .moon-icon {
+  color: #ffffff;
+}

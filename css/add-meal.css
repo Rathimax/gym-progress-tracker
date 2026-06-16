@@ -54,6 +54,23 @@
   font-size: 1.05rem;
 }
 
+/* Responsive Scaling for Mobile */
+@media (max-width: 768px) {
+  .add-meal-toggle {
+    padding: 3px;
+    margin-bottom: 1rem;
+    max-width: 320px;
+  }
+  .add-meal-toggle-btn {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.8rem;
+    gap: 4px;
+  }
+  .add-meal-toggle-btn i {
+    font-size: 0.95rem;
+  }
+}
+
 /* Sub-view visibility */
 .add-meal-subview {
   display: none;

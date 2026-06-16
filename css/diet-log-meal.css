@@ -54,26 +54,17 @@
 
 /* Form Card */
 .lm-card {
-  background: var(--card-bg, rgba(30, 41, 59, 0.7));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 30px;
   padding: 1.75rem;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  box-shadow: var(--shadow-lg);
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.lm-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, var(--accent-start), var(--accent-end));
-  border-radius: 20px 0 0 20px;
-}
+/* Colored side lines on cards have been removed */
 
 .lm-form {
   display: flex;
@@ -328,6 +319,52 @@
   .dd-hero-sub {
     font-size: 0.75rem;
   }
+
+  /* Add Meal Card Mobile Adjustments */
+  .lm-card {
+    padding: 1.25rem;
+    border-radius: 20px;
+  }
+  
+  .lm-form {
+    gap: 1.2rem;
+  }
+  
+  .lm-section {
+    gap: 0.5rem;
+  }
+  
+  .lm-label {
+    font-size: 0.75rem;
+  }
+  
+  .lm-pill {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  .lm-input-wrap input {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .lm-macro {
+    padding: 0.75rem;
+  }
+  
+  .lm-macro-head {
+    font-size: 0.75rem;
+  }
+  
+  .lm-macro-input-wrap input {
+    padding: 0.5rem 2.5rem 0.5rem 0.6rem;
+    font-size: 0.95rem;
+  }
+  
+  .lm-submit {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 500px) {
@@ -341,11 +378,6 @@
 }
 
 /* Light Mode */
-body:not(.dark-mode) .lm-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
-}
 
 body:not(.dark-mode) .lm-hero-title {
   color: var(--text-primary, #1e293b);

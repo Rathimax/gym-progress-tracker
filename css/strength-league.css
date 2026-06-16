@@ -1,3 +1,92 @@
+/* Expandable Search in Header */
+.league-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.league-header h2 {
+    margin: 0;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.expandable-search {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+    height: 36px;
+}
+
+.expandable-search input {
+    width: 0;
+    opacity: 0;
+    padding: 0;
+    border: none;
+    background: var(--input-bg);
+    color: var(--text);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    height: 100%;
+    transition: width 0.3s ease, opacity 0.3s ease, padding 0.3s ease, border-color 0.3s ease;
+    outline: none;
+}
+
+.expandable-search.active input {
+    width: 180px;
+    opacity: 1;
+    padding: 0 2.5rem 0 1rem;
+    border: 1px solid var(--card-border);
+}
+
+.expandable-search.active input:focus {
+    border-color: #6366f1;
+}
+
+.expandable-search .search-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.expandable-search .search-toggle-btn:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.expandable-search.active .search-toggle-btn {
+    color: var(--text);
+}
+
+@media (max-width: 450px) {
+    .league-header {
+        gap: 0.5rem;
+    }
+    .league-header h2 {
+        font-size: 1.2rem;
+    }
+    .expandable-search.active input {
+        width: 130px;
+        font-size: 0.8rem;
+    }
+}
+
 /* Strength League Badges */
 .tier-badge {
     display: inline-flex;

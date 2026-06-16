@@ -145,13 +145,41 @@
 
     <!-- DIET SIDEBAR (Hidden by default) -->
     <ul id="sidebar-diet" class="nav-links hidden-mode">
-      <li class="nav-item active" data-target="view-diet-dashboard"><span class="icon"><i
-            class="ri-dashboard-line"></i></span> <span class="label">Dashboard</span>
+      <li class="nav-item active" data-target="view-diet-dashboard"><span class="icon">
+<svg class="diet-hub-icon" viewBox="0 0 24 24" width="1.0em" height="1.0em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -2px;">
+  <rect x="3" y="3" width="7" height="7" rx="1.5" />
+  <rect x="14" y="3" width="7" height="7" rx="1.5" />
+  <rect x="3" y="14" width="7" height="7" rx="1.5" />
+  <circle cx="17.5" cy="17.5" r="3.5" />
+  <path d="M17.5 14v-1.5c1.5 0 2.5-.5 2.5-1.5 0 1-1 2-2.5 2z" fill="currentColor" stroke="none" />
+</svg></span> <span class="label">Dashboard</span>
       </li>
-      <li class="nav-item" data-target="view-diet-add-meal"><span class="icon"><i class="ri-add-circle-line"></i></span>
+      <li class="nav-item" data-target="view-diet-add-meal"><span class="icon">
+<svg class="ramen-icon" viewBox="0 0 64 64" width="1.25em" height="1.25em" style="vertical-align: middle; margin-top: -2px;">
+  <path d="M32 36L30 22l8 8 10-8-2 14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="36" cy="32" r="2.5" fill="currentColor"/>
+  <circle cx="44" cy="32" r="2.5" fill="currentColor"/>
+  <line x1="58" y1="12" x2="16" y2="36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="62" y1="18" x2="20" y2="42" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M22 36V22c0-5 6-7 8-4s3 8 3 14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 36v-6c0-4 4-6 6-3v9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 36c0 12 9 20 20 20s20-8 20-20H12z" fill="var(--bg-dark, #0f172a)" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M16 43c8 5 24 5 32 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M22 50c5 3 15 3 20 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M26 56v4h12v-4" fill="var(--bg-dark, #0f172a)" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+</svg></span>
         <span class="label">Add Meal</span>
       </li>
-      <li class="nav-item" data-target="view-diet-history"><span class="icon"><i class="ri-history-line"></i></span>
+      <li class="nav-item" data-target="view-diet-history"><span class="icon">
+<svg class="diet-history-icon" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -2px;">
+  <circle cx="12" cy="12" r="5" />
+  <path d="M12 9v3l1.5 1.5" stroke-width="1.5" />
+  <path d="M4 4v16" /> 
+  <path d="M2 4v3c0 1.1.9 2 2 2" /> 
+  <path d="M6 4v3c0 1.1-.9 2-2 2" /> 
+  <path d="M20 4v16" />
+  <path d="M20 4c-2 0-3 1.5-3 4v3h3" />
+</svg></span>
         <span class="label">History</span>
       </li>
       <li class="nav-item" data-target="view-diet-ai-coach"><span class="icon"><i class="ri-user-heart-line"></i></span>
@@ -529,7 +557,15 @@
 
       <!-- Strength League Dashboard -->
       <div class="card card-wide" style="margin-top: 1.5rem;">
-        <h2><span class="icon"><i class="ri-sword-fill"></i></span> Strength League</h2>
+        <div class="league-header">
+          <h2><span class="icon"><i class="ri-sword-fill"></i></span> Strength League</h2>
+          <div class="expandable-search" id="league-search-container">
+            <input type="text" id="league-search-input" placeholder="Search exercise..." aria-label="Search exercise">
+            <button class="search-toggle-btn" id="league-search-btn" aria-label="Toggle search">
+              <i class="ri-search-line"></i>
+            </button>
+          </div>
+        </div>
         <div id="league-dashboard-container" class="leagues-grid">
            <!-- Populated by JS -->
            <div id="league-empty-state" style="text-align:center; padding: 2rem; color: var(--text-light);">
@@ -542,7 +578,15 @@
     <!-- VIEW 4: TOOLS -->
     <div id="view-tools" class="view-section">
       <div class="card">
-        <h2><span class="icon"><i class="ri-cup-fill"></i></span> Personal Records</h2>
+        <div class="league-header">
+          <h2><span class="icon"><i class="ri-cup-fill"></i></span> Personal Records</h2>
+          <div class="expandable-search" id="pr-search-container">
+            <input type="text" id="pr-search-input" placeholder="Search exercise..." aria-label="Search exercise">
+            <button class="search-toggle-btn" id="pr-search-btn" aria-label="Toggle search">
+              <i class="ri-search-line"></i>
+            </button>
+          </div>
+        </div>
         <div id="pr-section">
           <ul id="pr-list"></ul>
         </div>
@@ -765,8 +809,14 @@
         <div class="setting-item">
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <label class="setting-label" style="margin:0;">Dark Mode</label>
-            <div class="switch"><input type="checkbox" id="theme-toggle" /><label for="theme-toggle"
-                class="toggle-switch"></label></div>
+            <div class="switch">
+              <input type="checkbox" id="theme-toggle" />
+              <label for="theme-toggle" class="theme-toggle-label">
+                <i class="ri-moon-clear-line moon-icon"></i>
+                <i class="ri-sun-line sun-icon"></i>
+                <span class="theme-toggle-thumb"></span>
+              </label>
+            </div>
           </div>
           <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.3rem;">Switch between light and dark themes.
           </p>
@@ -1608,15 +1658,44 @@
   <!-- Mobile Bottom Navigation (Diet) -->
   <nav id="nav-diet" class="bottom-nav hidden-mode">
     <div class="nav-item ripple active" data-target="view-diet-dashboard">
-      <span class="icon"><i class="ri-dashboard-line"></i></span>
+      <span class="icon">
+<svg class="diet-hub-icon" viewBox="0 0 24 24" width="1.0em" height="1.0em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -2px;">
+  <rect x="3" y="3" width="7" height="7" rx="1.5" />
+  <rect x="14" y="3" width="7" height="7" rx="1.5" />
+  <rect x="3" y="14" width="7" height="7" rx="1.5" />
+  <circle cx="17.5" cy="17.5" r="3.5" />
+  <path d="M17.5 14v-1.5c1.5 0 2.5-.5 2.5-1.5 0 1-1 2-2.5 2z" fill="currentColor" stroke="none" />
+</svg></span>
       <span class="label">Hub</span>
     </div>
     <div class="nav-item ripple" data-target="view-diet-add-meal">
-      <span class="icon"><i class="ri-add-circle-line"></i></span>
+      <span class="icon">
+<svg class="ramen-icon" viewBox="0 0 64 64" width="1.25em" height="1.25em" style="vertical-align: middle; margin-top: -2px;">
+  <path d="M32 36L30 22l8 8 10-8-2 14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="36" cy="32" r="2.5" fill="currentColor"/>
+  <circle cx="44" cy="32" r="2.5" fill="currentColor"/>
+  <line x1="58" y1="12" x2="16" y2="36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="62" y1="18" x2="20" y2="42" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M22 36V22c0-5 6-7 8-4s3 8 3 14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 36v-6c0-4 4-6 6-3v9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 36c0 12 9 20 20 20s20-8 20-20H12z" fill="var(--bg-dark, #0f172a)" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M16 43c8 5 24 5 32 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M22 50c5 3 15 3 20 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M26 56v4h12v-4" fill="var(--bg-dark, #0f172a)" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+</svg></span>
       <span class="label">Add</span>
     </div>
     <div class="nav-item ripple" data-target="view-diet-history">
-      <span class="icon"><i class="ri-history-line"></i></span>
+      <span class="icon">
+<svg class="diet-history-icon" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -2px;">
+  <circle cx="12" cy="12" r="5" />
+  <path d="M12 9v3l1.5 1.5" stroke-width="1.5" />
+  <path d="M4 4v16" /> 
+  <path d="M2 4v3c0 1.1.9 2 2 2" /> 
+  <path d="M6 4v3c0 1.1-.9 2-2 2" /> 
+  <path d="M20 4v16" />
+  <path d="M20 4c-2 0-3 1.5-3 4v3h3" />
+</svg></span>
       <span class="label">History</span>
     </div>
     <div class="nav-item ripple" data-target="view-diet-ai-coach">

@@ -69,7 +69,9 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   padding: 10px 16px;
@@ -90,8 +92,8 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--input-bg, rgba(51, 65, 85, 0.5));
   color: var(--text-light, #94a3b8);
   font-size: 1.4rem;
   display: flex;
@@ -118,8 +120,8 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--input-bg, rgba(51, 65, 85, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   padding: 8px 18px;
   font-size: 0.95rem;
@@ -145,13 +147,13 @@
 
 /* ── Premium Glass Summary Card ── */
 .dh-summary-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 20px;
   padding: 2rem 1.5rem 1.5rem;
   margin-bottom: 1.75rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
@@ -241,13 +243,14 @@
   gap: 4px;
   padding: 10px 6px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--input-bg, rgba(51, 65, 85, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.04);
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .dh-macro:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg, rgba(51, 65, 85, 0.8));
 }
 
 .dh-macro i {
@@ -322,7 +325,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-left: 4px solid #6366f1;
   border-radius: 14px;
@@ -334,7 +339,7 @@
 .dh-meal-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(40, 53, 75, 0.85);
 }
 
 .dh-meal-card:active {
@@ -457,11 +462,13 @@
 }
 
 .dh-weekly-stat {
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 1.25rem 1rem;
   text-align: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -510,11 +517,13 @@
 
 /* ── Chart Cards ── */
 .dh-chart-card {
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 1.25rem;
   margin-bottom: 1rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .dh-chart-card h3 {
@@ -556,15 +565,63 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .dh-summary-macros {
-    grid-template-columns: repeat(2, 1fr);
+  .dh-summary-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .dh-date-picker-row {
+    padding: 8px 12px;
+  }
+
+  .dh-date-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+  }
+
+  .dh-date-display {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    min-width: 140px;
+  }
+
+  .dh-hero-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .dh-hero-icon i {
+    font-size: 1.2rem;
   }
 
   .dh-hero-value {
-    font-size: 2.4rem;
+    font-size: 2.2rem;
+  }
+
+  .dh-summary-macros {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding-top: 1rem;
+  }
+
+  .dh-macro {
+    padding: 8px 4px;
+  }
+
+  .dh-macro i {
+    font-size: 1rem;
+  }
+
+  .dh-macro-val {
+    font-size: 1rem;
+  }
+
+  .dh-macro-label {
+    font-size: 0.65rem;
   }
 
   .dh-meal-card {
+    padding: 0.85rem 1rem;
     flex-direction: column;
     gap: 0.75rem;
   }
@@ -577,23 +634,66 @@
 
   .dh-weekly-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 
   .dh-segmented-toggle {
     width: calc(100% - 2rem);
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin: 0 auto 1.25rem auto;
   }
 
   .dh-toggle-btn {
     flex: 1;
     justify-content: center;
-    padding: 10px 12px;
-    font-size: 0.85rem;
+    padding: 8px 10px;
+    font-size: 0.8rem;
   }
 
   .dh-toggle-track {
     width: calc(50% - 4px);
+  }
+
+  .dh-insights-banner {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .dh-insights-banner i {
+    font-size: 1rem;
+  }
+
+  .dh-weekly-stat {
+    padding: 0.85rem 0.5rem;
+    border-radius: 12px;
+  }
+
+  .dh-weekly-stat i {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .dh-weekly-val {
+    font-size: 1.15rem;
+  }
+
+  .dh-weekly-label {
+    font-size: 0.6rem;
+  }
+
+  .dh-chart-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .dh-chart-card h3 {
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .dh-chart-wrap {
+    height: 180px;
   }
 }
 

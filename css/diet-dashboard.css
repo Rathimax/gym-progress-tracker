@@ -84,22 +84,16 @@
 
 /* Cards */
 .dd-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 30px;
   padding: 2rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-}
-
-body:not(.dark-mode) .dd-card {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dd-card-title {
@@ -203,17 +197,12 @@ body:not(.dark-mode) .dd-card {
 }
 
 .dd-cal-box {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: var(--input-bg);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 1.2rem;
   text-align: center;
   width: 100%;
-}
-
-body:not(.dark-mode) .dd-cal-box {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: rgba(0, 0, 0, 0.05);
 }
 
 .dd-cal-label {
@@ -407,3 +396,55 @@ body:not(.dark-mode) .dd-btn-sub-water:hover {
   background: #fee2e2;
 }
 
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .dd-card {
+    padding: 1.25rem;
+    border-radius: 20px;
+  }
+  .dd-card-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .calorie-ring-container {
+    width: 180px;
+    height: 180px;
+  }
+  .calorie-text .consumed-val {
+    font-size: 2.5rem;
+  }
+  .calorie-text .goal-val {
+    font-size: 0.85rem;
+  }
+  .dd-cal-display {
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  .dd-cal-value {
+    font-size: 1.4rem;
+  }
+  .dd-cal-label {
+    font-size: 0.75rem;
+  }
+  .dd-hero-compact .dd-hero-title {
+    font-size: 1.25rem;
+  }
+  .dd-hero-compact .dd-hero-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+  .macro-label {
+    font-size: 0.9rem;
+  }
+  .macro-row {
+    gap: 0.5rem;
+  }
+  .dd-water-actions {
+    margin-top: 1.5rem;
+  }
+  .dd-btn-add-water, .dd-btn-sub-water {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+}

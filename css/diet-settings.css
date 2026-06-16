@@ -65,42 +65,25 @@
   padding: 1.5rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.ds-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  border-radius: 20px 0 0 20px;
-}
-
-.ds-card--goals::before {
-  background: linear-gradient(180deg, #f97316, #fb923c);
-}
-
-.ds-card--ai::before {
-  background: linear-gradient(180deg, #8b5cf6, #a78bfa);
-}
-
-.ds-card--data::before {
-  background: linear-gradient(180deg, #14b8a6, #5eead4);
-}
+/* Colored side lines on cards have been removed */
 
 .ds-card--goals {
   grid-column: 1;
+  z-index: 10;
 }
 
 .ds-card--ai {
   grid-column: 2;
   grid-row: 1 / 3;
+  z-index: 5;
 }
 
 .ds-card--data {
   grid-column: 1;
+  z-index: 1;
 }
 
 .ds-card:hover {
@@ -271,6 +254,56 @@
   padding-right: 2rem;
 }
 
+/* Custom Dropdown Overrides for Diet Settings */
+.ds-field .custom-select-trigger {
+  background: var(--input-bg, rgba(51, 65, 85, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text, #f8fafc);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.ds-field .custom-select-wrapper.open .custom-select-trigger {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: var(--input-bg, rgba(51, 65, 85, 0.8));
+}
+
+.ds-field .custom-options {
+  background: var(--card-bg, rgba(30, 41, 59, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-top: 0.5rem;
+}
+
+.ds-field .custom-option {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text, #f8fafc);
+}
+
+.ds-field .custom-option:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: white;
+  padding-left: 1.25rem;
+}
+
+.ds-field .custom-option.selected {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.4));
+  color: #c4b5fd;
+  border-left: 3px solid #8b5cf6;
+}
+
 /* Coaching Pills */
 .ds-coaching-pills {
   display: flex;
@@ -413,12 +446,30 @@
     font-size: 0.75rem;
   }
 
+  .ds-card-header {
+    margin-bottom: 1rem;
+    gap: 0.65rem;
+  }
+
   .ds-card-header h3 {
     font-size: 0.95rem;
   }
 
+  .ds-card-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+
   .ds-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .ds-card {
+    padding: 1rem;
+    border-radius: 16px;
   }
 
   .ds-card--goals,
@@ -426,6 +477,33 @@
   .ds-card--data {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .ds-field input,
+  .ds-field select,
+  .ds-field .custom-select-trigger {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .ds-pill {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .ds-action-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .ds-toggle-row {
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+  }
+
+  .ds-card .btn-primary {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
   }
 }
 

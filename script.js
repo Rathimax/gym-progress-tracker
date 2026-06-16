@@ -1033,11 +1033,23 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
+        // Re-apply PR search filter if active
+        const prSearchInput = document.getElementById('pr-search-input');
+        if (prSearchInput && prSearchInput.value) {
+            prSearchInput.dispatchEvent(new Event('input'));
+        }
+
         if (dashboardContainer && userBw) {
             if (leaguesHtml) {
                 dashboardContainer.innerHTML = leaguesHtml;
             } else {
                 dashboardContainer.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-light);">Log more compound lifts to see your strength tiers.</div>';
+            }
+            
+            // Re-apply search filter if active
+            const searchInput = document.getElementById('league-search-input');
+            if (searchInput && searchInput.value) {
+                searchInput.dispatchEvent(new Event('input'));
             }
         }
 
@@ -2199,6 +2211,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 savePreferences();
                 updatePRSection(); // Re-render PR badges on change
             });
+            if (typeof applyCustomDropdown === 'function') {
+                applyCustomDropdown(strengthStandardSelect);
+            }
         }
 
         // Avatar Upload
@@ -3494,6 +3509,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 userPreferences.goalType = goalSelect.value;
                 savePreferences();
             });
+            if (typeof applyCustomDropdown === 'function') {
+                applyCustomDropdown(goalSelect);
+            }
         }
 
         // Coaching Style Pills
@@ -3864,6 +3882,80 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+
+    // --- Strength League Search ---
+    const initLeagueSearch = () => {
+        const searchContainer = document.getElementById('league-search-container');
+        const searchInput = document.getElementById('league-search-input');
+        const searchBtn = document.getElementById('league-search-btn');
+        const dashboard = document.getElementById('league-dashboard-container');
+
+        if (!searchContainer || !searchInput || !searchBtn || !dashboard) return;
+
+        searchBtn.addEventListener('click', () => {
+            searchContainer.classList.toggle('active');
+            if (searchContainer.classList.contains('active')) {
+                searchInput.focus();
+            } else {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input')); // trigger reset
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = dashboard.querySelectorAll('.league-card');
+            cards.forEach(card => {
+                const exNameElem = card.querySelector('.league-card-exercise');
+                if (exNameElem) {
+                    const exName = exNameElem.textContent.toLowerCase();
+                    if (exName.includes(query)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        });
+    };
+    initLeagueSearch();
+
+    // --- PR Search ---
+    const initPRSearch = () => {
+        const searchContainer = document.getElementById('pr-search-container');
+        const searchInput = document.getElementById('pr-search-input');
+        const searchBtn = document.getElementById('pr-search-btn');
+        const prList = document.getElementById('pr-list');
+
+        if (!searchContainer || !searchInput || !searchBtn || !prList) return;
+
+        searchBtn.addEventListener('click', () => {
+            searchContainer.classList.toggle('active');
+            if (searchContainer.classList.contains('active')) {
+                searchInput.focus();
+            } else {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input')); // trigger reset
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const items = prList.querySelectorAll('.pr-item');
+            items.forEach(item => {
+                const exNameElem = item.querySelector('.pr-name');
+                if (exNameElem) {
+                    const exName = exNameElem.textContent.toLowerCase();
+                    if (exName.includes(query)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        });
+    };
+    initPRSearch();
 
     initCalorieQuestionnaire();
 });
