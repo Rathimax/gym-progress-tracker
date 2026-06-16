@@ -390,9 +390,3 @@ body.dark-mode .theme-toggle-label .sun-icon {
 body.dark-mode .theme-toggle-label .moon-icon {
   color: #ffffff;
 }
-
-@media (max-width: 768px) {
-  body.mode-compact .container {
-    padding-bottom: 0.5rem;
-  }
-}

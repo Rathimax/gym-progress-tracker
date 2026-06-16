@@ -176,7 +176,8 @@ body.dark-mode .ripple-element {
 /* Adjust Body Padding for Bottom Nav */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 0;
+    padding-bottom: 80px;
+    /* Ensure content isn't hidden behind nav (65px + padding) */
   }
 
   /* Hide Sidebar on Mobile */

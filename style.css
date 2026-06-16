@@ -127,6 +127,6 @@
 
   /* Add bottom padding to body so content isn't hidden behind floating nav */
   body {
-    padding-bottom: 60px;
+    padding-bottom: 90px;
   }
 }

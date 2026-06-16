@@ -134,8 +134,8 @@ header {
   /* 1. Body Padding Shift */
   body {
     padding-left: 0;
-    padding-bottom: 0;
-    /* Space for bottom bar removed since floating pill handles it */
+    padding-bottom: 70px;
+    /* Space for bottom bar */
   }
 
   /* 2. Mobile Bottom Bar */
