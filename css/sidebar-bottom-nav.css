@@ -15,7 +15,7 @@ body {
   left: 0;
   width: 250px;
   height: 100vh;
-  background: var(--card-bg);
+  background: var(--bg-sidebar);
   border-right: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;

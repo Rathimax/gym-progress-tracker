@@ -21,6 +21,7 @@ input[type="number"] {
 :root {
   /* Modern Purple Palette */
   --bg: #F5F6FA;
+  --bg-sidebar: #FFFFFF;
   --card-bg: #FFFFFF;
   --card-hover-bg: #fbfaf7;
   /* Bone White */
@@ -66,18 +67,19 @@ input[type="number"] {
 }
 
 html.dark-mode {
-  --bg: #0f172a;
-  --card-bg: #1e293b;
-  --card-hover-bg: #2d3748;
+  --bg: #080B14;
+  --bg-sidebar: #0D1320;
+  --card-bg: #0C121D;
+  --card-hover-bg: #161F30;
   /* Subtle lighter grey for dark mode */
-  --text: #f8fafc;
-  --text-light: #94a3b8;
-  --input-bg: #334155;
+  --text: #F1F5F9;
+  --text-light: #94A3B8;
+  --input-bg: #1A2332;
   --card-border: rgba(255, 255, 255, 0.06);
 
   /* Semantic Text Hierarchy (Dark Mode) */
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
   --text-muted: #64748b;
   --text-accent: #fb923c;
 
