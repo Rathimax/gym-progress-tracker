@@ -1747,6 +1747,10 @@
         <p style="font-size:0.85rem; font-weight:700; color:var(--text-light); margin-bottom:0.5rem;">Select
           Exercises:
         </p>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+          <input type="text" id="routine-custom-exercise-input" placeholder="Type a custom exercise..." style="flex:1; padding:0.6rem 1rem; border-radius:12px; border:1px solid var(--card-border); background:var(--input-bg); color:var(--text); font-size:0.9rem;">
+          <button id="btn-add-routine-custom-exercise" type="button" style="background:var(--accent-start); color:white; border:none; border-radius:12px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Add Custom Exercise"><i class="ri-add-line"></i></button>
+        </div>
         <div id="exercise-selection-list" class="selection-grid"
           style="max-height:300px; overflow-y:auto; margin-bottom:1rem; border:1px solid var(--card-border); padding:0.5rem; border-radius:12px;">
         </div>
@@ -1886,7 +1890,7 @@
       <div id="medal-icon" style="font-size:5rem; margin-bottom:1rem; animation: bounce 2s infinite;">🏅</div>
       <h2 id="medal-title" style="color:var(--accent-end); margin-bottom:0.5rem;">New Medal!</h2>
       <p id="medal-desc" style="color:var(--text-light); margin-bottom:1.5rem;">You unlocked a new achievement.</p>
-      <button class="btn-primary"
+      <button id="medal-btn" class="btn-primary"
         onclick="document.getElementById('modal-medal').classList.add('hidden')">Awesome!</button>
     </div>
   </div>

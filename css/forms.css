@@ -71,11 +71,7 @@ button[type="submit"]:hover {
   transform: translateY(-2px) scale(1.01);
 }
 
-.button-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
+
 
 #clear-btn {
   background-color: var(--danger);

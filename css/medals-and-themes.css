@@ -1,4 +1,41 @@
 /* --- MEDAL CASE --- */
+.tier-section {
+  margin-bottom: 2rem;
+}
+
+.tier-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Optional tier colors */
+.tier-easy {
+  color: #cd7f32; /* Bronze */
+}
+.tier-medium {
+  color: #c0c0c0; /* Silver */
+}
+.tier-hard {
+  color: #ffd700; /* Gold */
+}
+
+.tier-title::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
 .medal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));

@@ -1,43 +1,44 @@
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 export const MEDALS = [
     // --- FIRST STEPS ---
-    { id: 'first_workout', name: 'First Log', desc: 'Logged your first workout', icon: 'ri-edit-circle-line' },
-    { id: 'consistency_3', name: '3-Day Streak', desc: 'Logged workouts 3 days in a row', icon: 'ri-fire-fill' },
-    { id: 'consistency_7', name: 'Consistency Champ', desc: 'Workout every day for 7 days', icon: 'ri-calendar-check-fill' },
+    { id: 'first_workout', name: 'First Log', desc: 'Logged your first workout', icon: 'ri-edit-circle-line', tier: 'easy' },
+    { id: 'consistency_3', name: '3-Day Streak', desc: 'Logged workouts 3 days in a row', icon: 'ri-fire-fill', tier: 'easy' },
+    { id: 'consistency_7', name: 'Consistency Champ', desc: 'Workout every day for 7 days', icon: 'ri-calendar-check-fill', tier: 'medium' },
 
     // --- TIME BASED ---
-    { id: 'early_bird', name: 'Early Bird', desc: 'Workout before 7 AM', icon: 'ri-sun-foggy-fill' },
-    { id: 'night_owl', name: 'Night Owl', desc: 'Workout after 9 PM', icon: 'ri-moon-clear-fill' },
-    { id: 'midnight_grind', name: 'Midnight Grind', desc: 'Workout between 12 AM - 4 AM', icon: 'ri-moon-foggy-line' },
+    { id: 'early_bird', name: 'Early Bird', desc: 'Workout before 7 AM', icon: 'ri-sun-foggy-fill', tier: 'easy' },
+    { id: 'night_owl', name: 'Night Owl', desc: 'Workout after 9 PM', icon: 'ri-moon-clear-fill', tier: 'easy' },
+    { id: 'midnight_grind', name: 'Midnight Grind', desc: 'Workout between 12 AM - 4 AM', icon: 'ri-moon-foggy-line', tier: 'medium' },
 
     // --- HABITS ---
-    { id: 'routine_builder', name: 'Routine Builder', desc: 'Logged a workout 2 weeks in a row', icon: 'ri-building-4-line' },
-    { id: 'never_miss_monday', name: 'Never Miss Monday', desc: 'Workout every Monday for 4 weeks', icon: 'ri-calendar-event-fill' },
-    { id: 'comeback_kid', name: 'Comeback Kid', desc: 'Returned after a 7+ day break', icon: 'ri-repeat-line' },
-    { id: 'month_strong', name: 'Month Strong', desc: '20+ workouts in a single month', icon: 'ri-calendar-fill' },
+    { id: 'routine_builder', name: 'Routine Builder', desc: 'Logged a workout 2 weeks in a row', icon: 'ri-building-4-line', tier: 'medium' },
+    { id: 'never_miss_monday', name: 'Never Miss Monday', desc: 'Workout every Monday for 4 weeks', icon: 'ri-calendar-event-fill', tier: 'hard' },
+    { id: 'comeback_kid', name: 'Comeback Kid', desc: 'Returned after a 7+ day break', icon: 'ri-repeat-line', tier: 'medium' },
+    { id: 'month_strong', name: 'Month Strong', desc: '20+ workouts in a single month', icon: 'ri-calendar-fill', tier: 'hard' },
 
     // --- PERFORMANCE ---
-    { id: 'personal_best', name: 'Personal Best', desc: 'Break a PR in any exercise', icon: 'ri-trophy-fill' },
-    { id: 'heavy_day', name: 'Heavy Day', desc: 'Lifted over 100kg', icon: 'ri-dumbbell-fill' },
-    { id: 'volume_monster', name: 'Volume Monster', desc: 'Over 10,000kg volume in one workout', icon: 'ri-bar-chart-grouped-fill' },
-    { id: 'endurance_king', name: 'Endurance King', desc: 'Workout session longer than 90 mins', icon: 'ri-timer-flash-fill' },
+    { id: 'personal_best', name: 'Personal Best', desc: 'Break a PR in any exercise', icon: 'ri-trophy-fill', tier: 'medium' },
+    { id: 'heavy_day', name: 'Heavy Day', desc: 'Lifted over 100kg', icon: 'ri-dumbbell-fill', tier: 'hard' },
+    { id: 'volume_monster', name: 'Volume Monster', desc: 'Over 10,000kg volume in one workout', icon: 'ri-bar-chart-grouped-fill', tier: 'hard' },
+    { id: 'endurance_king', name: 'Endurance King', desc: 'Workout session longer than 90 mins', icon: 'ri-timer-flash-fill', tier: 'hard' },
 
     // --- MILESTONES ---
-    { id: 'club_50', name: '50 Workouts Club', desc: 'Logged 50 total workouts', icon: 'ri-medal-fill' },
-    { id: 'club_100', name: '100 Workouts Club', desc: 'Logged 100 total workouts', icon: 'ri-medal-2-fill' },
-    { id: 'streak_30', name: 'One-Month Streak', desc: '30 consecutive workout days', icon: 'ri-fire-line' },
-    { id: 'half_year', name: 'Half-Year Hustler', desc: 'consistent training for 6 months', icon: 'ri-brain-line' },
+    { id: 'club_50', name: '50 Workouts Club', desc: 'Logged 50 total workouts', icon: 'ri-medal-fill', tier: 'medium' },
+    { id: 'club_100', name: '100 Workouts Club', desc: 'Logged 100 total workouts', icon: 'ri-medal-2-fill', tier: 'hard' },
+    { id: 'streak_30', name: 'One-Month Streak', desc: '30 consecutive workout days', icon: 'ri-fire-line', tier: 'hard' },
+    { id: 'half_year', name: 'Half-Year Hustler', desc: 'consistent training for 6 months', icon: 'ri-brain-line', tier: 'hard' },
 
     // --- FUN & GAMIFIED ---
-    { id: 'explorer', name: 'Explorer', desc: 'Logged 5 different exercise types', icon: 'ri-compass-3-fill' },
-    { id: 'leg_day_survivor', name: 'Leg Day Survivor', desc: 'Completed 5 Leg workouts', icon: 'ri-walk-fill' },
-    { id: 'no_excuses', name: 'No Excuses', desc: 'Workout on a weekend', icon: 'ri-snowy-fill' },
-    { id: 'double_trouble', name: 'Double Trouble', desc: 'Two sessions in one day', icon: 'ri-sword-fill' },
-    { id: 'consistency_motivation', name: 'Discipline', desc: ' returned after a short break', icon: 'ri-mental-health-line' },
+    { id: 'explorer', name: 'Explorer', desc: 'Logged 5 different exercise types', icon: 'ri-compass-3-fill', tier: 'easy' },
+    { id: 'leg_day_survivor', name: 'Leg Day Survivor', desc: 'Completed 5 Leg workouts', icon: 'ri-walk-fill', tier: 'medium' },
+    { id: 'no_excuses', name: 'No Excuses', desc: 'Workout on a weekend', icon: 'ri-snowy-fill', tier: 'easy' },
+    { id: 'double_trouble', name: 'Double Trouble', desc: 'Two sessions in one day', icon: 'ri-sword-fill', tier: 'medium' },
+    { id: 'consistency_motivation', name: 'Discipline', desc: ' returned after a short break', icon: 'ri-mental-health-line', tier: 'medium' },
 
     // Existing Legacy
-    { id: 'routine_complete', name: 'Routine Master', desc: 'Completed a full routine', icon: 'ri-trophy-line' },
-    { id: 'volume_10k', name: 'Volume Hunter', desc: 'Accumulated 10k volume', icon: 'ri-bar-chart-box-line' }
+    { id: 'routine_complete', name: 'Routine Master', desc: 'Completed a full routine', icon: 'ri-trophy-line', tier: 'medium' },
+    { id: 'volume_10k', name: 'Volume Hunter', desc: 'Accumulated 10k volume', icon: 'ri-bar-chart-box-line', tier: 'hard' }
 ];
 
 const MUSCLE_GROUPS = {
@@ -49,12 +50,34 @@ const MUSCLE_GROUPS = {
     'Core': ['Plank', 'Burpees', 'Mountain Climbers']
 };
 
-export const initGamification = () => {
+export const initGamification = (db, auth) => {
     // State
     let unlockedMedals = [];
-    try {
-        unlockedMedals = JSON.parse(localStorage.getItem('gymMedals')) || [];
-    } catch (e) { unlockedMedals = []; }
+
+    const loadGamificationFromServer = async (uid) => {
+        if (!uid) return;
+        try {
+            // First migrate local -> server if needed
+            const stored = localStorage.getItem('gymMedals');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                unlockedMedals = parsed; // Optimistically set local
+                if (parsed.length > 0) {
+                    await setDoc(doc(db, 'userGamification', uid), { unlockedMedals: parsed }, { merge: true });
+                }
+            }
+
+            const docSnap = await getDoc(doc(db, 'userGamification', uid));
+            if (docSnap.exists() && docSnap.data().unlockedMedals) {
+                unlockedMedals = docSnap.data().unlockedMedals;
+                localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals)); // Keep backup
+            }
+        } catch (e) {
+            console.error("Failed to load medals from server, falling back to local:", e);
+            const stored = localStorage.getItem('gymMedals');
+            if (stored) unlockedMedals = JSON.parse(stored);
+        }
+    };
 
     // Elements
     const modal = document.getElementById('modal-medal');
@@ -62,7 +85,19 @@ export const initGamification = () => {
     const desc = document.getElementById('medal-desc');
     const icon = document.getElementById('medal-icon');
 
-    const save = () => localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+    const saveToServer = async () => {
+        if (auth.currentUser) {
+            try {
+                await setDoc(doc(db, 'userGamification', auth.currentUser.uid), { unlockedMedals }, { merge: true });
+                localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+            } catch (e) {
+                console.error("Failed to save medals:", e);
+                localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+            }
+        } else {
+            localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+        }
+    };
 
     const showUnlock = (medal) => {
         if (!modal) return;
@@ -79,8 +114,12 @@ export const initGamification = () => {
     const showDetails = (medal, isUnlocked) => {
         if (!modal) return;
         title.textContent = isUnlocked ? "Medal Details" : "Locked Medal";
-        desc.innerHTML = `<strong>${medal.name}</strong><br>${medal.desc}<br><br>${isUnlocked ? '✅ Achieved' : '🔒 Keep going!'}`;
+        desc.innerHTML = `<strong>${medal.name}</strong><br>${medal.desc}<br><br>${isUnlocked ? '<i class="ri-checkbox-circle-fill"></i> Achieved' : '<i class="ri-lock-fill"></i> Keep going!'}`;
         icon.innerHTML = `<i class="${medal.icon}"></i>`;
+        
+        const btn = document.getElementById('medal-btn');
+        if (btn) btn.innerText = isUnlocked ? 'Awesome!' : 'Understood';
+
         modal.classList.remove('hidden');
     };
 
@@ -90,7 +129,7 @@ export const initGamification = () => {
         if (!medal) return false;
 
         unlockedMedals.push(id);
-        save();
+        saveToServer();
         showUnlock(medal);
         return true;
     };
@@ -118,6 +157,7 @@ export const initGamification = () => {
     };
 
     return {
+        loadGamificationFromServer,
         unlock,
         getUnlocked: () => unlockedMedals,
         getProgress: () => {
@@ -128,30 +168,56 @@ export const initGamification = () => {
         },
         renderRewards: (container) => {
             if (!container) return;
-            container.innerHTML = '<div class="medal-grid"></div>';
-            const grid = container.querySelector('.medal-grid');
+            container.innerHTML = ''; // Clear container
 
-            // Sort: Unlocked first, then by ID
-            const sortedMedals = [...MEDALS].sort((a, b) => {
-                const aUn = unlockedMedals.includes(a.id);
-                const bUn = unlockedMedals.includes(b.id);
-                if (aUn && !bUn) return -1;
-                if (!aUn && bUn) return 1;
-                return 0;
-            });
+            const tiers = [
+                { id: 'easy', title: 'Bronze (Easy)' },
+                { id: 'medium', title: 'Silver (Medium)' },
+                { id: 'hard', title: 'Gold (Hard)' }
+            ];
 
-            sortedMedals.forEach(medal => {
-                const isUnlocked = unlockedMedals.includes(medal.id);
-                const card = document.createElement('div');
-                card.className = `medal-card ${isUnlocked ? '' : 'locked'}`;
-                card.innerHTML = `
-                    <div class="icon"><i class="${medal.icon}"></i></div>
-                    <div class="name">${medal.name}</div>
-                    <div class="status">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
-                `;
-                card.title = medal.desc;
-                card.addEventListener('click', () => showDetails(medal, isUnlocked));
-                grid.appendChild(card);
+            tiers.forEach(tier => {
+                // Filter medals for this tier
+                const tierMedals = MEDALS.filter(m => m.tier === tier.id);
+                if (tierMedals.length === 0) return;
+
+                // Sort: Unlocked first, then by ID
+                const sortedMedals = tierMedals.sort((a, b) => {
+                    const aUn = unlockedMedals.includes(a.id);
+                    const bUn = unlockedMedals.includes(b.id);
+                    if (aUn && !bUn) return -1;
+                    if (!aUn && bUn) return 1;
+                    return 0;
+                });
+
+                // Create tier section
+                const section = document.createElement('div');
+                section.className = 'tier-section';
+                
+                const header = document.createElement('h3');
+                header.className = `tier-title tier-${tier.id}`;
+                header.innerText = tier.title;
+                section.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'medal-grid';
+
+                sortedMedals.forEach(medal => {
+                    const isUnlocked = unlockedMedals.includes(medal.id);
+                    const card = document.createElement('div');
+                    card.className = `medal-card ${isUnlocked ? '' : 'locked'}`;
+                    card.innerHTML = `
+                        <div class="icon"><i class="${medal.icon}"></i></div>
+                        <div class="name">${medal.name}</div>
+                        <div class="status">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
+                    `;
+                    card.title = medal.desc;
+                    card.addEventListener('click', () => showDetails(medal, isUnlocked));
+                    grid.appendChild(card);
+                });
+
+                section.appendChild(grid);
+                container.appendChild(section);
             });
         },
         checkMilestones: (history, currentWorkout) => {

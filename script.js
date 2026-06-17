@@ -2990,7 +2990,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Init Modules
         routinesModule = initRoutines(app, db, auth, elements);
-        gamificationModule = initGamification();
+        gamificationModule = initGamification(db, auth);
 
         // Hide loader initially, but UI might be locked until auth
         hideLoader();
@@ -3034,6 +3034,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideLogin();
                 showNotification(`Welcome back, ${user.displayName || user.email}!`);
                 updateDataStatus();
+
+                // Load Gamification & Routines Data
+                if (routinesModule && routinesModule.loadRoutinesFromServer) {
+                    await routinesModule.loadRoutinesFromServer(user.uid);
+                }
+                if (gamificationModule && gamificationModule.loadGamificationFromServer) {
+                    await gamificationModule.loadGamificationFromServer(user.uid);
+                }
+
                 // Load Data
                 await loadDataFromServer();
                 updateAllUI();

@@ -1,3 +1,5 @@
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
 export const initRoutines = (app, db, auth, elements) => {
     console.log("Routines Module Initialized");
 
@@ -66,6 +68,8 @@ export const initRoutines = (app, db, auth, elements) => {
         const select = document.getElementById('exercise-select');
         if (!select) return;
 
+        const standardExercises = new Set();
+
         Array.from(select.querySelectorAll('optgroup')).forEach(group => {
             const grpLabel = document.createElement('div');
             grpLabel.className = 'routine-group-label';
@@ -74,6 +78,7 @@ export const initRoutines = (app, db, auth, elements) => {
             selectionList.appendChild(grpLabel);
 
             Array.from(group.querySelectorAll('option')).forEach(opt => {
+                standardExercises.add(opt.value);
                 const mask = document.createElement('label');
                 mask.className = 'selection-item';
                 const checked = preSelected.includes(opt.value) ? 'checked' : '';
@@ -82,6 +87,24 @@ export const initRoutines = (app, db, auth, elements) => {
                 selectionList.appendChild(mask);
             });
         });
+
+        // ── Custom Exercises from Pre-selected ──
+        const customExercises = preSelected.filter(ex => !standardExercises.has(ex));
+        if (customExercises.length > 0) {
+            const grpLabel = document.createElement('div');
+            grpLabel.className = 'routine-group-label custom-group-label';
+            grpLabel.textContent = 'Custom';
+            grpLabel.style.cssText = 'grid-column:1/-1; font-weight:bold; font-size:0.75rem; margin-top:0.5rem; color:var(--accent-end);';
+            selectionList.appendChild(grpLabel);
+
+            customExercises.forEach(ex => {
+                const mask = document.createElement('label');
+                mask.className = 'selection-item custom-item';
+                mask.innerHTML = `<input type="checkbox" value="${ex}" checked> ${ex}`;
+                mask.dataset.name = ex.toLowerCase();
+                selectionList.appendChild(mask);
+            });
+        }
 
         // Live filter
         searchInput.addEventListener('input', () => {
@@ -100,20 +123,82 @@ export const initRoutines = (app, db, auth, elements) => {
                 lbl.style.display = hasVisible ? '' : 'none';
             });
         });
+
+        // ── Hook up the custom exercise input ──
+        const customInput = document.getElementById('routine-custom-exercise-input');
+        const btnAddCustom = document.getElementById('btn-add-routine-custom-exercise');
+        if (customInput && btnAddCustom) {
+            // Remove previous event listeners by replacing the element
+            const newBtnAddCustom = btnAddCustom.cloneNode(true);
+            btnAddCustom.parentNode.replaceChild(newBtnAddCustom, btnAddCustom);
+            
+            newBtnAddCustom.addEventListener('click', () => {
+                const val = customInput.value.trim();
+                if (!val) return;
+                
+                // Add to custom group, create if doesn't exist
+                let customGrp = selectionList.querySelector('.custom-group-label');
+                if (!customGrp) {
+                    customGrp = document.createElement('div');
+                    customGrp.className = 'routine-group-label custom-group-label';
+                    customGrp.textContent = 'Custom';
+                    customGrp.style.cssText = 'grid-column:1/-1; font-weight:bold; font-size:0.75rem; margin-top:0.5rem; color:var(--accent-end);';
+                    selectionList.appendChild(customGrp);
+                }
+                
+                const mask = document.createElement('label');
+                mask.className = 'selection-item custom-item';
+                mask.innerHTML = `<input type="checkbox" value="${val}" checked> ${val}`;
+                mask.dataset.name = val.toLowerCase();
+                selectionList.appendChild(mask);
+                
+                customInput.value = ''; // clear input
+            });
+        }
     };
 
     // --- LOGIC ---
-    const loadRoutines = () => {
+    const loadRoutinesFromServer = async (uid) => {
+        if (!uid) return;
         try {
+            // First migrate local -> server if needed
+            const stored = localStorage.getItem('gymRoutines');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                localRoutines = parsed; // Optimistically set local
+                if (parsed.length > 0) {
+                    await setDoc(doc(db, 'userRoutines', uid), { routines: parsed }, { merge: true });
+                }
+            }
+
+            const docSnap = await getDoc(doc(db, 'userRoutines', uid));
+            if (docSnap.exists() && docSnap.data().routines) {
+                localRoutines = docSnap.data().routines;
+                localStorage.setItem('gymRoutines', JSON.stringify(localRoutines)); // Keep backup
+            }
+        } catch (e) {
+            console.error("Failed to load routines from server, falling back to local:", e);
             const stored = localStorage.getItem('gymRoutines');
             if (stored) localRoutines = JSON.parse(stored);
-        } catch (e) { localRoutines = []; }
+        }
         renderList();
     };
 
-    const saveRoutineToStorage = () => {
-        localStorage.setItem('gymRoutines', JSON.stringify(localRoutines));
+    const saveRoutineToServer = async () => {
         renderList();
+        if (auth.currentUser) {
+            try {
+                await setDoc(doc(db, 'userRoutines', auth.currentUser.uid), { routines: localRoutines }, { merge: true });
+                localStorage.setItem('gymRoutines', JSON.stringify(localRoutines)); // Keep local sync as backup
+            } catch (e) {
+                console.error("Failed to save routine:", e);
+                // Fallback to local storage if Firestore rules block it or offline
+                localStorage.setItem('gymRoutines', JSON.stringify(localRoutines));
+            }
+        } else {
+            // Not logged in fallback
+            localStorage.setItem('gymRoutines', JSON.stringify(localRoutines));
+        }
     };
 
     const renderList = () => {
@@ -158,7 +243,7 @@ export const initRoutines = (app, db, auth, elements) => {
                 if (window.showConfirmDialog) {
                     window.showConfirmDialog("Delete Routine?", `Are you sure you want to delete "${routine.name}"?`, () => {
                         localRoutines = localRoutines.filter(r => r.id !== routine.id);
-                        saveRoutineToStorage();
+                        saveRoutineToServer();
                         // If the deleted routine was being edited, reset the create view
                         if (editingRoutineId === routine.id) {
                             editingRoutineId = null;
@@ -172,7 +257,7 @@ export const initRoutines = (app, db, auth, elements) => {
                 } else {
                     if (confirm(`Delete "${routine.name}"?`)) {
                         localRoutines = localRoutines.filter(r => r.id !== routine.id);
-                        saveRoutineToStorage();
+                        saveRoutineToServer();
                         // If the deleted routine was being edited, reset the create view
                         if (editingRoutineId === routine.id) {
                             editingRoutineId = null;
@@ -219,11 +304,33 @@ export const initRoutines = (app, db, auth, elements) => {
 
             tag.addEventListener('click', () => {
                 const select = document.getElementById('exercise-select');
+                const customInput = document.getElementById('exercise-text');
+                const toggleBtn = document.getElementById('toggle-input-btn');
+                
                 if (select) {
-                    select.value = ex;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                    const trigger = document.querySelector('.custom-select-trigger');
-                    if (trigger) trigger.textContent = ex;
+                    const isStandard = Array.from(select.options).some(opt => opt.value === ex);
+                    
+                    if (isStandard) {
+                        // Standard exercise: ensure standard mode is active
+                        if (toggleBtn && toggleBtn.classList.contains('active')) {
+                            toggleBtn.click();
+                        }
+                        select.value = ex;
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        const trigger = document.querySelector('.custom-select-trigger');
+                        if (trigger) trigger.textContent = ex;
+                    } else {
+                        // Custom exercise: ensure custom mode is active
+                        if (toggleBtn && !toggleBtn.classList.contains('active')) {
+                            toggleBtn.click();
+                        }
+                        if (customInput) {
+                            customInput.value = ex;
+                            // Trigger blur or input events if needed by script.js
+                            customInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    }
+                    
                     document.querySelector('.card-log-workout').scrollIntoView({ behavior: 'smooth' });
                     tag.style.transform = 'scale(1.1)';
                     setTimeout(() => tag.style.transform = 'scale(1)', 200);
@@ -254,7 +361,7 @@ export const initRoutines = (app, db, auth, elements) => {
             localRoutines.push({ id: Date.now(), name, exercises: selected });
         }
 
-        saveRoutineToStorage();
+        saveRoutineToServer();
 
         nameInput.value = '';
         createView.classList.add('hidden');
@@ -262,10 +369,8 @@ export const initRoutines = (app, db, auth, elements) => {
         if (btnSave) btnSave.textContent = 'Save Routine';
     });
 
-    // Init Load
-    loadRoutines();
-
     return {
+        loadRoutinesFromServer,
         checkProgress: (exerciseName) => {
             if (!activeRoutine) return false;
             const target = activeRoutine.exercises.find(e => e.toLowerCase() === exerciseName.toLowerCase());

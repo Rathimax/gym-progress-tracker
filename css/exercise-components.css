@@ -245,11 +245,7 @@ select.hidden-native,
   color: white;
 }
 
-.button-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
+
 
 .bw-stats {
   display: flex;
