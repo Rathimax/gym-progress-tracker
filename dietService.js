@@ -19,8 +19,8 @@ const formatDate = (rawDate) => {
 
 // ==========================================
 // 1. MEAL TRACKING 
-// Path: users/{uid}/meals/{date}/items/{mealId}
-// ==========================================
+// Path: users/{uid}/meals/{date}/items/{mealId} 
+// ========================================== 
 
 export const addMeal = async (db, uid, date, mealData) => {
     if (!uid) throw new Error("Authentication required: uid is missing.");
