@@ -239,6 +239,29 @@ document.addEventListener('DOMContentLoaded', () => {
         bmiResultsArea: document.getElementById('bmi-results-area'),
         bmiValue: document.getElementById('bmi-value'),
         bmiCategory: document.getElementById('bmi-category'),
+        
+        // AI Diet Plan Elements
+        btnGenerateDietPlan: document.getElementById('btn-generate-diet-plan'),
+        btnGenerateDietPlanBf: document.getElementById('btn-generate-diet-plan-bf'),
+        dietPrefsOverlay: document.getElementById('diet-prefs-overlay'),
+        dietPrefGoal: document.getElementById('diet-pref-goal'),
+        dietPrefType: document.getElementById('diet-pref-type'),
+        dietPrefStrictness: document.getElementById('diet-pref-strictness'),
+        btnCancelDietPlan: document.getElementById('btn-cancel-diet-plan'),
+        btnConfirmDietPlan: document.getElementById('btn-confirm-diet-plan'),
+        
+        aiDietPlanCard: document.getElementById('ai-diet-plan-card'),
+        btnCloseDietPlan: document.getElementById('btn-close-diet-plan'),
+        aiPlanSummary: document.getElementById('ai-plan-summary'),
+        aiPlanCalories: document.getElementById('ai-plan-calories'),
+        aiPlanMacros: document.getElementById('ai-plan-macros'),
+        aiPlanMeals: document.getElementById('ai-plan-meals'),
+        aiPlanNotes: document.getElementById('ai-plan-notes'),
+        
+        pastPlansHeader: document.getElementById('past-plans-header'),
+        pastPlansToggleIcon: document.getElementById('past-plans-toggle-icon'),
+        pastPlansContent: document.getElementById('past-plans-content'),
+        pastPlansList: document.getElementById('past-plans-list'),
 
         bfGender: document.getElementById('bf-gender'),
         bfHeight: document.getElementById('bf-height'),
@@ -1538,7 +1561,200 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.bmiValue.textContent = bmi;
                 elements.bmiCategory.textContent = cat;
                 elements.bmiResultsArea.classList.remove('hidden');
+
+                // Save snapshot for AI Plan
+                window.currentBmiSnapshot = {
+                    bmi: bmi,
+                    category: cat,
+                    height: h,
+                    weight: w,
+                    age: userPreferences.age || 25,
+                    sex: userPreferences.gender || 'Unknown'
+                };
             });
+
+            // --- AI Diet Plan Logic ---
+            const renderActiveDietPlan = (planObj) => {
+                const p = planObj.planData;
+                elements.aiPlanSummary.textContent = p.summary || '';
+                elements.aiPlanCalories.textContent = `${p.dailyCalorieTarget || 0} kcal`;
+                elements.aiPlanMacros.textContent = `${p.macros?.protein_g || 0}g P | ${p.macros?.carbs_g || 0}g C | ${p.macros?.fats_g || 0}g F`;
+                
+                elements.aiPlanMeals.innerHTML = (p.meals || []).map(m => `
+                    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <strong style="color: var(--text-color);">${m.name}</strong>
+                            <span style="font-size: 0.8rem; color: var(--text-light);">${m.approxCalories} kcal</span>
+                        </div>
+                        <ul style="padding-left: 1rem; margin: 0; font-size: 0.85rem; color: var(--text-light);">
+                            ${m.items.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+
+                elements.aiPlanNotes.innerHTML = (p.notes || []).map(n => `<li>${n}</li>`).join('');
+                elements.aiDietPlanCard.classList.remove('hidden');
+            };
+
+            window.loadPastDietPlans = async () => {
+                const user = auth.currentUser;
+                if (!user) return;
+                try {
+                    const q = query(collection(db, `users/${user.uid}/dietPlans`), orderBy("createdAt", "desc"));
+                    const snap = await getDocs(q);
+                    if (snap.empty) {
+                        elements.pastPlansList.innerHTML = `<div style="text-align: center; color: var(--text-light); font-size: 0.9rem;">No past plans found.</div>`;
+                        return;
+                    }
+                    let html = '';
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const dateStr = new Date(d.createdAt).toLocaleDateString();
+                        const cals = d.planData?.dailyCalorieTarget || 0;
+                        const goal = d.goalAtTimeOfGeneration || 'Maintain';
+                        const type = d.dietType || 'Any';
+                        
+                        html += `
+                        <div class="past-plan-item" style="background: var(--surface-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;" onclick='window.renderPastPlan(${JSON.stringify(d).replace(/'/g, "&#39;")})'>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: var(--text-color);">${dateStr}</strong>
+                                <span style="font-size: 0.8rem; background: var(--accent-start); color: white; padding: 2px 6px; border-radius: 4px;">${cals} kcal</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px;">${goal} • ${type}</div>
+                        </div>`;
+                    });
+                    elements.pastPlansList.innerHTML = html;
+                } catch (e) {
+                    console.error("Failed to load past plans", e);
+                }
+            };
+            
+            window.renderPastPlan = (d) => {
+                renderActiveDietPlan(d);
+                elements.aiDietPlanCard.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            const showDietPrefModal = () => {
+                if (!window.currentBmiSnapshot) return;
+                
+                const lastGen = userPreferences.lastPlanGenerationTime;
+                if (lastGen) {
+                    const now = Date.now();
+                    const hoursDiff = (now - lastGen) / (1000 * 60 * 60);
+                    if (hoursDiff < 24) {
+                        const hoursLeft = Math.ceil(24 - hoursDiff);
+                        return showNotification(`Wait ${hoursLeft}h to generate another plan.`, "error");
+                    }
+                }
+
+                if (userPreferences.goalType) {
+                    if (userPreferences.goalType.includes('Cut')) elements.dietPrefGoal.value = 'Cut (Lose Weight)';
+                    else if (userPreferences.goalType.includes('Bulk')) elements.dietPrefGoal.value = 'Bulk (Gain Weight)';
+                    else elements.dietPrefGoal.value = 'Maintain';
+                }
+                elements.dietPrefsOverlay.classList.remove('hidden');
+            };
+
+            if (elements.btnGenerateDietPlan) {
+                elements.btnGenerateDietPlan.addEventListener('click', showDietPrefModal);
+            }
+            if (elements.btnGenerateDietPlanBf) {
+                elements.btnGenerateDietPlanBf.addEventListener('click', showDietPrefModal);
+            }
+
+            if (elements.btnCancelDietPlan) {
+                elements.btnCancelDietPlan.addEventListener('click', () => {
+                    elements.dietPrefsOverlay.classList.add('hidden');
+                });
+            }
+
+            if (elements.btnConfirmDietPlan) {
+                elements.btnConfirmDietPlan.addEventListener('click', async () => {
+                    const user = auth.currentUser;
+                    if (!user) return showNotification("Please sign in first.", "error");
+
+                    elements.dietPrefsOverlay.classList.add('hidden');
+                    const ogText = elements.btnGenerateDietPlan ? elements.btnGenerateDietPlan.innerHTML : '';
+                    if (elements.btnGenerateDietPlan) {
+                        elements.btnGenerateDietPlan.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Generating...';
+                        elements.btnGenerateDietPlan.disabled = true;
+                    }
+                    const ogTextBf = elements.btnGenerateDietPlanBf ? elements.btnGenerateDietPlanBf.innerHTML : '';
+                    if (elements.btnGenerateDietPlanBf) {
+                        elements.btnGenerateDietPlanBf.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Generating...';
+                        elements.btnGenerateDietPlanBf.disabled = true;
+                    }
+
+                    try {
+                        let parsedData = null;
+                        for (let i = 0; i < 2; i++) {
+                            const res = await fetch('/api/generate-diet-plan', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    uid: user.uid,
+                                    ...window.currentBmiSnapshot,
+                                    goal: elements.dietPrefGoal.value,
+                                    dietType: elements.dietPrefType.value,
+                                    strictness: elements.dietPrefStrictness.value
+                                })
+                            });
+                            if (!res.ok) throw new Error('API failed');
+                            const data = await res.json();
+                            if (data.success && data.planData) {
+                                parsedData = data.planData;
+                                break;
+                            }
+                        }
+
+                        if (!parsedData) throw new Error('Failed to generate plan.');
+
+                        const newPlanObj = {
+                            createdAt: Date.now(),
+                            bmiSnapshot: window.currentBmiSnapshot,
+                            goalAtTimeOfGeneration: elements.dietPrefGoal.value,
+                            dietType: elements.dietPrefType.value,
+                            strictness: elements.dietPrefStrictness.value,
+                            planData: parsedData
+                        };
+                        const docRef = await addDoc(collection(db, `users/${user.uid}/dietPlans`), newPlanObj);
+
+                        userPreferences.lastPlanGenerationTime = Date.now();
+                        userPreferences.latestDietPlanId = docRef.id;
+                        await setDoc(doc(db, "users", user.uid), { preferences: userPreferences }, { merge: true });
+
+                        renderActiveDietPlan(newPlanObj);
+                        showNotification("Diet Plan Generated!", "success");
+                        window.loadPastDietPlans();
+                    } catch (err) {
+                        console.error(err);
+                        showNotification("Failed to generate plan. Try again.", "error");
+                    } finally {
+                        if (elements.btnGenerateDietPlan) {
+                            elements.btnGenerateDietPlan.innerHTML = ogText;
+                            elements.btnGenerateDietPlan.disabled = false;
+                        }
+                        if (elements.btnGenerateDietPlanBf) {
+                            elements.btnGenerateDietPlanBf.innerHTML = ogTextBf;
+                            elements.btnGenerateDietPlanBf.disabled = false;
+                        }
+                    }
+                });
+            }
+
+            if (elements.btnCloseDietPlan) {
+                elements.btnCloseDietPlan.addEventListener('click', () => {
+                    elements.aiDietPlanCard.classList.add('hidden');
+                });
+            }
+            
+            if (elements.pastPlansHeader) {
+                elements.pastPlansHeader.addEventListener('click', () => {
+                    elements.pastPlansContent.classList.toggle('hidden');
+                    const isHidden = elements.pastPlansContent.classList.contains('hidden');
+                    elements.pastPlansToggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                });
+            }
         }
 
         // Body Fat Listener
@@ -1590,6 +1806,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const bf = calculateBodyFat(gender, h, w, n, hip);
 
                 if (!bf || bf <= 0) return showNotification("Invalid inputs", "error");
+
+                // Save snapshot for AI Diet Plan
+                window.currentBmiSnapshot = {
+                    bmi: bf + ' (Body Fat %)',
+                    category: getBFCategory(gender, bf),
+                    height: h,
+                    weight: window.userPreferences?.weight || 70, // Fallback if missing
+                    age: window.userPreferences?.age || 25,
+                    sex: gender === 'male' ? 'Male' : 'Female'
+                };
 
                 elements.bfValue.textContent = bf + "%";
                 elements.bfValue.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-end'); // Use CSS variable color if possible, or js reference
@@ -3047,6 +3273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await loadDataFromServer();
                 updateAllUI();
                 if (window.updateDietDashboard) window.updateDietDashboard(); // Arms listeners immediately on auth — mode-agnostic
+                if (window.loadPastDietPlans) window.loadPastDietPlans();
                 // Trigger an initial render of Diet History if the function is exposed or we simulate a click on the active tab
                 const activeDietBtn = document.querySelector('.dh-toggle-btn.active');
                 if (activeDietBtn) {

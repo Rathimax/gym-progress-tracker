@@ -545,3 +545,17 @@ button.refresh-btn:hover {
 .pr-toggle-btn:active {
   transform: scale(0.96);
 }
+
+/* --- AI Diet Plan Grid --- */
+.diet-plan-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 600px) {
+  .diet-plan-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

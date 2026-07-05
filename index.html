@@ -89,6 +89,48 @@
     </div>
   </div>
 
+  <!-- Diet Plan Preferences Modal -->
+  <div id="diet-prefs-overlay" class="confirm-overlay hidden">
+    <div class="confirm-modal" style="text-align: left;">
+      <h3 style="margin-bottom: 1rem; text-align: center;">Diet Preferences</h3>
+      <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 1.2rem; text-align: center;">Let's fine-tune your AI Diet Plan.</p>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Goal Type</label>
+        <select id="diet-pref-goal" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
+          <option value="Cut (Lose Weight)">Cut (Lose Weight)</option>
+          <option value="Maintain">Maintain</option>
+          <option value="Bulk (Gain Weight)">Bulk (Gain Weight)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Diet Type</label>
+        <select id="diet-pref-type" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
+          <option value="Any">Any (Mixed)</option>
+          <option value="Vegetarian">Vegetarian (No meat/fish)</option>
+          <option value="Vegan">Vegan (Plant-based only)</option>
+          <option value="Non-Vegetarian">Non-Vegetarian (Include meat/poultry)</option>
+          <option value="Pescatarian">Pescatarian (Fish/seafood only)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Strictness</label>
+        <select id="diet-pref-strictness" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
+          <option value="Flexible">Flexible (Easy to stick to, allow treats)</option>
+          <option value="Moderate" selected>Moderate (Balanced approach)</option>
+          <option value="Strict">Strict (Aggressive, exact macros)</option>
+        </select>
+      </div>
+
+      <div class="confirm-actions">
+        <button id="btn-cancel-diet-plan" style="background: transparent; color: var(--text-light); border: 1px solid var(--border-color);">Cancel</button>
+        <button id="btn-confirm-diet-plan" class="btn-primary" style="flex: 1;"><i class="ri-magic-line"></i> Generate</button>
+      </div>
+    </div>
+  </div>
+
   <!-- INLINE LOGIN SCREEN (Google Sign-In Only) -->
   <div id="login-screen" class="login-screen">
     <div class="login-container">
@@ -668,8 +710,57 @@
         <div id="bmi-results-area" class="hidden" style="margin-top: 1rem; text-align: center;">
           <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Your BMI: <strong id="bmi-value">--</strong></div>
           <div id="bmi-category" style="font-weight: 600; color: var(--accent-end);">--</div>
+          <button id="btn-generate-diet-plan" class="btn-primary" style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><i class="ri-ai-generate"></i> Generate AI Diet Plan</button>
         </div>
       </div>
+
+      <!-- Diet Plan Section -->
+      <div class="card" id="diet-plan-container">
+        <div class="card-header-flex">
+          <h2><span class="icon"><i class="ri-restaurant-fill"></i></span> Diet Plan</h2>
+        </div>
+
+        <!-- AI Diet Plan Active Area -->
+        <div id="ai-diet-plan-card" class="hidden" style="animation: fadeIn 0.3s ease; margin-bottom: 1rem; max-height: 450px; overflow-y: auto; padding-right: 10px;">
+          <p id="ai-plan-summary" style="font-size: 0.95rem; color: var(--text-light); margin-bottom: 1rem; line-height: 1.4;"></p>
+          
+          <div class="diet-plan-stats-grid">
+            <div style="background: rgba(var(--accent-start-rgb), 0.1); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 0.8rem; color: var(--text-light);">Daily Target</div>
+              <div id="ai-plan-calories" style="font-size: 1.2rem; font-weight: 700; color: var(--text-color);">-- kcal</div>
+            </div>
+            <div style="background: rgba(var(--accent-end-rgb), 0.1); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 0.8rem; color: var(--text-light);">Macros</div>
+              <div id="ai-plan-macros" style="font-size: 0.9rem; font-weight: 600; color: var(--text-color);">-- P | -- C | -- F</div>
+            </div>
+          </div>
+
+          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Meals</h3>
+          <div id="ai-plan-meals" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem;">
+            <!-- Meal items injected here -->
+          </div>
+
+          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Notes</h3>
+          <ul id="ai-plan-notes" style="padding-left: 1.2rem; font-size: 0.9rem; color: var(--text-light); display: flex; flex-direction: column; gap: 5px; margin: 0;">
+            <!-- Notes injected here -->
+          </ul>
+        </div>
+
+        <!-- Past Plans Dropdown -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
+          <div class="card-header-flex" style="cursor: pointer; margin-bottom: 0;" id="past-plans-header">
+            <h3 style="font-size: 1.1rem; margin: 0;"><span class="icon"><i class="ri-history-line"></i></span> Past Diet Plans</h3>
+            <i class="ri-arrow-down-s-line" id="past-plans-toggle-icon" style="transition: transform 0.3s ease;"></i>
+          </div>
+          <div id="past-plans-content" class="hidden" style="margin-top: 1rem;">
+            <div id="past-plans-list" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Past plans injected here -->
+              <div style="text-align: center; color: var(--text-light); font-size: 0.9rem;">No past plans found.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- Body Fat Calculator -->
       <div class="card">
@@ -722,6 +813,11 @@
         <div id="bf-results-area" class="hidden" style="margin-top: 1rem; text-align: center;">
           <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Body Fat: <strong id="bf-value">--</strong></div>
           <div id="bf-category" style="font-weight: 600; color: var(--accent-end);">--</div>
+          
+          <!-- AI Diet Plan Generator from BF% -->
+          <button id="btn-generate-diet-plan-bf" class="btn-primary" style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--accent-gradient); color: white; border: none; padding: 0.8rem; border-radius: 50px; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);">
+            <i class="ri-ai-generate"></i> Generate AI Diet Plan
+          </button>
         </div>
       </div>
 

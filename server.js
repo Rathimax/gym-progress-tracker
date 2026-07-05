@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import refineFoodHandler from './api/refine-food.js';
+import generateDietPlanHandler from './api/generate-diet-plan.js';
 
 dotenv.config();
 
@@ -230,6 +231,7 @@ If there are multiple foods, combine their totals. If it's not food, set default
 // AI FOOD REFINEMENT API
 // ==========================================
 app.post('/api/refine-food', refineFoodHandler);
+app.post('/api/generate-diet-plan', generateDietPlanHandler);
 
 const PORT = 3000;
 app.listen(PORT, () => {
