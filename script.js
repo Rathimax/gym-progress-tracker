@@ -1318,7 +1318,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Search
         if (selectElement.options.length > 5) {
             const sBox = document.createElement('div'); sBox.className = 'dropdown-search-container';
-            const sInp = document.createElement('input'); sInp.className = 'dropdown-search-input'; sInp.placeholder = '🔍 Search...';
+            const sInp = document.createElement('input'); 
+            sInp.className = 'dropdown-search-input'; 
+            sInp.placeholder = '🔍 Search...';
+            sInp.id = `${selectElement.id || 'select'}-search-input`;
+            sInp.name = `${selectElement.id || 'select'}-search`;
+
             sInp.addEventListener('input', e => {
                 const v = e.target.value.toLowerCase();
                 optionsDiv.querySelectorAll('.custom-option').forEach(o => { if (o.textContent.toLowerCase().includes(v)) o.classList.remove('hidden-option'); else o.classList.add('hidden-option'); });
@@ -2596,6 +2601,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         userPreferences.avatarType = 'image';
                         applyAvatar(userPreferences.avatar, 'image');
                         savePreferences();
+
+                        // Sync with Firestore
+                        if (currentUserProfile && auth.currentUser) {
+                            currentUserProfile.avatar = userPreferences.avatar;
+                            currentUserProfile.avatarType = 'image';
+                            setDoc(doc(db, "users", auth.currentUser.uid), {
+                                avatar: userPreferences.avatar,
+                                avatarType: 'image'
+                            }, { merge: true });
+                        }
                     };
                     reader.readAsDataURL(file);
                 }
@@ -2610,6 +2625,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     userPreferences.avatarType = 'emoji';
                     applyAvatar(emoji, 'emoji');
                     savePreferences();
+
+                    // Sync with Firestore
+                    if (currentUserProfile && auth.currentUser) {
+                        currentUserProfile.avatar = emoji;
+                        currentUserProfile.avatarType = 'emoji';
+                        setDoc(doc(db, "users", auth.currentUser.uid), {
+                            avatar: emoji,
+                            avatarType: 'emoji'
+                        }, { merge: true });
+                    }
                 }
             });
         }
@@ -4381,6 +4406,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (needsUpdate) {
                 await setDoc(userRef, currentUserProfile, { merge: true });
             }
+
+            // Sync Firestore avatar to local preferences
+            if (currentUserProfile.avatar) {
+                userPreferences.avatar = currentUserProfile.avatar;
+                userPreferences.avatarType = currentUserProfile.avatarType || 'image';
+                applyAvatar(userPreferences.avatar, userPreferences.avatarType);
+                savePreferences();
+            }
         } else {
             const friendCode = generateFriendCode();
             let dName = user.displayName;
@@ -4407,6 +4440,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentUserProfile = snap.data();
                     const liveCodeElem = document.getElementById('my-friend-code');
                     if (liveCodeElem && currentUserProfile.friendCode) liveCodeElem.innerText = currentUserProfile.friendCode;
+                    
+                    // Sync Firestore avatar to local preferences
+                    if (currentUserProfile.avatar) {
+                        userPreferences.avatar = currentUserProfile.avatar;
+                        userPreferences.avatarType = currentUserProfile.avatarType || 'image';
+                        applyAvatar(userPreferences.avatar, userPreferences.avatarType);
+                        savePreferences();
+                    }
+
                     await loadFriendsProfiles();
                     await renderFriendRequests();
                     await renderCurrentFriends();
@@ -4921,11 +4963,23 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const competitors = [];
         if (currentUserProfile?.prs && currentUserProfile.prs[exercise]) {
-            competitors.push({ name: currentUserProfile.displayName || 'You', weight: currentUserProfile.prs[exercise], isMe: true });
+            competitors.push({ 
+                name: currentUserProfile.displayName || 'You', 
+                weight: currentUserProfile.prs[exercise], 
+                isMe: true,
+                avatar: currentUserProfile.avatar || null,
+                avatarType: currentUserProfile.avatarType || null
+            });
         }
         friendsProfiles.forEach(f => {
             if (f.prs && f.prs[exercise]) {
-                competitors.push({ name: f.displayName || 'Friend', weight: f.prs[exercise], isMe: false });
+                competitors.push({ 
+                    name: f.displayName || 'Friend', 
+                    weight: f.prs[exercise], 
+                    isMe: false,
+                    avatar: f.avatar || null,
+                    avatarType: f.avatarType || null
+                });
             }
         });
         
@@ -4945,11 +4999,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (groups.length > 1) top3[1] = groups[1].members; // 2nd
         if (groups.length > 2) top3[2] = groups[2].members; // 3rd
         
+        const renderAvatarBubble = (avatar, avatarType, name, isMeClass) => {
+            if (avatar) {
+                if (avatarType === 'emoji') {
+                    return `<div class="podium-avatar ${isMeClass}">${avatar}</div>`;
+                } else {
+                    return `<div class="podium-avatar ${isMeClass}" style="background-image: url('${avatar}'); background-size: cover; background-position: center; color: transparent;">${getInitials(name)}</div>`;
+                }
+            }
+            return `<div class="podium-avatar ${isMeClass}">${getInitials(name)}</div>`;
+        };
+
         const generateAvatarHTML = (members) => {
             if (!members || members.length === 0) return '';
             if (members.length === 1) {
                 const isMeClass = members[0].isMe ? 'is-me' : '';
-                return `<div class="podium-avatar ${isMeClass}">${getInitials(members[0].name)}</div>`;
+                return renderAvatarBubble(members[0].avatar, members[0].avatarType, members[0].name, isMeClass);
             } else {
                 const hasMe = members.some(m => m.isMe);
                 const isMeClass = hasMe ? 'is-me' : '';
@@ -4964,10 +5029,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? generateAvatarHTML(members)
                 : `<div class="podium-avatar empty">-</div>`;
             
+            let badgeHTML = '';
+            if (hasMembers) {
+                if (rankNum === '1') {
+                    badgeHTML = `<div class="podium-ribbon rank-1"><i class="ri-award-fill"></i><span class="ribbon-text">1st</span></div>`;
+                } else if (rankNum === '2') {
+                    badgeHTML = `<div class="podium-ribbon rank-2"><i class="ri-award-fill"></i><span class="ribbon-text">2nd</span></div>`;
+                } else if (rankNum === '3') {
+                    badgeHTML = `<div class="podium-ribbon rank-3"><i class="ri-award-fill"></i><span class="ribbon-text">3rd</span></div>`;
+                }
+            } else {
+                badgeHTML = `<div class="podium-ribbon empty"><span class="ribbon-text">${rankNum}</span></div>`;
+            }
+
             return `
                 <div class="podium-pillar-wrapper" style="${wrapperStyle}">
                     ${avatarHTML}
-                    <div class="podium-pillar ${rankClass} ${hasMembers ? '' : 'empty'}">${rankNum}</div>
+                    <div class="podium-pillar ${rankClass} ${hasMembers ? '' : 'empty'}">
+                        ${badgeHTML}
+                    </div>
                 </div>
             `;
         };
@@ -5002,9 +5082,19 @@ document.addEventListener('DOMContentLoaded', () => {
         groups.forEach(group => {
             group.members.forEach(m => {
                 const isMeStyle = m.isMe ? 'border-color: var(--primary-color);' : '';
+                let avatarHTML = '';
+                if (m.avatar) {
+                    if (m.avatarType === 'emoji') {
+                        avatarHTML = `<div class="podium-scorer-avatar" style="background: var(--input-bg);">${m.avatar}</div>`;
+                    } else {
+                        avatarHTML = `<div class="podium-scorer-avatar" style="background-image: url('${m.avatar}'); background-size: cover; background-position: center; color: transparent;">${getInitials(m.name)}</div>`;
+                    }
+                } else {
+                    avatarHTML = `<div class="podium-scorer-avatar" style="background: ${m.isMe ? 'var(--primary-color)' : 'var(--card-border)'};">${getInitials(m.name)}</div>`;
+                }
                 listHTML += `
                     <div class="podium-scorer-item" style="${isMeStyle}">
-                        <div class="podium-scorer-avatar" style="background: ${m.isMe ? 'var(--primary-color)' : 'var(--card-border)'};">${getInitials(m.name)}</div>
+                        ${avatarHTML}
                         <div class="podium-scorer-info">
                             <div class="podium-scorer-name">${m.name}</div>
                             <div class="podium-scorer-weight">${m.weight} kg</div>
@@ -5017,6 +5107,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         podiumScorersList.innerHTML = listHTML;
+
+        // Dynamic gym & kindness quotes
+        const LEADERBOARD_QUOTES = [
+            { text: "You have no enemies. No one has any enemies. There's no one that it's okay to hurt.", author: "Thors, Vinland Saga" },
+            { text: "A true warrior doesn't need a sword.", author: "Thors, Vinland Saga" },
+            { text: "To perform better, you have to eat better.", author: "Gym Guide" },
+            { text: "Consistency is more important than perfection.", author: "Gym Guide" },
+            { text: "The only bad workout is the one that didn't happen.", author: "Fitness Pro" },
+            { text: "If you win, you live. If you lose, you die. If you don't fight, you can't win!", author: "Eren Yeager, Attack on Titan" },
+            { text: "People who can't abandon anything can't change anything.", author: "Armin Arlert, Attack on Titan" },
+            { text: "The only thing we're allowed to do... is to believe that we won't regret the choice we made.", author: "Levi Ackerman, Attack on Titan" },
+            { text: "If you want to save someone, you have to become stronger yourself.", author: "Thorfinn, Vinland Saga" },
+            { text: "You must build a land where no one is sold as a slave, where there is no war.", author: "Thorfinn, Vinland Saga" },
+            { text: "I want to be a kinder, gentler person. I want to be a person who is worthy of this beautiful world.", author: "Thorfinn, Vinland Saga" },
+            { text: "Eat for the body you want, not the body you have.", author: "Nutrition Guide" },
+            { text: "Your body is a temple, but only if you treat it as one.", author: "Gym Wisdom" },
+            { text: "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable.", author: "Socrates" }
+        ];
+
+        const quoteTextEl = document.getElementById('podium-quote-text');
+        const quoteAuthorEl = document.getElementById('podium-quote-author');
+        if (quoteTextEl && quoteAuthorEl) {
+            const randomQuote = LEADERBOARD_QUOTES[Math.floor(Math.random() * LEADERBOARD_QUOTES.length)];
+            quoteTextEl.textContent = randomQuote.text;
+            quoteAuthorEl.textContent = `— ${randomQuote.author}`;
+        }
 
         const appHeader = document.querySelector('header');
         if (appHeader) appHeader.style.display = 'none';

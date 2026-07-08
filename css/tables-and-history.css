@@ -1,3 +1,24 @@
+:root {
+  --bg-page: #F5F6FA;
+  --bg-surface: #FFFFFF;
+  --bg-surface-raised: #F8FAFC;
+  --podium-border: rgba(0, 0, 0, 0.06);
+  --scorer-border: rgba(0, 0, 0, 0.08);
+  --scorer-border-gold: rgba(255, 90, 60, 0.2);
+  --text-color: #484b6a;
+}
+
+html.dark-mode {
+  --bg-page: #0A0E14;
+  --bg-surface: #131820;
+  --bg-surface-raised: #1C222C;
+  --podium-border: rgba(255, 255, 255, 0.06);
+  --scorer-border: rgba(255, 255, 255, 0.08);
+  --scorer-border-gold: rgba(255, 90, 60, 0.15);
+  --text-color: #F1F5F9;
+}
+
+
 /* History Table */
 table {
   width: 100%;
@@ -471,7 +492,7 @@ td:first-child {
   left: 250px;
   right: 0;
   bottom: 0;
-  background: var(--bg, #080B14);
+  background: var(--bg-page, #0A0E14);
   z-index: 9999;
   overflow-y: auto;
   overflow-x: hidden;
@@ -493,7 +514,7 @@ td:first-child {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--card-bg, #0C121D);
+  background: var(--bg-surface, #131820);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex;
   flex-direction: row;
@@ -539,7 +560,20 @@ td:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(180deg, var(--card-bg, #0C121D) 0%, var(--bg, #080B14) 100%);
+  background: var(--bg-surface, #131820);
+  position: relative;
+}
+.podium-display-area::before {
+  content: '';
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle at center, rgba(255, 180, 60, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 .podium-display-inner {
   width: 100%;
@@ -547,6 +581,8 @@ td:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 .podium-graphic {
   display: flex;
@@ -599,12 +635,60 @@ td:first-child {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 14px;
-  color: rgba(0, 0, 0, 0.7);
-  font-weight: 900;
-  font-size: 1.8rem;
+  padding-top: 10px;
   box-sizing: border-box;
   box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.podium-ribbon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.podium-ribbon i {
+  font-size: 2.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+.podium-ribbon.rank-1 i {
+  background: linear-gradient(135deg, #FFF9C4, #FFB300);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.podium-ribbon.rank-2 i {
+  background: linear-gradient(135deg, #FFFFFF, #94A3B8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.podium-ribbon.rank-3 i {
+  background: linear-gradient(135deg, #FFE0B2, #CD7F32);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.podium-ribbon .ribbon-text {
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(0, 0, 0, 0.75);
+  font-family: 'Outfit', sans-serif;
+}
+.podium-ribbon.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.4) !important;
+  margin-top: 4px;
+}
+.podium-ribbon.empty .ribbon-text {
+  color: inherit;
+  font-size: 0.85rem;
 }
 .podium-pillar.rank-1 {
   height: 140px;
@@ -643,7 +727,9 @@ td:first-child {
 
 
 .podium-list-area {
-  padding: 1.5rem 1rem 2rem;
+  padding: 2.5rem 1rem 2rem;
+  background: var(--bg-surface, #131820);
+  border-top: 1px solid var(--podium-border);
 }
 .podium-list-title {
   text-align: center;
@@ -657,12 +743,16 @@ td:first-child {
 .podium-scorer-item {
   display: flex;
   align-items: center;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
+  background: var(--bg-surface-raised, #1C222C);
+  border: 1px solid var(--scorer-border);
   padding: 1rem;
   border-radius: 16px;
   margin-bottom: 0.8rem;
   gap: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+.podium-scorer-item:first-child {
+  border-color: var(--scorer-border-gold);
 }
 .podium-scorer-avatar {
   width: 42px;
@@ -687,6 +777,7 @@ td:first-child {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text);
 }
 .podium-scorer-weight {
   font-size: 0.85rem;
@@ -703,4 +794,34 @@ td:first-child {
 body.no-scroll {
   overflow: hidden !important;
 }
+
+.podium-quote-container {
+  padding: 2rem 1.5rem 3rem;
+  text-align: center;
+  background: var(--bg-page, #0A0E14);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.podium-quote-text {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-light, #94A3B8);
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0 0 0.6rem 0;
+  position: relative;
+}
+
+.podium-quote-author {
+  font-size: 0.75rem;
+  color: var(--accent-end, #f7797d);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 

@@ -41,7 +41,9 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="assets/app-logo.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 
   <title>FitTrack Gym Tracker</title>
 
@@ -561,7 +563,7 @@
 
           <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
 
-          <label for="duration">Estimated Duration:</label>
+          <label for="duration-minutes">Estimated Duration:</label>
           <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
               placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59"
               placeholder="Secs" /></div>
@@ -2003,7 +2005,7 @@
 
         <!-- Gender -->
         <div class="cq-field">
-          <label for="cq-gender" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Gender</label>
+          <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Gender</label>
           <div class="custom-select-wrapper" id="cq-gender-wrapper">
             <div class="custom-select-trigger" id="cq-gender-trigger">
               <span>Select Gender</span>
@@ -2061,7 +2063,7 @@
 
         <!-- Activity Level -->
         <div class="cq-field">
-          <label for="cq-activity" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Activity Level</label>
+          <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Activity Level</label>
           <div class="custom-select-wrapper" id="cq-activity-wrapper">
             <div class="custom-select-trigger" id="cq-activity-trigger">
               <span>Select Activity Level</span>
@@ -2080,7 +2082,8 @@
 
         <!-- Goal Type -->
         <div class="cq-field">
-          <label for="cq-goal-type" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Goal Type</label>
+          <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Goal Type</label>
+
           <div class="custom-select-wrapper" id="cq-goal-type-wrapper">
             <div class="custom-select-trigger" id="cq-goal-type-trigger">
               <span>⚖️ Maintain (No change)</span>
@@ -2152,6 +2155,11 @@
       <div class="podium-list-area">
         <h3 class="podium-list-title">Top Scorers</h3>
         <div id="podium-scorers-list"></div>
+      </div>
+
+      <div class="podium-quote-container">
+        <p class="podium-quote-text" id="podium-quote-text"></p>
+        <span class="podium-quote-author" id="podium-quote-author"></span>
       </div>
     </div>
   </div>
