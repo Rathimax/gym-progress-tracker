@@ -506,7 +506,12 @@ td:first-child {
 @media (max-width: 768px) {
   .podium-modal {
     left: 0;
-    bottom: 65px;
+  }
+  .bottom-nav {
+    z-index: 10005 !important;
+  }
+  .podium-quote-container {
+    padding-bottom: calc(85px + env(safe-area-inset-bottom)) !important;
   }
 }
 
