@@ -506,6 +506,7 @@ td:first-child {
 @media (max-width: 768px) {
   .podium-modal {
     left: 0;
+    bottom: 65px;
   }
 }
 
