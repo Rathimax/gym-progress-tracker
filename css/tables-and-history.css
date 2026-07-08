@@ -511,7 +511,7 @@ td:first-child {
     z-index: 10005 !important;
   }
   .podium-quote-container {
-    padding-bottom: calc(85px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(105px + env(safe-area-inset-bottom)) !important;
   }
 }
 
