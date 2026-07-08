@@ -153,3 +153,30 @@
     font-size: 0.8rem !important;
   }
 }
+
+/* Fix Diet bottom navbar selected indicators size to match Hub/Add/History */
+.nav-pill .nav-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 14px !important;
+  height: 38px !important;
+  box-sizing: border-box !important;
+  border-radius: 9999px !important;
+  flex: 0 1 auto !important;
+}
+.nav-pill .nav-item .icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 18px !important;
+  width: 18px !important;
+  font-size: 1.1rem !important;
+  line-height: 1 !important;
+}
+.nav-pill .nav-item .icon i {
+  line-height: 1 !important;
+  display: block !important;
+}
+
