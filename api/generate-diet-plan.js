@@ -23,7 +23,8 @@ export default async function handler(req, res) {
             sex,
             goal,
             dietType,
-            strictness
+            strictness,
+            specialRequirements
         } = req.body || {};
 
         if (!bmi || !weight || !height) {
@@ -44,8 +45,9 @@ export default async function handler(req, res) {
 - Fitness Goal: ${goal || 'Maintain'}
 - Diet Preference: ${dietType || 'Any'} (Veg/Non-Veg)
 - strictness Level: ${strictness || 'Moderate'}
+${specialRequirements ? `- Special Requirements / Allergies: ${specialRequirements}` : ''}
 
-Create a plan tailored to their goal, diet preference, and strictness level. 
+Create a plan tailored to their goal, diet preference, strictness level, and any special requirements. 
 
 Return ONLY a STRICT JSON object with no markdown fences, no preamble, and no extra text, in this exact shape:
 {

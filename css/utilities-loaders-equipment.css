@@ -431,3 +431,85 @@
   transform: translateX(-50%) scale(1);
 }
 
+/* === FORK AND KNIFE DIET LOADER === */
+.diet-plan-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.loader-fork {
+  display: inline-block;
+  animation: fork-dance 0.6s infinite alternate ease-in-out;
+}
+.loader-knife {
+  display: inline-block;
+  animation: knife-dance 0.6s infinite alternate ease-in-out;
+  animation-delay: 0.15s;
+}
+
+@keyframes fork-dance {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-4px) rotate(-20deg);
+  }
+}
+
+@keyframes knife-dance {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-4px) rotate(20deg);
+  }
+}
+
+/* === DIET PREFERENCES TEXTAREA === */
+.diet-pref-textarea::placeholder {
+  color: var(--text-light) !important;
+  opacity: 0.6;
+}
+.diet-pref-textarea:focus {
+  border-color: var(--accent-end) !important;
+}
+
+/* === DIET PREFERENCES CUSTOM SELECT === */
+.diet-pref-select {
+  width: 100%;
+  padding: 10px 35px 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background-color: var(--input-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.diet-pref-select:focus {
+  border-color: var(--accent-end) !important;
+  box-shadow: 0 0 0 2px rgba(247, 121, 125, 0.15);
+}
+
+.diet-pref-select option {
+  background-color: var(--card-bg);
+  color: var(--text);
+  padding: 8px;
+}
+
+
+
+

@@ -40,6 +40,12 @@ Fitness enthusiasts often struggle with:
 *   **Water Tracker**: Monitor hydration levels throughout the day.
 *   **Meal Management**: Categorize meals (Breakfast, Lunch, Dinner, Snack) with precise nutritional data.
 *   **Weekly Analytics**: Understand your nutritional trends and consistency scores.
+*   **AI Diet Plan**: Tailored daily menus, macro metrics, and guidelines generated directly by Gemini AI based on your physical metrics.
+
+### 👥 Social & Strength League
+*   **Friend Connection**: Share and connect with other users via custom friend codes.
+*   **Strength League Leaderboard**: A real-time league ranking users by their exercise PRs (e.g., Deadlift, Bench Press) supporting tied ranks, tied indicator badges, and active user highlighting.
+*   **Interactive 3D Podium**: A visual 3-pillar podium modal (Gold, Silver, Bronze) rendering the top 3 lifters for any exercise, complete with background scroll locking and automatic dismissals when changing views.
 
 ---
 
@@ -62,6 +68,13 @@ A dedicated nutrition expert that lives in Diet Mode.
 ### 📸 AI Food Scanner & Refiner
 - **Vision Integration**: Snap a photo of your meal, and Gemini identifies the dish and estimates its macros instantly.
 - **Smart Refinement**: If the AI guesses wrong, simply tell it (e.g., "It's a masala dosa, not plain"), and it will recalculate all macros with pinpoint accuracy.
+
+### 📋 AI Diet Plan Generator
+- **Comprehensive Personalization**: Automatically reads your physical profile (Weight, Height, Age, Sex, and calculated BMI) to design a perfect calorie and macro target.
+- **Custom Preferences**: Fine-tune the generator by choosing your fitness goal (Cut, Bulk, Maintain), strictness level, and diet preferences (Veg, Vegan, Non-Veg, Pescatarian).
+- **Special Requirements Input**: A custom text area allows you to specify custom constraints (e.g., "I can eat eggs but no meat", "lactose intolerant", or "no peanuts") which Gemini seamlessly integrates into the recipe choices.
+- **Premium UX Animation**: Custom select dropdowns tailored for dark and light modes, combined with a playful animated fork & knife loading micro-animation that dances while your plan generates.
+
 
 ---
 

@@ -2,6 +2,35 @@
 <html lang="en">
 
 <head>
+  <script>
+    window.addEventListener('error', function(e) {
+      const err = document.createElement('div');
+      err.style.position = 'fixed';
+      err.style.top = '0';
+      err.style.left = '0';
+      err.style.zIndex = '100000';
+      err.style.background = 'red';
+      err.style.color = 'white';
+      err.style.padding = '10px';
+      err.style.fontSize = '20px';
+      err.innerHTML = e.message + ' at ' + e.filename + ':' + e.lineno;
+      document.body.appendChild(err);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      const err = document.createElement('div');
+      err.style.position = 'fixed';
+      err.style.top = '0';
+      err.style.left = '0';
+      err.style.zIndex = '100000';
+      err.style.background = 'red';
+      err.style.color = 'white';
+      err.style.padding = '10px';
+      err.style.fontSize = '20px';
+      err.innerHTML = 'Unhandled Rejection: ' + (e.reason ? (e.reason.message || e.reason) : 'Unknown');
+      document.body.appendChild(err);
+    });
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description"
@@ -97,32 +126,62 @@
       
       <div style="margin-bottom: 1rem;">
         <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Goal Type</label>
-        <select id="diet-pref-goal" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
-          <option value="Cut (Lose Weight)">Cut (Lose Weight)</option>
-          <option value="Maintain">Maintain</option>
-          <option value="Bulk (Gain Weight)">Bulk (Gain Weight)</option>
-        </select>
+        <div class="custom-select-wrapper" id="diet-pref-goal-wrapper" style="width: 100%;">
+          <div class="custom-select-trigger" style="padding: 10px 12px; border-radius: 8px;">
+            <span>Cut (Lose Weight)</span>
+            <i class="ri-arrow-down-s-line"></i>
+          </div>
+          <div class="custom-options">
+            <span class="custom-option selected" data-value="Cut (Lose Weight)">Cut (Lose Weight)</span>
+            <span class="custom-option" data-value="Maintain">Maintain</span>
+            <span class="custom-option" data-value="Bulk (Gain Weight)">Bulk (Gain Weight)</span>
+          </div>
+          <input type="hidden" id="diet-pref-goal" value="Cut (Lose Weight)">
+        </div>
       </div>
 
       <div style="margin-bottom: 1rem;">
         <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Diet Type</label>
-        <select id="diet-pref-type" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
-          <option value="Any">Any (Mixed)</option>
-          <option value="Vegetarian">Vegetarian (No meat/fish)</option>
-          <option value="Vegan">Vegan (Plant-based only)</option>
-          <option value="Non-Vegetarian">Non-Vegetarian (Include meat/poultry)</option>
-          <option value="Pescatarian">Pescatarian (Fish/seafood only)</option>
-        </select>
+        <div class="custom-select-wrapper" id="diet-pref-type-wrapper" style="width: 100%;">
+          <div class="custom-select-trigger" style="padding: 10px 12px; border-radius: 8px;">
+            <span>Any (Mixed)</span>
+            <i class="ri-arrow-down-s-line"></i>
+          </div>
+          <div class="custom-options">
+            <span class="custom-option selected" data-value="Any">Any (Mixed)</span>
+            <span class="custom-option" data-value="Vegetarian">Vegetarian (No meat/fish)</span>
+            <span class="custom-option" data-value="Vegan">Vegan (Plant-based only)</span>
+            <span class="custom-option" data-value="Non-Vegetarian">Non-Vegetarian (Include meat/poultry)</span>
+            <span class="custom-option" data-value="Pescatarian">Pescatarian (Fish/seafood only)</span>
+          </div>
+          <input type="hidden" id="diet-pref-type" value="Any">
+        </div>
       </div>
 
       <div style="margin-bottom: 1.5rem;">
         <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Strictness</label>
-        <select id="diet-pref-strictness" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color);">
-          <option value="Flexible">Flexible (Easy to stick to, allow treats)</option>
-          <option value="Moderate" selected>Moderate (Balanced approach)</option>
-          <option value="Strict">Strict (Aggressive, exact macros)</option>
-        </select>
+        <div class="custom-select-wrapper" id="diet-pref-strictness-wrapper" style="width: 100%;">
+          <div class="custom-select-trigger" style="padding: 10px 12px; border-radius: 8px;">
+            <span>Moderate (Balanced approach)</span>
+            <i class="ri-arrow-down-s-line"></i>
+          </div>
+          <div class="custom-options">
+            <span class="custom-option" data-value="Flexible">Flexible (Easy to stick to, allow treats)</span>
+            <span class="custom-option selected" data-value="Moderate">Moderate (Balanced approach)</span>
+            <span class="custom-option" data-value="Strict">Strict (Aggressive, exact macros)</span>
+          </div>
+          <input type="hidden" id="diet-pref-strictness" value="Moderate">
+        </div>
       </div>
+
+
+
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Special Requirements / Allergies</label>
+        <textarea id="diet-pref-special" class="diet-pref-textarea" placeholder="e.g. I can eat eggs but not meat, lactose intolerant, no peanuts, etc." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text); font-family: inherit; font-size: 0.9rem; resize: vertical; min-height: 60px; box-sizing: border-box; outline: none;"></textarea>
+      </div>
+
+
 
       <div class="confirm-actions">
         <button id="btn-cancel-diet-plan" style="background: transparent; color: var(--text-light); border: 1px solid var(--border-color);">Cancel</button>
@@ -177,6 +236,9 @@
       </li>
       <li class="nav-item" data-target="view-achievements"><span class="icon"><i class="ri-trophy-line"></i></span>
         <span class="label">Awards</span>
+      </li>
+      <li class="nav-item" data-target="view-social"><span class="icon"><i class="ri-group-line"></i></span>
+        <span class="label">Social</span>
       </li>
       <li class="nav-item" data-target="view-tools"><span class="icon"><i class="ri-tools-line"></i></span> <span
           class="label">Tools</span></li>
@@ -617,6 +679,69 @@
       </div>
     </div>
 
+    <!-- VIEW: SOCIAL -->
+    <div id="view-social" class="view-section hidden">
+
+      <!-- Leaderboard -->
+      <div class="card fade-in" style="grid-column: 1 / -1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+          <h3 style="margin: 0;">Leaderboard</h3>
+          <select id="leaderboard-exercise-select" class="dropdown" style="max-width: 100%;">
+            <option value="">Select Exercise</option>
+            <!-- Options populated via JS -->
+          </select>
+        </div>
+
+        <div class="leaderboard-container">
+          <table class="history-table" id="social-leaderboard-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Exercise</th>
+                <th>Name</th>
+                <th>PR Weight</th>
+                <th>Diff to You</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              <tr><td colspan="5" style="text-align:center; padding:2rem 0; color:var(--text-light);">Loading Leaderboard...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div id="friend-requests-container" class="card fade-in">
+        <h3 style="margin-bottom: 1rem;"><i class="ri-user-add-line"></i> Friend Requests</h3>
+        <div id="friend-requests-list" style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 250px; overflow-y: auto;">
+          <div style="text-align: center; color: var(--text-light); padding: 1rem 0;">No pending requests</div>
+        </div>
+      </div>
+
+      <!-- Current Friends -->
+      <div id="current-friends-container" class="card fade-in">
+        <h3 style="margin-bottom: 1rem;"><i class="ri-team-line"></i> Current Friends</h3>
+        <div id="current-friends-list" style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 250px; overflow-y: auto;">
+          <div style="text-align: center; color: var(--text-light); padding: 1rem 0;">Loading friends...</div>
+        </div>
+      </div>
+
+      <!-- Profile & Invite Card -->
+      <div class="card fade-in" style="text-align: center;">
+        <h3 style="margin-bottom: 0.5rem;">Your Friend Code</h3>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+          <div id="my-friend-code" style="font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; padding: 10px 20px; background: var(--bg-color); border-radius: 8px; border: 1px dashed var(--primary-color);">------</div>
+          <button id="btn-copy-code" class="btn-primary" style="padding: 10px 15px;"><i class="ri-file-copy-line"></i></button>
+        </div>
+        
+        <div class="input-group" style="display: flex; gap: 0.5rem; margin-top: 1.5rem; text-align: left;">
+          <input type="text" id="add-friend-input" placeholder="Enter friend..." maxlength="6" style="text-transform: uppercase; font-size: 0.85rem; padding: 0.5rem 0.8rem; min-width: 0;">
+          <button id="btn-add-friend" class="btn-primary" style="font-size: 0.85rem; padding: 0.5rem 0.8rem; white-space: nowrap;">Send Request</button>
+        </div>
+      </div>
+
+    </div>
+
     <!-- VIEW 4: TOOLS -->
     <div id="view-tools" class="view-section">
       <div class="card">
@@ -716,9 +841,10 @@
 
       <!-- Diet Plan Section -->
       <div class="card" id="diet-plan-container">
-        <div class="card-header-flex">
+        <div class="card-header-flex" style="margin-bottom: 0.5rem;">
           <h2><span class="icon"><i class="ri-restaurant-fill"></i></span> Diet Plan</h2>
         </div>
+        <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.5rem; line-height: 1.4;">Use the BMI or Body Fat Percentage calculator to generate a highly tailored diet plan for your body's specific needs.</p>
 
         <!-- AI Diet Plan Active Area -->
         <div id="ai-diet-plan-card" class="hidden" style="animation: fadeIn 0.3s ease; margin-bottom: 1rem; max-height: 450px; overflow-y: auto; padding-right: 10px;">
@@ -1742,6 +1868,10 @@
       <span class="icon"><i class="ri-trophy-line"></i></span>
       <span class="label">Awards</span>
     </div>
+    <div class="nav-item ripple" data-target="view-social">
+      <span class="icon"><i class="ri-group-line"></i></span>
+      <span class="label">Social</span>
+    </div>
     <div class="nav-item ripple" data-target="view-tools">
       <span class="icon"><i class="ri-tools-line"></i></span>
       <span class="label">Tools</span>
@@ -2002,6 +2132,27 @@
         scans.
       </p>
       <button class="btn-primary" id="btn-close-bf-info-modal">Got it</button>
+    </div>
+  </div>
+
+  <!-- Podium Modal: slides in from the right using margin-left (no transform) -->
+  <div id="view-podium" class="podium-modal">
+    <div class="podium-header">
+      <button id="btn-close-podium" class="podium-back-btn">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      <div id="podium-title">Leaderboard</div>
+    </div>
+    <div class="podium-content">
+      <div class="podium-display-area">
+        <!-- Generated via JS -->
+        <div id="podium-graphic-container"></div>
+      </div>
+
+      <div class="podium-list-area">
+        <h3 class="podium-list-title">Top Scorers</h3>
+        <div id="podium-scorers-list"></div>
+      </div>
     </div>
   </div>
 

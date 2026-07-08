@@ -3,7 +3,7 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
@@ -247,8 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
         dietPrefGoal: document.getElementById('diet-pref-goal'),
         dietPrefType: document.getElementById('diet-pref-type'),
         dietPrefStrictness: document.getElementById('diet-pref-strictness'),
+        dietPrefSpecial: document.getElementById('diet-pref-special'),
         btnCancelDietPlan: document.getElementById('btn-cancel-diet-plan'),
         btnConfirmDietPlan: document.getElementById('btn-confirm-diet-plan'),
+
         
         aiDietPlanCard: document.getElementById('ai-diet-plan-card'),
         btnCloseDietPlan: document.getElementById('btn-close-diet-plan'),
@@ -288,6 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // State
+    // Social / Leaderboard State
+    let currentUserProfile = null;
+    let friendsProfiles = [];
+
+    // Local state
     let data = [];
     let bwData = [];
     let prMap = {};
@@ -712,7 +719,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 4. DATABASE FUNCTIONS
     // ==========================================
-    const addWorkoutToServer = async (workout) => { const user = auth.currentUser; if (!user) throw new Error("No user"); const docRef = await addDoc(collection(db, "workouts"), { ...workout, userId: user.uid }); return docRef.id; };
+    const addWorkoutToServer = async (workout) => { 
+        const user = auth.currentUser; 
+        if (!user) throw new Error("No user"); 
+        const docRef = await addDoc(collection(db, "workouts"), { ...workout, userId: user.uid }); 
+        
+        // Update Social PR
+        if (window.updateSocialPR) {
+            await window.updateSocialPR(workout.exercise, parseFloat(workout.weight));
+        }
+
+        return docRef.id; 
+    };
     const addBodyWeightToServer = async (entry) => { const user = auth.currentUser; if (!user) throw new Error("No user"); const docRef = await addDoc(collection(db, "bodyweight"), { ...entry, userId: user.uid }); return docRef.id; };
     const loadDataFromServer = async () => {
         const user = auth.currentUser; if (!user) return;
@@ -726,7 +744,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. UI & CALCULATIONS
     // ==========================================
     const calculateCalories = (workout) => { const intensity = EXERCISE_INTENSITY_FACTORS[workout.exercise] || EXERCISE_INTENSITY_FACTORS['default']; let duration = (workout.durationMinutes || 0) + ((workout.durationSeconds || 0) / 60); if (duration === 0) duration = (workout.sets || 1) * 1.5; return duration * intensity; };
-    const calculatePRs = () => { prMap = {}; prDates = {}; data.forEach(w => { if (w.weight && (!prMap[w.exercise] || w.weight > prMap[w.exercise])) { prMap[w.exercise] = w.weight; prDates[w.exercise] = w.date; } }); };
+    const calculatePRs = () => { 
+        prMap = {}; prDates = {}; 
+        data.forEach(w => { 
+            if (w.weight && (!prMap[w.exercise] || w.weight > prMap[w.exercise])) { 
+                prMap[w.exercise] = w.weight; 
+                prDates[w.exercise] = w.date; 
+            } 
+        });
+        
+        // Ensure social PRs are strictly synchronized with actual history PRs
+        if (currentUserProfile) {
+            let changed = false;
+            if (!currentUserProfile.prs) { currentUserProfile.prs = {}; changed = true; }
+            Object.keys(prMap).forEach(ex => {
+                if (currentUserProfile.prs[ex] !== prMap[ex]) {
+                    currentUserProfile.prs[ex] = prMap[ex];
+                    changed = true;
+                }
+            });
+            if (changed) {
+                try {
+                    const targetUid = currentUserProfile.uid || (auth.currentUser ? auth.currentUser.uid : null);
+                    if (targetUid) {
+                        setDoc(doc(db, "users", targetUid), { prs: currentUserProfile.prs }, { merge: true }).then(() => {
+                            if (typeof populateLeaderboardExercises === 'function') populateLeaderboardExercises();
+                            if (typeof renderLeaderboard === 'function') renderLeaderboard();
+                        }).catch(e => console.error("Could not sync PRs", e));
+                    }
+                } catch (e) {
+                    console.error("Error syncing PRs", e);
+                }
+            }
+        }
+    };
 
     const updateAllUI = () => { calculatePRs(); updateDataStatus(); updateStats(); updateBodyWeightStats(); updateHistory(); updatePRSection(); updateAnalyticsDropdown(); updateChart(); updateMuscleHeatmap(); updateWeeklySummary(); populatePRHistoryDropdown(); };
 
@@ -1430,6 +1481,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetId = item.dataset.target;
             const targetView = document.getElementById(targetId);
 
+            // Automatically close podium when switching tabs
+            const viewPodium = document.getElementById('view-podium');
+            if (viewPodium && viewPodium.classList.contains('active')) {
+                viewPodium.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+                const appHeader = document.querySelector('header');
+                if (appHeader) appHeader.style.display = '';
+            }
+
             // 1. Remove active class from all views
             elements.views.forEach(v => v.classList.remove('active-view'));
 
@@ -1466,7 +1526,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (headerProfile) {
             headerProfile.addEventListener('click', () => {
-                document.querySelector('.nav-item[data-target="view-settings"]').click();
+                if (appMode === 'diet') {
+                    document.querySelector('.nav-item[data-target="view-diet-settings"]').click();
+                } else {
+                    document.querySelector('.nav-item[data-target="view-settings"]').click();
+                }
             });
         }
 
@@ -1634,6 +1698,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.aiDietPlanCard.scrollIntoView({ behavior: 'smooth' });
             };
 
+            // Custom Select Dropdown Initializer for Diet Prefs
+            const initDietCustomSelect = (wrapperId) => {
+                const wrapper = document.getElementById(wrapperId);
+                if (!wrapper) return;
+
+                const trigger = wrapper.querySelector('.custom-select-trigger');
+                const options = wrapper.querySelectorAll('.custom-option');
+                const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+                const triggerText = trigger.querySelector('span');
+
+                trigger.addEventListener('click', (e) => {
+                    document.querySelectorAll('.custom-select-wrapper').forEach(other => {
+                        if (other !== wrapper) {
+                            other.classList.remove('open');
+                            const otherOptions = other.querySelector('.custom-options');
+                            if (otherOptions) otherOptions.classList.remove('open');
+                        }
+                    });
+
+                    wrapper.classList.toggle('open');
+                    const menu = wrapper.querySelector('.custom-options');
+                    if (menu) menu.classList.toggle('open');
+                    e.stopPropagation();
+                });
+
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const val = option.getAttribute('data-value');
+                        const text = option.textContent;
+
+                        hiddenInput.value = val;
+                        triggerText.textContent = text;
+                        
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+
+                        wrapper.classList.remove('open');
+                        const menu = wrapper.querySelector('.custom-options');
+                        if (menu) menu.classList.remove('open');
+                    });
+                });
+            };
+
+            // Initialize all three custom selects
+            initDietCustomSelect('diet-pref-goal-wrapper');
+            initDietCustomSelect('diet-pref-type-wrapper');
+            initDietCustomSelect('diet-pref-strictness-wrapper');
+
             const showDietPrefModal = () => {
                 if (!window.currentBmiSnapshot) return;
                 
@@ -1652,6 +1764,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (userPreferences.goalType.includes('Bulk')) elements.dietPrefGoal.value = 'Bulk (Gain Weight)';
                     else elements.dietPrefGoal.value = 'Maintain';
                 }
+
+                // Sync custom select trigger text and selection classes
+                const goalVal = elements.dietPrefGoal.value;
+                const wrapper = document.getElementById('diet-pref-goal-wrapper');
+                if (wrapper) {
+                    const triggerText = wrapper.querySelector('.custom-select-trigger span');
+                    if (triggerText) triggerText.textContent = goalVal;
+                    wrapper.querySelectorAll('.custom-option').forEach(opt => {
+                        if (opt.getAttribute('data-value') === goalVal) {
+                            opt.classList.add('selected');
+                        } else {
+                            opt.classList.remove('selected');
+                        }
+                    });
+                }
+
                 elements.dietPrefsOverlay.classList.remove('hidden');
             };
 
@@ -1661,6 +1789,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (elements.btnGenerateDietPlanBf) {
                 elements.btnGenerateDietPlanBf.addEventListener('click', showDietPrefModal);
             }
+
 
             if (elements.btnCancelDietPlan) {
                 elements.btnCancelDietPlan.addEventListener('click', () => {
@@ -1676,17 +1805,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.dietPrefsOverlay.classList.add('hidden');
                     const ogText = elements.btnGenerateDietPlan ? elements.btnGenerateDietPlan.innerHTML : '';
                     if (elements.btnGenerateDietPlan) {
-                        elements.btnGenerateDietPlan.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Generating...';
+                        elements.btnGenerateDietPlan.innerHTML = '<span class="diet-plan-loader"><i class="ri-fork-line loader-fork"></i><i class="ri-knife-line loader-knife"></i></span> Generating...';
                         elements.btnGenerateDietPlan.disabled = true;
                     }
                     const ogTextBf = elements.btnGenerateDietPlanBf ? elements.btnGenerateDietPlanBf.innerHTML : '';
                     if (elements.btnGenerateDietPlanBf) {
-                        elements.btnGenerateDietPlanBf.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Generating...';
+                        elements.btnGenerateDietPlanBf.innerHTML = '<span class="diet-plan-loader"><i class="ri-fork-line loader-fork"></i><i class="ri-knife-line loader-knife"></i></span> Generating...';
                         elements.btnGenerateDietPlanBf.disabled = true;
                     }
 
+
                     try {
                         let parsedData = null;
+                        const specialReq = elements.dietPrefSpecial ? elements.dietPrefSpecial.value.trim() : "";
                         for (let i = 0; i < 2; i++) {
                             const res = await fetch('/api/generate-diet-plan', {
                                 method: 'POST',
@@ -1696,7 +1827,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ...window.currentBmiSnapshot,
                                     goal: elements.dietPrefGoal.value,
                                     dietType: elements.dietPrefType.value,
-                                    strictness: elements.dietPrefStrictness.value
+                                    strictness: elements.dietPrefStrictness.value,
+                                    specialRequirements: specialReq
                                 })
                             });
                             if (!res.ok) throw new Error('API failed');
@@ -1715,8 +1847,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             goalAtTimeOfGeneration: elements.dietPrefGoal.value,
                             dietType: elements.dietPrefType.value,
                             strictness: elements.dietPrefStrictness.value,
+                            specialRequirements: specialReq,
                             planData: parsedData
                         };
+
                         const docRef = await addDoc(collection(db, `users/${user.uid}/dietPlans`), newPlanObj);
 
                         userPreferences.lastPlanGenerationTime = Date.now();
@@ -3269,6 +3403,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     await gamificationModule.loadGamificationFromServer(user.uid);
                 }
 
+                // Initialize Social Profile
+                if (window.initUserProfile) await window.initUserProfile(user);
+
                 // Load Data
                 await loadDataFromServer();
                 updateAllUI();
@@ -4198,4 +4335,703 @@ document.addEventListener('DOMContentLoaded', () => {
     initPRSearch();
 
     initCalorieQuestionnaire();
+
+    // ==========================================
+    // SOCIAL / LEADERBOARD LOGIC
+    // ==========================================
+
+    const generateFriendCode = () => {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    };
+
+    window.initUserProfile = async (user) => {
+        const userRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userRef);
+        
+        if (docSnap.exists()) {
+            currentUserProfile = docSnap.data();
+            let needsUpdate = false;
+            
+            if (!currentUserProfile.uid) {
+                currentUserProfile.uid = user.uid;
+                needsUpdate = true;
+            }
+            if (!currentUserProfile.friendCode) {
+                currentUserProfile.friendCode = generateFriendCode();
+                needsUpdate = true;
+            }
+            if (!currentUserProfile.friends) {
+                currentUserProfile.friends = [];
+                needsUpdate = true;
+            }
+            if (!currentUserProfile.prs) {
+                currentUserProfile.prs = {};
+                needsUpdate = true;
+            }
+            if (!currentUserProfile.friendRequests) {
+                currentUserProfile.friendRequests = [];
+                needsUpdate = true;
+            }
+            if (!currentUserProfile.displayName || currentUserProfile.displayName === 'undefined') {
+                currentUserProfile.displayName = user.displayName || user.email || 'Gym Bro';
+                if (currentUserProfile.displayName === 'undefined') currentUserProfile.displayName = 'Gym Bro';
+                needsUpdate = true;
+            }
+            
+            if (needsUpdate) {
+                await setDoc(userRef, currentUserProfile, { merge: true });
+            }
+        } else {
+            const friendCode = generateFriendCode();
+            let dName = user.displayName;
+            if (!dName || dName === 'undefined') dName = user.email;
+            if (!dName || dName === 'undefined') dName = 'Gym Bro';
+            
+            currentUserProfile = {
+                uid: user.uid,
+                displayName: dName,
+                friendCode: friendCode,
+                friends: [],
+                friendRequests: [],
+                prs: {}
+            };
+            await setDoc(userRef, currentUserProfile);
+        }
+        
+        const codeElem = document.getElementById('my-friend-code');
+        if (codeElem) codeElem.innerText = currentUserProfile.friendCode;
+        
+        if (!window._userProfileListener) {
+            window._userProfileListener = onSnapshot(userRef, async (snap) => {
+                if (snap.exists()) {
+                    currentUserProfile = snap.data();
+                    const liveCodeElem = document.getElementById('my-friend-code');
+                    if (liveCodeElem && currentUserProfile.friendCode) liveCodeElem.innerText = currentUserProfile.friendCode;
+                    await loadFriendsProfiles();
+                    await renderFriendRequests();
+                    await renderCurrentFriends();
+                    if (typeof populateLeaderboardExercises === 'function') populateLeaderboardExercises();
+                    if (typeof renderLeaderboard === 'function') renderLeaderboard();
+                }
+            });
+        } else {
+            // Manual fetch if listener already active (shouldn't happen often)
+            await loadFriendsProfiles();
+            await renderFriendRequests(); // Render requests
+            await renderCurrentFriends();
+            populateLeaderboardExercises();
+        }
+    };
+
+    const loadFriendsProfiles = async () => {
+        if (!currentUserProfile || !currentUserProfile.friends || currentUserProfile.friends.length === 0) {
+            friendsProfiles = [];
+            return;
+        }
+        
+        friendsProfiles = [];
+        // Fetch each friend's profile
+        for (const friendUid of currentUserProfile.friends) {
+            const friendSnap = await getDoc(doc(db, "users", friendUid));
+            if (friendSnap.exists()) {
+                friendsProfiles.push(friendSnap.data());
+            }
+        }
+    };
+
+    const renderFriendRequests = async () => {
+        const container = document.getElementById('friend-requests-container');
+        const listElem = document.getElementById('friend-requests-list');
+        if (!container || !listElem || !currentUserProfile) return;
+
+        const requests = currentUserProfile.friendRequests || [];
+        if (requests.length === 0) {
+            listElem.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 1rem 0;">No pending requests</div>';
+            return;
+        }
+
+        listElem.innerHTML = '';
+
+        for (const reqUid of requests) {
+            const snap = await getDoc(doc(db, "users", reqUid));
+            if (snap.exists()) {
+                const reqData = snap.data();
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                item.style.padding = '0.8rem';
+                item.style.background = 'var(--bg-color)';
+                item.style.borderRadius = '8px';
+                
+                item.innerHTML = `
+                    <div style="font-weight: 500;">${reqData.displayName}</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem;" onclick="acceptFriendRequest('${reqUid}')">Accept</button>
+                        <button class="btn-outline" style="padding: 5px 15px; font-size: 0.9rem; background: transparent; color: var(--text-color); border: 1px solid var(--border-color);" onclick="declineFriendRequest('${reqUid}')">Decline</button>
+                    </div>
+                `;
+                listElem.appendChild(item);
+            }
+        }
+    };
+
+    const renderCurrentFriends = async () => {
+        const container = document.getElementById('current-friends-container');
+        const listElem = document.getElementById('current-friends-list');
+        if (!container || !listElem || !currentUserProfile) return;
+
+        const friends = currentUserProfile.friends || [];
+        if (friends.length === 0) {
+            listElem.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 1rem 0;">No friends yet</div>';
+            return;
+        }
+
+        listElem.innerHTML = '';
+
+        for (const friendUid of friends) {
+            const snap = await getDoc(doc(db, "users", friendUid));
+            if (snap.exists()) {
+                const friendData = snap.data();
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                item.style.padding = '0.8rem';
+                item.style.background = 'var(--bg-color)';
+                item.style.borderRadius = '8px';
+                
+                item.innerHTML = `
+                    <div style="font-weight: 500;">${friendData.displayName}</div>
+                    <button class="btn-outline" style="padding: 4px 12px; font-size: 0.75rem; width: auto; flex: 0 0 auto; min-width: 0; border-radius: 6px; cursor: pointer; background: transparent; color: var(--error-color); border: 1px solid rgba(255, 99, 132, 0.3);" onclick="removeFriend('${friendUid}', '${friendData.displayName.replace(/'/g, "\\'")}')">Remove</button>
+                `;
+                listElem.appendChild(item);
+            }
+        }
+    };
+
+    window.acceptFriendRequest = async (senderUid) => {
+        if (!currentUserProfile) return;
+        try {
+            // Remove from requests, add to friends
+            const newRequests = (currentUserProfile.friendRequests || []).filter(uid => uid !== senderUid);
+            const myNewFriends = [...(currentUserProfile.friends || []), senderUid];
+            
+            // 1. Update MY profile
+            await setDoc(doc(db, "users", currentUserProfile.uid), {
+                friendRequests: newRequests,
+                friends: myNewFriends
+            }, { merge: true });
+            
+            currentUserProfile.friendRequests = newRequests;
+            currentUserProfile.friends = myNewFriends;
+
+            // 2. Update SENDER'S profile (add me to their friends list)
+            const senderSnap = await getDoc(doc(db, "users", senderUid));
+            if (senderSnap.exists()) {
+                const senderData = senderSnap.data();
+                const theirNewFriends = [...(senderData.friends || []), currentUserProfile.uid];
+                await setDoc(doc(db, "users", senderUid), { friends: theirNewFriends }, { merge: true });
+            }
+
+            showNotification('Friend request accepted!');
+            await loadFriendsProfiles();
+            await renderFriendRequests();
+            await renderCurrentFriends();
+            populateLeaderboardExercises();
+            renderLeaderboard();
+        } catch (e) {
+            console.error("Error accepting request:", e);
+            showNotification("Failed to accept request.", "error");
+        }
+    };
+
+    window.declineFriendRequest = async (senderUid) => {
+        if (!currentUserProfile) return;
+        try {
+            const newRequests = (currentUserProfile.friendRequests || []).filter(uid => uid !== senderUid);
+            await setDoc(doc(db, "users", currentUserProfile.uid), { friendRequests: newRequests }, { merge: true });
+            
+            currentUserProfile.friendRequests = newRequests;
+            showNotification('Friend request declined.');
+            await renderFriendRequests();
+        } catch (e) {
+            console.error("Error declining request:", e);
+            showNotification("Failed to decline request.", "error");
+        }
+    };
+
+    window.removeFriend = async (friendUid, friendName = "this friend") => {
+        if (!currentUserProfile) return;
+        
+        window.showConfirmDialog("Remove Friend", `Are you sure you wanna remove ${friendName} from the friend list?`, async () => {
+            try {
+                const newFriends = (currentUserProfile.friends || []).filter(uid => uid !== friendUid);
+                await setDoc(doc(db, "users", currentUserProfile.uid), { friends: newFriends }, { merge: true });
+                currentUserProfile.friends = newFriends;
+
+                const friendSnap = await getDoc(doc(db, "users", friendUid));
+                if (friendSnap.exists()) {
+                    const friendData = friendSnap.data();
+                    const theirNewFriends = (friendData.friends || []).filter(uid => uid !== currentUserProfile.uid);
+                    await setDoc(doc(db, "users", friendUid), { friends: theirNewFriends }, { merge: true });
+                }
+
+                showNotification('Friend removed.');
+                await loadFriendsProfiles();
+                await renderCurrentFriends();
+                populateLeaderboardExercises();
+                renderLeaderboard();
+            } catch (e) {
+                console.error("Error removing friend:", e);
+                showNotification("Failed to remove friend.", "error");
+            }
+        });
+    };
+
+    document.getElementById('btn-copy-code')?.addEventListener('click', () => {
+        const code = document.getElementById('my-friend-code').innerText;
+        navigator.clipboard.writeText(code);
+        showNotification('Friend Code copied!');
+    });
+
+    document.getElementById('btn-add-friend')?.addEventListener('click', async () => {
+        const codeInput = document.getElementById('add-friend-input');
+        const code = codeInput.value.trim().toUpperCase();
+        
+        if (!code || code.length !== 6) {
+            showNotification('Please enter a valid 6-digit code.', 'error');
+            return;
+        }
+        if (code === currentUserProfile.friendCode) {
+            showNotification('You cannot add yourself.', 'error');
+            return;
+        }
+
+        try {
+            // Find user by friendCode
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("friendCode", "==", code));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                showNotification('No user found with that code.', 'error');
+                return;
+            }
+
+            const friendDoc = querySnapshot.docs[0];
+            const friendData = friendDoc.data();
+            const targetFriendUid = friendDoc.id; // Always defined, document ID is the UID
+            const myUid = auth.currentUser.uid;
+
+            if (currentUserProfile.friends && currentUserProfile.friends.includes(targetFriendUid)) {
+                showNotification('You are already friends!', 'info');
+                return;
+            }
+
+            if (friendData.friendRequests && friendData.friendRequests.includes(myUid)) {
+                showNotification('Friend request already sent!', 'info');
+                return;
+            }
+            
+            if (currentUserProfile.friendRequests && currentUserProfile.friendRequests.includes(targetFriendUid)) {
+                showNotification('They already sent you a request! Check your Pending Requests.', 'info');
+                return;
+            }
+
+            // Send Request
+            const theirNewRequests = [...(friendData.friendRequests || []), myUid];
+            
+            try {
+                await setDoc(doc(db, "users", targetFriendUid), { friendRequests: theirNewRequests }, { merge: true });
+                codeInput.value = '';
+                showNotification(`Friend request sent to ${friendData.displayName}!`);
+            } catch (e) {
+                console.error("Could not send friend request:", e);
+                showNotification("Could not send friend request. Check permissions.", "error");
+            }
+        } catch (err) {
+            console.error("Error adding friend:", err);
+            showNotification(`Failed: ${err.message}`, "error");
+        }
+    });
+
+    const populateLeaderboardExercises = () => {
+        const select = document.getElementById('leaderboard-exercise-select');
+        if (!select) return;
+        
+        const currentSelection = select.value;
+        select.innerHTML = '<option value="">Select Exercise</option>';
+        
+        const allExercises = new Set();
+        
+        // Add all predefined exercises from the main workout logger
+        const mainExerciseSelect = document.getElementById('exercise-select');
+        if (mainExerciseSelect) {
+            Array.from(mainExerciseSelect.options).forEach(opt => {
+                if (opt.value && opt.value !== '') {
+                    allExercises.add(opt.value);
+                }
+            });
+        }
+
+        // Add any custom exercises the user or friends might have logged
+        if (currentUserProfile?.prs) {
+            Object.keys(currentUserProfile.prs).forEach(ex => allExercises.add(ex));
+        }
+        friendsProfiles.forEach(f => {
+            if (f.prs) {
+                Object.keys(f.prs).forEach(ex => allExercises.add(ex));
+            }
+        });
+
+        Array.from(allExercises).sort().forEach(ex => {
+            const opt = document.createElement('option');
+            opt.value = ex;
+            opt.textContent = ex;
+            select.appendChild(opt);
+        });
+
+        if (allExercises.has(currentSelection)) {
+            select.value = currentSelection;
+        }
+
+        if (typeof applyCustomDropdown === 'function') {
+            applyCustomDropdown(select);
+        }
+    };
+
+    document.getElementById('leaderboard-exercise-select')?.addEventListener('change', () => {
+        renderLeaderboard();
+    });
+
+    const renderLeaderboard = () => {
+        const tbody = document.getElementById('leaderboard-tbody');
+        const select = document.getElementById('leaderboard-exercise-select');
+        if (!tbody || !select) return;
+
+        let exercisesToRender = [];
+        if (select.value) {
+            exercisesToRender = [select.value];
+        } else {
+            exercisesToRender = [
+                'Deadlift (Conventional)', 
+                'Bench Press (Barbell)', 
+                'Squat (Barbell Back)', 
+                'Bicep Curl (Dumbbell)', 
+                'Lat Pulldown (Wide Grip)'
+            ];
+        }
+
+        let allRowsHtml = '';
+        let hasAnyData = false;
+
+        exercisesToRender.forEach(exercise => {
+            const competitors = [];
+            if (currentUserProfile?.prs && currentUserProfile.prs[exercise]) {
+                competitors.push({ name: currentUserProfile.displayName, weight: currentUserProfile.prs[exercise], isMe: true, exercise: exercise });
+            }
+            
+            friendsProfiles.forEach(f => {
+                if (f.prs && f.prs[exercise]) {
+                    competitors.push({ name: f.displayName, weight: f.prs[exercise], isMe: false, exercise: exercise });
+                }
+            });
+
+            if (competitors.length > 0) {
+                if (hasAnyData) {
+                    allRowsHtml += `<tr class="exercise-spacer"><td colspan="5"></td></tr>`;
+                }
+                hasAnyData = true;
+                competitors.sort((a, b) => b.weight - a.weight);
+
+                let myPr = 0;
+                if (currentUserProfile?.prs && currentUserProfile.prs[exercise]) {
+                    myPr = currentUserProfile.prs[exercise];
+                }
+
+                // Group competitors by weight to handle ties properly
+                const groups = [];
+                competitors.forEach(c => {
+                    if (groups.length > 0 && groups[groups.length - 1].weight === c.weight) {
+                        groups[groups.length - 1].members.push(c);
+                    } else {
+                        groups.push({ weight: c.weight, members: [c] });
+                    }
+                });
+
+                let overallIndex = 0;
+
+                allRowsHtml += groups.map((group) => {
+                    const groupRankIndex = overallIndex;
+                    
+                    let rankHtml = `#${groupRankIndex + 1}`;
+                    if (groupRankIndex === 0) rankHtml = '🥇 1st';
+                    else if (groupRankIndex === 1) rankHtml = '🥈 2nd';
+                    else if (groupRankIndex === 2) rankHtml = '🥉 3rd';
+
+                    let diffHtml = '';
+                    if (myPr > 0) {
+                        if (group.members.some(m => m.isMe)) {
+                            // If I am in this tied group, the diff is "Tied" for the whole group.
+                            // If I'm the ONLY one in this group, diff should just be '-'
+                            if (group.members.length === 1) {
+                                diffHtml = '<span style="color: var(--text-light);">-</span>';
+                            } else {
+                                diffHtml = `<span class="diff-pill diff-tied">Tied</span>`;
+                            }
+                        } else {
+                            const diff = group.weight - myPr;
+                            if (diff > 0) diffHtml = `<span class="diff-pill diff-positive">+${diff} kg</span>`;
+                            else if (diff < 0) diffHtml = `<span class="diff-pill diff-negative">${diff} kg</span>`;
+                        }
+                    } else {
+                        diffHtml = '<span style="color: var(--text-light);">-</span>';
+                    }
+
+                    const displayExercise = group.members[0].exercise.split(' (')[0];
+                    
+                    let iconColor = 'var(--primary-color)';
+                    let iconPaths = '';
+                    let isFill = false;
+                    let isImage = false;
+
+                    if (displayExercise.includes('Bicep')) {
+                        iconColor = '#ff9f43';
+                        iconPaths = `<path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1" /><path d="M15 14a5 5 0 0 0-7.584 2" /><path d="M9.964 6.825C8.019 7.977 9.5 13 8 15" />`;
+                    } else if (displayExercise.includes('Bench') || displayExercise.includes('Chest')) {
+                        isImage = true;
+                        iconPaths = `<img src="assets/images/chest-logo.png" class="leaderboard-icon img-chest" alt="Chest Logo">`;
+                    } else if (displayExercise.includes('Squat') || displayExercise.includes('Legs')) {
+                        isImage = true;
+                        iconPaths = `<img src="assets/images/legs-logo.png" class="leaderboard-icon img-legs" alt="Legs Logo">`;
+                    } else if (displayExercise.includes('Deadlift')) {
+                        iconColor = '#ff6b6b';
+                        iconPaths = `<path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z" /><path d="m2.5 21.5 1.4-1.4" /><path d="m20.1 3.9 1.4-1.4" /><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z" /><path d="m9.6 14.4 4.8-4.8" />`;
+                    } else if (displayExercise.includes('Lat Pulldown') || displayExercise.includes('Back')) {
+                        isImage = true;
+                        iconPaths = `<img src="assets/images/back-logo.png" class="leaderboard-icon img-back" alt="Back Logo">`;
+                    } else {
+                        isFill = true;
+                        iconColor = 'var(--primary-color)';
+                        iconPaths = `<path d="M12 23a7.5 7.5 0 0 0 7.5-7.5c0-3.3-1.6-5.8-3.6-7.8-1-.9-1.8-1.8-1.8-3 0-1.6 1.4-2.8 2.5-3.8A10.8 10.8 0 0 0 12 1a10.8 10.8 0 0 0-4.6 2.9c1 .8 2.4 2 2.4 3.6 0 1.2-.8 2.1-1.8 3-2 2-3.6 4.5-3.6 7.8A7.5 7.5 0 0 0 12 23Z"/>`;
+                    }
+                    
+                    let iconHtml;
+                    if (isImage) {
+                        iconHtml = iconPaths; // Because it's an img tag now
+                    } else {
+                        iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="leaderboard-icon" viewBox="0 0 24 24" fill="${isFill ? 'currentColor' : 'none'}" stroke="${isFill ? 'none' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: ${iconColor}; filter: drop-shadow(0 0 5px ${iconColor}40);">${iconPaths}</svg>`;
+                    }
+
+                    const groupRowsHtml = group.members.map((c, mIndex) => {
+                        const isFirstInGroup = mIndex === 0;
+                        const isFirstOverall = overallIndex === 0 && isFirstInGroup;
+                        const rowspanCount = group.members.length;
+
+                        const exerciseTdHtml = isFirstOverall 
+                            ? `<td rowspan="${competitors.length}" style="vertical-align: middle; color: var(--text-color); border-bottom: 1px solid rgba(255,255,255,0.05);"><div style="display: flex; align-items: center; justify-content: center;">${iconHtml} <span style="font-weight: 600;">${displayExercise}</span></div></td>` 
+                            : '';
+
+                        const rankTdHtml = isFirstInGroup ? `<td ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${rankHtml}</td>` : '';
+                        const diffTdHtml = isFirstInGroup ? `<td ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${diffHtml}</td>` : '';
+
+                        return `
+                            <tr class="leaderboard-data-row" data-exercise="${exercise}" style="cursor: pointer; ${c.isMe ? 'background: rgba(var(--primary-color), 0.1); font-weight: bold;' : ''}">
+                                ${rankTdHtml}
+                                ${exerciseTdHtml}
+                                <td class="leaderboard-center-cell">${c.name}</td>
+                                <td class="leaderboard-center-cell">${c.weight} kg</td>
+                                ${diffTdHtml}
+                            </tr>
+                        `;
+                    }).join('');
+
+                    overallIndex += group.members.length;
+                    return groupRowsHtml;
+                }).join('');
+            }
+        });
+
+        if (!hasAnyData) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem 0; color:var(--text-light);">No PRs logged for these exercises yet.</td></tr>';
+        } else {
+            tbody.innerHTML = allRowsHtml;
+        }
+    };
+
+    window.updateSocialPR = async (exercise, weight) => {
+        if (!currentUserProfile) return;
+        
+        const currentPr = currentUserProfile.prs?.[exercise] || 0;
+        if (weight > currentPr) {
+            if (!currentUserProfile.prs) currentUserProfile.prs = {};
+            currentUserProfile.prs[exercise] = weight;
+            try {
+                const targetUid = currentUserProfile.uid || (auth.currentUser ? auth.currentUser.uid : null);
+                if (targetUid) {
+                    await setDoc(doc(db, "users", targetUid), { prs: currentUserProfile.prs }, { merge: true });
+                }
+            } catch (e) {
+                console.error("Failed to update Social PR:", e);
+            }
+            
+            if (typeof populateLeaderboardExercises === 'function') populateLeaderboardExercises();
+            const select = document.getElementById('leaderboard-exercise-select');
+            if (select && select.value === exercise) {
+                if (typeof renderLeaderboard === 'function') renderLeaderboard();
+            }
+        }
+    };
+
+    // ==========================================
+    // PODIUM FEATURE
+    // ==========================================
+    const viewPodium = document.getElementById('view-podium');
+    const btnClosePodium = document.getElementById('btn-close-podium');
+    const podiumGraphicContainer = document.getElementById('podium-graphic-container');
+    const podiumScorersList = document.getElementById('podium-scorers-list');
+    const podiumTitle = document.getElementById('podium-title');
+    const podiumHeader = document.getElementById('podium-header');
+
+    if (btnClosePodium && viewPodium) {
+        btnClosePodium.addEventListener('click', () => {
+            viewPodium.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+            const appHeader = document.querySelector('header');
+            if (appHeader) appHeader.style.display = '';
+        });
+    }
+
+    const getInitials = (name) => {
+        if (!name) return '?';
+        const parts = name.split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    };
+
+    window.openPodium = (exercise) => {
+        if (!viewPodium) return;
+        
+        let displayExercise = exercise;
+        if (exercise.includes('(')) {
+            displayExercise = exercise.split('(')[0].trim();
+        }
+        podiumTitle.textContent = displayExercise;
+        
+        const competitors = [];
+        if (currentUserProfile?.prs && currentUserProfile.prs[exercise]) {
+            competitors.push({ name: currentUserProfile.displayName || 'You', weight: currentUserProfile.prs[exercise], isMe: true });
+        }
+        friendsProfiles.forEach(f => {
+            if (f.prs && f.prs[exercise]) {
+                competitors.push({ name: f.displayName || 'Friend', weight: f.prs[exercise], isMe: false });
+            }
+        });
+        
+        competitors.sort((a, b) => b.weight - a.weight);
+        
+        const groups = [];
+        competitors.forEach(c => {
+            if (groups.length === 0 || groups[groups.length - 1].weight !== c.weight) {
+                groups.push({ weight: c.weight, members: [c] });
+            } else {
+                groups[groups.length - 1].members.push(c);
+            }
+        });
+        
+        const top3 = [null, null, null];
+        if (groups.length > 0) top3[0] = groups[0].members; // 1st
+        if (groups.length > 1) top3[1] = groups[1].members; // 2nd
+        if (groups.length > 2) top3[2] = groups[2].members; // 3rd
+        
+        const generateAvatarHTML = (members) => {
+            if (!members || members.length === 0) return '';
+            if (members.length === 1) {
+                const isMeClass = members[0].isMe ? 'is-me' : '';
+                return `<div class="podium-avatar ${isMeClass}">${getInitials(members[0].name)}</div>`;
+            } else {
+                const hasMe = members.some(m => m.isMe);
+                const isMeClass = hasMe ? 'is-me' : '';
+                return `<div class="podium-avatar ${isMeClass}" style="font-size: 0.8rem;">+${members.length}</div>`;
+            }
+        };
+
+
+        const generatePillarHTML = (members, rankClass, rankNum, wrapperStyle = '') => {
+            const hasMembers = members && members.length > 0;
+            const avatarHTML = hasMembers 
+                ? generateAvatarHTML(members)
+                : `<div class="podium-avatar empty">-</div>`;
+            
+            return `
+                <div class="podium-pillar-wrapper" style="${wrapperStyle}">
+                    ${avatarHTML}
+                    <div class="podium-pillar ${rankClass} ${hasMembers ? '' : 'empty'}">${rankNum}</div>
+                </div>
+            `;
+        };
+
+        // Find user's own rank
+        let myRank = null;
+        let rankCounter = 1;
+        for (const group of groups) {
+            if (group.members.some(m => m.isMe)) {
+                myRank = rankCounter;
+                break;
+            }
+            rankCounter += group.members.length;
+        }
+        const myRankSubtitle = myRank ? `<div style="text-align:center; font-size:0.9rem; color:var(--text-light); margin-bottom:0.5rem;">Your Rank: <strong style="color:var(--text, #F1F5F9)">#${myRank}</strong></div>` : '';
+
+        let graphicHTML = `
+            <div class="podium-display-inner">
+            ${myRankSubtitle}
+            <div class="podium-graphic">
+                ${generatePillarHTML(top3[1], 'rank-2', '2')}
+                ${generatePillarHTML(top3[0], 'rank-1', '1', 'z-index: 5;')}
+                ${generatePillarHTML(top3[2], 'rank-3', '3')}
+            </div>
+            </div>
+        `;
+
+        podiumGraphicContainer.innerHTML = graphicHTML;
+        
+        let listHTML = '';
+        let currentRank = 1;
+        groups.forEach(group => {
+            group.members.forEach(m => {
+                const isMeStyle = m.isMe ? 'border-color: var(--primary-color);' : '';
+                listHTML += `
+                    <div class="podium-scorer-item" style="${isMeStyle}">
+                        <div class="podium-scorer-avatar" style="background: ${m.isMe ? 'var(--primary-color)' : 'var(--card-border)'};">${getInitials(m.name)}</div>
+                        <div class="podium-scorer-info">
+                            <div class="podium-scorer-name">${m.name}</div>
+                            <div class="podium-scorer-weight">${m.weight} kg</div>
+                        </div>
+                        <div class="podium-scorer-rank">${currentRank}</div>
+                    </div>
+                `;
+            });
+            currentRank += group.members.length;
+        });
+        
+        podiumScorersList.innerHTML = listHTML;
+
+        const appHeader = document.querySelector('header');
+        if (appHeader) appHeader.style.display = 'none';
+        viewPodium.classList.add('active');
+        document.body.classList.add('no-scroll');
+    };
+
+    const leaderboardTbody = document.getElementById('leaderboard-tbody');
+    if (leaderboardTbody) {
+        leaderboardTbody.addEventListener('click', (e) => {
+            const tr = e.target.closest('.leaderboard-data-row');
+            if (tr && tr.dataset.exercise) {
+                window.openPodium(tr.dataset.exercise);
+            }
+        });
+    }
+
 });
