@@ -232,3 +232,60 @@ export const getWeeklyDietData = async (db, uid) => {
         return { success: false, error: error.message };
     }
 };
+
+// ==========================================
+// 5. RECIPE BUILDER
+// Path: users/{uid}/recipes/{recipeId}
+// ==========================================
+
+export const saveRecipe = async (db, uid, recipeData) => {
+    if (!uid) throw new Error("Authentication required: uid is missing.");
+    try {
+        const recipesRef = collection(db, "users", uid, "recipes");
+        const payload = {
+            recipeName: recipeData.recipeName || "Unnamed Recipe",
+            calories: Number(recipeData.calories) || 0,
+            protein: Number(recipeData.protein) || 0,
+            carbs: Number(recipeData.carbs) || 0,
+            fat: Number(recipeData.fat) || 0,
+            mealType: recipeData.mealType || "Snack",
+            weight: Number(recipeData.weight) || 0,
+            createdAt: serverTimestamp()
+        };
+        const docRef = await addDoc(recipesRef, payload);
+        return { success: true, id: docRef.id, data: payload };
+    } catch (error) {
+        console.error("Error saving recipe:", error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const getRecipes = async (db, uid) => {
+    if (!uid) throw new Error("Authentication required: uid is missing.");
+    try {
+        const recipesRef = collection(db, "users", uid, "recipes");
+        const q = query(recipesRef, orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        const recipes = [];
+        snapshot.forEach((doc) => {
+            recipes.push({ id: doc.id, ...doc.data() });
+        });
+        return { success: true, recipes };
+    } catch (error) {
+        console.error("Error fetching recipes:", error);
+        return { success: false, error: error.message, recipes: [] };
+    }
+};
+
+export const deleteRecipe = async (db, uid, recipeId) => {
+    if (!uid || !recipeId) throw new Error("Missing required parameters for recipe deletion.");
+    try {
+        const recipeRef = doc(db, "users", uid, "recipes", recipeId);
+        await deleteDoc(recipeRef);
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting recipe:", error);
+        return { success: false, error: error.message };
+    }
+};
+

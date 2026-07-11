@@ -40,8 +40,8 @@
 }
 
 .setting-item .custom-option {
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--text, #f8fafc);
 }
@@ -49,7 +49,7 @@
 .setting-item .custom-option:hover {
   background: rgba(99, 102, 241, 0.15);
   color: white;
-  padding-left: 1.25rem;
+  padding-left: 1rem;
 }
 
 .setting-item .custom-option.selected {
@@ -78,3 +78,17 @@
   }
 }
 
+/* Mobile Compression for Settings Dropdowns */
+@media (max-width: 768px) {
+  .setting-item .custom-option {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  .setting-item .custom-option:hover {
+    padding-left: 0.8rem;
+  }
+  .setting-item .custom-select-trigger {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}

@@ -1,27 +1,27 @@
-@import url('./css/variables-and-reset.css');
-@import url('./css/layout.css');
-@import url('./css/forms.css');
-@import url('./css/header-nav.css');
-@import url('./css/tables-and-history.css');
-@import url('./css/exercise-components.css');
-@import url('./css/sidebar-bottom-nav.css');
-@import url('./css/timer.css');
-@import url('./css/utilities-loaders-equipment.css');
-@import url('./css/upgrades-and-tactile.css');
-@import url('./css/routines.css');
-@import url('./css/medals-and-themes.css');
-@import url('./css/muscle-heatmap.css');
-@import url('./css/bmi-ai-pr.css');
-@import url('./css/diet-dashboard.css');
-@import url('./css/diet-log-meal.css');
-@import url('./css/add-meal.css');
-@import url('./css/diet-ai-scan.css');
-@import url('./css/diet-history.css');
-@import url('./css/diet-coach.css');
-@import url('./css/diet-settings.css');
-@import url('./css/general-settings.css');
-@import url('./css/light-mode-overrides.css');
-@import url('./css/login.css');
+@import url('./css/variables-and-reset.css?v=55');
+@import url('./css/layout.css?v=55');
+@import url('./css/forms.css?v=55');
+@import url('./css/header-nav.css?v=55');
+@import url('./css/tables-and-history.css?v=55');
+@import url('./css/exercise-components.css?v=55');
+@import url('./css/sidebar-bottom-nav.css?v=55');
+@import url('./css/timer.css?v=55');
+@import url('./css/utilities-loaders-equipment.css?v=55');
+@import url('./css/upgrades-and-tactile.css?v=55');
+@import url('./css/routines.css?v=55');
+@import url('./css/medals-and-themes.css?v=55');
+@import url('./css/muscle-heatmap.css?v=55');
+@import url('./css/bmi-ai-pr.css?v=55');
+@import url('./css/diet-dashboard.css?v=55');
+@import url('./css/diet-log-meal.css?v=55');
+@import url('./css/add-meal.css?v=55');
+@import url('./css/diet-ai-scan.css?v=55');
+@import url('./css/diet-history.css?v=55');
+@import url('./css/diet-coach.css?v=55');
+@import url('./css/diet-settings.css?v=55');
+@import url('./css/general-settings.css?v=55');
+@import url('./css/light-mode-overrides.css?v=55');
+@import url('./css/login.css?v=55');
 
 
 /* ---- Floating pill nav (Mobile Only) ---- */
@@ -180,3 +180,41 @@
   display: block !important;
 }
 
+
+/* Skeleton Loader */
+@keyframes skeletonPulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+
+.skeleton-row td {
+  padding: 1rem 0;
+  vertical-align: middle;
+}
+
+.skeleton-block {
+  height: 16px;
+  background-color: var(--input-bg);
+  border-radius: 4px;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-avatar {
+  width: 24px;
+  height: 24px;
+  background-color: var(--input-bg);
+  border-radius: 50%;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+/* Cropper.js Circular Mask Overrides */
+.cropper-view-box,
+.cropper-face {
+  border-radius: 50%;
+}
+
+/* Modal styling for crop avatar */
+#modal-crop-avatar .modal-content {
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-btn);
+}

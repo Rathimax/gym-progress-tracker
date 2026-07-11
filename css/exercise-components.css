@@ -175,11 +175,16 @@ select.hidden-native,
   margin-bottom: 1.5rem;
 }
 
-.inline-form input,
-.inline-form button {
+.inline-form input {
   width: 100%;
   margin: 0;
   padding: 1.1rem;
+}
+
+.inline-form button {
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem;
 }
 
 .data-info-columns {
@@ -232,14 +237,12 @@ select.hidden-native,
 }
 
 .data-management-grid #clear-btn {
-  grid-column: 1 / -1;
   background: #ef4444;
   color: white;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .data-management-grid #logout-btn {
-  grid-column: 1 / -1;
   background: var(--text-light);
   /* Kept grey as requested originally, but structured better */
   color: white;
@@ -251,19 +254,19 @@ select.hidden-native,
   display: flex;
   justify-content: space-between;
   background: var(--input-bg);
-  padding: 1.5rem;
-  border-radius: 24px;
-  font-size: 0.95rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
   color: var(--text-light);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
 }
 
 .bw-stats strong {
   color: var(--accent-end);
-  font-size: 1.4rem;
-  margin-top: 4px;
+  font-size: 1.15rem;
+  margin-top: 2px;
   display: block;
 }
 
@@ -445,3 +448,41 @@ select.hidden-native,
   }
 }
 
+@keyframes icon-pump {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.3) rotate(-15deg); }
+  50% { transform: scale(1.3) rotate(15deg); }
+  75% { transform: scale(1.3) rotate(-15deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes icon-weigh {
+  0% { transform: scale(1) translateY(0); }
+  25% { transform: scale(1.2) translateY(2px); }
+  50% { transform: scale(1.2) translateY(-4px); }
+  75% { transform: scale(1.2) translateY(2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* Mobile Optimizations for Calculators */
+@media (max-width: 450px) {
+  .calculator-grid {
+    gap: 0.75rem;
+  }
+  .calc-inputs {
+    gap: 0.75rem;
+  }
+  .calculator-grid input,
+  .calculator-grid select {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+  .unit-toggle-container {
+    margin-bottom: 0.25rem;
+  }
+  #btn-calculate-1rm,
+  #btn-calculate-bmi,
+  #btn-calculate-bf {
+    margin-top: 0.5rem;
+  }
+}

@@ -38,15 +38,15 @@
 
 .medal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
   padding: 0.5rem;
 }
 
 .medal-card {
   background: var(--input-bg);
   border-radius: 16px;
-  padding: 1rem;
+  padding: 0.75rem 0.25rem;
   text-align: center;
   border: 1px solid transparent;
   cursor: pointer;
@@ -55,7 +55,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
+  min-height: 90px;
 }
 
 .medal-card:hover {
@@ -79,18 +79,19 @@
 }
 
 .medal-card .icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
 }
 
 .medal-card .name {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text);
+  line-height: 1.2;
 }
 
 .medal-card .status {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--text-light);
   margin-top: 0.2rem;
 }
@@ -301,25 +302,63 @@ body.mode-compact .history-date table th {
   background-color: #fff;
 }
 
+/* Settings Description */
+.setting-desc {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
 @media (max-width: 768px) {
-  /* Settings Tightening */
+  /* Ultra-compact Settings UI for Mobile */
   .setting-item {
-    margin-bottom: 1.2rem;
-    padding-bottom: 1rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.8rem;
   }
 
   .setting-label {
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .setting-desc {
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+    line-height: 1.2;
   }
 
   .segmented-control {
-    padding: 3px;
+    padding: 2px;
   }
 
   .segment-btn {
-    padding: 0.4rem;
-    font-size: 0.75rem;
+    padding: 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  /* Make toggles smaller */
+  .form-switch {
+    width: 40px;
+    height: 22px;
+  }
+  
+  .form-switch::after {
+    width: 18px;
+    height: 18px;
+    top: 1px;
+    left: 1px;
+  }
+  
+  .switch input:checked+.form-switch::after {
+    transform: translateX(18px);
+  }
+
+  #strength-standard-select {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 6px !important;
   }
 
   /* Theme Grid Compression */

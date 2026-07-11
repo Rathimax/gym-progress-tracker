@@ -3,7 +3,7 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, setDoc, getDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
@@ -23,6 +23,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Enable Offline Persistence
+let persistenceError = null;
+enableIndexedDbPersistence(db).catch((err) => {
+    persistenceError = err.code;
+    console.warn("Firestore Persistence Error:", err.code);
+});
+
 const auth = getAuth(app);
 const storage = getStorage(app);
 // auth.useDeviceLanguage(); // Optional: Localize language
@@ -287,6 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
         modalBfInfo: document.getElementById('modal-bf-info'),
         closeBfInfo: document.getElementById('close-bf-info'),
         btnCloseBfInfoModal: document.getElementById('btn-close-bf-info-modal'),
+
+        // Strength League Info Modal
+        btnLeagueInfo: document.getElementById('btn-league-info'),
+        modalLeagueInfo: document.getElementById('modal-league-info'),
+        closeLeagueInfo: document.getElementById('close-league-info'),
+        btnCloseLeagueInfoModal: document.getElementById('btn-close-league-info-modal'),
     };
 
     // State
@@ -645,7 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOk.onclick = () => { closeModal(); if (onOk) onOk(); };
         overlay.classList.remove('hidden');
     };
-    const showNotification = (msg, type = 'success') => {
+    let notificationTimer = null;
+    const showNotification = (msg, type = 'success', persistent = false) => {
         const notif = document.getElementById('notification');
         if (!notif) return;
 
@@ -656,9 +671,24 @@ document.addEventListener('DOMContentLoaded', () => {
         notif.textContent = text;
         notif.className = `notification show ${type}`;
 
-        // Slightly shorter visibility so it feels lighter
-        setTimeout(() => notif.classList.remove('show'), 2200);
+        if (notificationTimer) clearTimeout(notificationTimer);
+
+        if (!persistent) {
+            // Slightly shorter visibility so it feels lighter
+            notificationTimer = setTimeout(() => notif.classList.remove('show'), 2200);
+        }
     };
+
+    const hideNotification = () => {
+        const notif = document.getElementById('notification');
+        if (notif) notif.classList.remove('show');
+    };
+
+    if (persistenceError === 'failed-precondition') {
+        setTimeout(() => showNotification("Offline mode disabled (app open in multiple tabs).", "error"), 1000);
+    } else if (persistenceError === 'unimplemented') {
+        setTimeout(() => showNotification("Browser doesn't support offline mode.", "error"), 1000);
+    }
 
     // Equipment Cycling Animation for Custom Loader
     const startLoaderAnimation = () => {
@@ -1311,7 +1341,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.createElement('div'); container.className = 'custom-select-wrapper';
         const trigger = document.createElement('div'); trigger.className = 'custom-select-trigger';
         const selected = selectElement.options[selectElement.selectedIndex];
-        trigger.innerHTML = `<span class="trigger-text">${selected ? selected.textContent : 'Select...'}</span><i class="ri-arrow-down-s-line"></i>`;
+        
+        const SUMO_SVG = `<svg width="1.25em" height="1.25em" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="margin-right:8px; display:inline-block; vertical-align:middle; flex-shrink:0;">
+          <circle cx="15" cy="40" r="4" fill="#e0bcae"/>
+          <circle cx="49" cy="40" r="4" fill="#e0bcae"/>
+          <path d="M22 18 C 22 10, 42 10, 42 18 Z" fill="#534741"/>
+          <rect x="40" y="14" width="12" height="2" fill="#777"/>
+          <circle cx="46" cy="15" r="4" fill="#d05c5c"/>
+          <path d="M12 40 C 12 18, 52 18, 52 40 L 46 40 C 42 26, 36 28, 32 28 C 28 28, 22 26, 18 40 Z" fill="#534741"/>
+          <path d="M16 42 C 16 58, 24 62, 32 62 C 40 62, 48 58, 48 42 C 48 30, 44 28, 32 28 C 20 28, 16 30, 16 42 Z" fill="#f3d1c1"/>
+          <path d="M24 16 C 24 12, 40 12, 40 16 L 40 20 L 38 20 L 38 17 L 36 17 L 36 20 L 34 20 L 34 17 L 32 17 L 32 20 L 30 20 L 30 17 L 28 17 L 28 20 L 26 20 L 26 17 L 24 17 Z" fill="#e1b858"/>
+        </svg>`;
+
+        const getIconHtml = (opt) => {
+            if (!opt) return '';
+            if (opt.dataset.customSvg === 'sumo') return SUMO_SVG;
+            if (!opt.dataset.icon) return '';
+            const color = opt.dataset.iconColor ? `color:${opt.dataset.iconColor};` : '';
+            return `<i class="${opt.dataset.icon}" style="margin-right:8px;${color}"></i>`;
+        };
+        
+        trigger.innerHTML = `<span class="trigger-text" style="display:flex;align-items:center;">${getIconHtml(selected)}${selected ? selected.textContent : 'Select...'}</span><i class="ri-arrow-down-s-line"></i>`;
 
         const optionsDiv = document.createElement('div'); optionsDiv.className = 'custom-options';
 
@@ -1338,11 +1388,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const grp = document.createElement('div'); grp.className = 'custom-optgroup-wrapper';
                 const lbl = document.createElement('div'); lbl.className = 'custom-optgroup-label'; lbl.textContent = child.label; grp.appendChild(lbl);
                 Array.from(child.children).forEach(opt => {
-                    const div = document.createElement('div'); div.className = 'custom-option'; div.textContent = opt.textContent;
+                    const div = document.createElement('div'); div.className = 'custom-option'; div.style.display = 'flex'; div.style.alignItems = 'center';
+                    div.innerHTML = `${getIconHtml(opt)}${opt.textContent}`;
                     div.addEventListener('click', () => {
                         selectElement.value = opt.value; selectElement.dispatchEvent(new Event('change'));
                         const textSpan = trigger.querySelector('.trigger-text');
-                        if (textSpan) textSpan.textContent = opt.textContent; 
+                        if (textSpan) textSpan.innerHTML = `${getIconHtml(opt)}${opt.textContent}`; 
                         container.classList.remove('open');
                         optionsDiv.classList.remove('open');
 
@@ -1362,11 +1413,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 optionsDiv.appendChild(grp);
             } else if (child.tagName === 'OPTION') {
-                const div = document.createElement('div'); div.className = 'custom-option'; div.textContent = child.textContent;
+                const div = document.createElement('div'); div.className = 'custom-option'; div.style.display = 'flex'; div.style.alignItems = 'center';
+                div.innerHTML = `${getIconHtml(child)}${child.textContent}`;
                 div.addEventListener('click', () => {
                     selectElement.value = child.value; selectElement.dispatchEvent(new Event('change'));
                     const textSpan = trigger.querySelector('.trigger-text');
-                    if (textSpan) textSpan.textContent = child.textContent; 
+                    if (textSpan) textSpan.innerHTML = `${getIconHtml(child)}${child.textContent}`; 
                     container.classList.remove('open');
                     optionsDiv.classList.remove('open');
                     if (selectElement.id === 'exercise-select') handleAutoFill(child.value);
@@ -1527,6 +1579,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.add-meal-subview').forEach(sv => sv.classList.remove('active'));
                 const targetView = document.getElementById('subview-' + target);
                 if (targetView) targetView.classList.add('active');
+                if (target === 'recipes' && typeof window.loadRecipes === 'function') {
+                    window.loadRecipes();
+                }
             });
         });
         if (headerProfile) {
@@ -1987,7 +2042,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === elements.modalBfInfo) {
                 elements.modalBfInfo.classList.add('hidden');
             }
+            if (elements.modalLeagueInfo && e.target === elements.modalLeagueInfo) {
+                elements.modalLeagueInfo.classList.add('hidden');
+            }
         });
+
+        // Strength League Info Modal Listeners
+        if (elements.btnLeagueInfo) {
+            elements.btnLeagueInfo.addEventListener('click', () => {
+                if (elements.modalLeagueInfo) elements.modalLeagueInfo.classList.remove('hidden');
+            });
+        }
+        if (elements.closeLeagueInfo) {
+            elements.closeLeagueInfo.addEventListener('click', () => {
+                if (elements.modalLeagueInfo) elements.modalLeagueInfo.classList.add('hidden');
+            });
+        }
+        if (elements.btnCloseLeagueInfoModal) {
+            elements.btnCloseLeagueInfoModal.addEventListener('click', () => {
+                if (elements.modalLeagueInfo) elements.modalLeagueInfo.classList.add('hidden');
+            });
+        }
         elements.historyList.addEventListener('click', async (e) => {
             const deleteBtn = e.target.closest('.delete-item-btn');
             if (deleteBtn) {
@@ -2001,7 +2076,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-        elements.bwForm.addEventListener('submit', async (e) => { e.preventDefault(); const w = parseFloat(elements.bwInput.value); if (w) { const id = await addBodyWeightToServer({ weight: w, date: elements.bwDate.value }); bwData.push({ id, weight: w, date: elements.bwDate.value }); bwData.sort((a, b) => new Date(a.date) - new Date(b.date)); updateAllUI(); showNotification("Logged."); } });
+        elements.bwForm.addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const w = parseFloat(elements.bwInput.value); 
+            if (w) { 
+                const btn = elements.bwForm.querySelector('button[type="submit"]');
+                const origTxt = btn.innerHTML;
+                btn.innerHTML = '<i class="ri-scales-3-fill" style="display:inline-block; animation: icon-weigh 0.6s ease-in-out;"></i> Logged!';
+                btn.disabled = true;
+                if (navigator.vibrate) navigator.vibrate(50);
+                
+                const id = await addBodyWeightToServer({ weight: w, date: elements.bwDate.value }); 
+                bwData.push({ id, weight: w, date: elements.bwDate.value }); 
+                bwData.sort((a, b) => new Date(a.date) - new Date(b.date)); 
+                updateAllUI(); 
+                showNotification("Logged."); 
+                
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                
+                setTimeout(() => {
+                    btn.innerHTML = origTxt;
+                    btn.disabled = false;
+                }, 1200);
+            } 
+        });
 
         // Exercise data export (workouts)
         elements.exportBtn.addEventListener('click', () => {
@@ -2227,6 +2325,246 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // ==========================================
+        // DIET: RECIPES & QUICK LOG
+        // ==========================================
+        const btnCreateRecipeModal = document.getElementById('btn-create-recipe-modal');
+        const recipeModalOverlay = document.getElementById('recipe-modal-overlay');
+        const btnCancelRecipe = document.getElementById('btn-cancel-recipe');
+        const recipeCreateForm = document.getElementById('recipe-create-form');
+        const recipeMealType = document.getElementById('recipe-meal-type');
+        const recipesListGrid = document.getElementById('recipes-list-grid');
+
+        // Style the custom select for recipes
+        if (recipeMealType && typeof applyCustomDropdown === 'function') {
+            applyCustomDropdown(recipeMealType);
+        }
+
+        const showRecipeModal = () => {
+            if (recipeModalOverlay) {
+                recipeModalOverlay.classList.remove('hidden');
+            }
+        };
+
+        const hideRecipeModal = () => {
+            if (recipeModalOverlay) {
+                recipeModalOverlay.classList.add('hidden');
+                recipeCreateForm.reset();
+                const weightInput = document.getElementById('recipe-weight-input');
+                if (weightInput) weightInput.value = '';
+                if (recipeMealType && typeof applyCustomDropdown === 'function') {
+                    recipeMealType.value = "Snack";
+                    applyCustomDropdown(recipeMealType);
+                }
+            }
+        };
+
+        if (btnCreateRecipeModal) {
+            btnCreateRecipeModal.addEventListener('click', showRecipeModal);
+        }
+        if (btnCancelRecipe) {
+            btnCancelRecipe.addEventListener('click', hideRecipeModal);
+        }
+
+        let cachedRecipes = null;
+
+        const renderRecipeCards = (recipes) => {
+            if (recipes && recipes.length > 0) {
+                recipesListGrid.innerHTML = '';
+                recipes.forEach(recipe => {
+                    const card = document.createElement('div');
+                    card.className = 'recipe-card';
+                    card.innerHTML = `
+                        <div class="recipe-card-header">
+                            <h4 class="recipe-name">${recipe.recipeName}${recipe.weight ? ` <span style="font-size: 0.8rem; color: var(--text-light); font-weight: normal;">(${recipe.weight}g)</span>` : ''}</h4>
+                            <span class="recipe-type" data-type="${recipe.mealType}">${recipe.mealType}</span>
+                        </div>
+                        <div class="recipe-macros">
+                            <div class="recipe-macro-item">
+                                <span class="recipe-macro-val" style="color: #0ea5e9;">${recipe.calories}</span>
+                                <span class="recipe-macro-lbl">kcal</span>
+                            </div>
+                            <div class="recipe-macro-item">
+                                <span class="recipe-macro-val" style="color: #3b82f6;">${recipe.protein}g</span>
+                                <span class="recipe-macro-lbl">Protein</span>
+                            </div>
+                            <div class="recipe-macro-item">
+                                <span class="recipe-macro-val" style="color: #8b5cf6;">${recipe.carbs}g</span>
+                                <span class="recipe-macro-lbl">Carbs</span>
+                            </div>
+                            <div class="recipe-macro-item">
+                                <span class="recipe-macro-val" style="color: #ec4899;">${recipe.fat}g</span>
+                                <span class="recipe-macro-lbl">Fat</span>
+                            </div>
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="btn-primary btn-recipe-log" data-id="${recipe.id}">
+                                <i class="ri-add-circle-line"></i> Quick Log
+                            </button>
+                            <button class="btn-recipe-delete" data-id="${recipe.id}" title="Delete Recipe">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    // Quick Log Handler
+                    card.querySelector('.btn-recipe-log').addEventListener('click', async (e) => {
+                        const btn = e.currentTarget;
+                        const originalContent = btn.innerHTML;
+                        btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Logging...';
+                        btn.disabled = true;
+
+                        try {
+                            const user = auth.currentUser;
+                            const today = new Date().toISOString().split('T')[0];
+                            const mealData = {
+                                mealType: recipe.mealType,
+                                foodName: recipe.weight ? `${recipe.recipeName} (${recipe.weight}g)` : recipe.recipeName,
+                                calories: recipe.calories,
+                                protein: recipe.protein,
+                                carbs: recipe.carbs,
+                                fat: recipe.fat
+                            };
+                            const logResult = await dietService.addMeal(db, user.uid, today, mealData);
+                            if (logResult.success) {
+                                showNotification(`Logged ${recipe.recipeName} successfully! 🍎`, 'success');
+                                // Update dashboard
+                                if (window.updateDietDashboard) window.updateDietDashboard();
+                                // Redirect to dashboard
+                                document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
+                            } else {
+                                showNotification('Failed to log recipe meal.', 'error');
+                            }
+                        } catch (err) {
+                            console.error('Quick Log recipe error:', err);
+                            showNotification('Failed to log recipe meal.', 'error');
+                        } finally {
+                            btn.innerHTML = originalContent;
+                            btn.disabled = false;
+                        }
+                    });
+
+                    // Delete Handler
+                    card.querySelector('.btn-recipe-delete').addEventListener('click', async (e) => {
+                        // Use custom confirm if available
+                        const confirmDelete = confirm(`Are you sure you want to delete the recipe "${recipe.recipeName}"?`);
+                        if (!confirmDelete) return;
+
+                        const btn = e.currentTarget;
+                        const user = auth.currentUser;
+                        btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+                        btn.disabled = true;
+
+                        try {
+                            const delResult = await dietService.deleteRecipe(db, user.uid, recipe.id);
+                            if (delResult.success) {
+                                showNotification(`Deleted recipe "${recipe.recipeName}"`, 'success');
+                                window.loadRecipes(true);
+                            } else {
+                                showNotification('Failed to delete recipe.', 'error');
+                            }
+                        } catch (err) {
+                            console.error('Delete recipe error:', err);
+                            showNotification('Failed to delete recipe.', 'error');
+                        }
+                    });
+
+                    recipesListGrid.appendChild(card);
+                });
+            } else {
+                recipesListGrid.innerHTML = `
+                    <div class="recipes-empty">
+                        <i class="ri-folder-info-line"></i>
+                        <p>No saved recipes yet. Create one to enable quick logging!</p>
+                    </div>
+                `;
+            }
+        };
+
+        window.loadRecipes = async (forceRefresh = false) => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // If we have cached recipes and aren't forcing a refresh, render immediately
+            if (cachedRecipes && !forceRefresh) {
+                renderRecipeCards(cachedRecipes);
+                return;
+            }
+
+            recipesListGrid.innerHTML = `
+                <div class="recipes-empty" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
+                    <i class="ri-loader-4-line ri-spin" style="font-size: 2rem; color: var(--accent-start);"></i>
+                    <p style="margin-top: 0.5rem;">Loading recipes...</p>
+                </div>
+            `;
+
+            try {
+                const res = await dietService.getRecipes(db, user.uid);
+                if (res.success) {
+                    cachedRecipes = res.recipes;
+                    renderRecipeCards(cachedRecipes);
+                } else if (!cachedRecipes) {
+                    recipesListGrid.innerHTML = `
+                        <div class="recipes-empty">
+                            <i class="ri-error-warning-line" style="color: #ef4444;"></i>
+                            <p>Failed to load recipes.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error loading recipes:", error);
+                if (!cachedRecipes) {
+                    recipesListGrid.innerHTML = `
+                        <div class="recipes-empty">
+                            <i class="ri-error-warning-line" style="color: #ef4444;"></i>
+                            <p>Failed to load recipes.</p>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        // Form submit handler for saving a new recipe
+        if (recipeCreateForm) {
+            recipeCreateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = auth.currentUser;
+                if (!user) return;
+
+                const submitBtn = document.getElementById('btn-submit-recipe');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Saving...';
+                submitBtn.disabled = true;
+
+                const recipeData = {
+                    recipeName: document.getElementById('recipe-name-input').value.trim(),
+                    mealType: recipeMealType.value,
+                    weight: parseFloat(document.getElementById('recipe-weight-input').value) || 0,
+                    calories: parseFloat(document.getElementById('recipe-calories-input').value) || 0,
+                    protein: parseFloat(document.getElementById('recipe-protein-input').value) || 0,
+                    carbs: parseFloat(document.getElementById('recipe-carbs-input').value) || 0,
+                    fat: parseFloat(document.getElementById('recipe-fat-input').value) || 0
+                };
+
+                try {
+                    const saveResult = await dietService.saveRecipe(db, user.uid, recipeData);
+                    if (saveResult.success) {
+                        showNotification(`Saved recipe "${recipeData.recipeName}"!`, 'success');
+                        hideRecipeModal();
+                        window.loadRecipes();
+                    } else {
+                        showNotification('Failed to save recipe.', 'error');
+                    }
+                } catch (err) {
+                    console.error('Save recipe error:', err);
+                    showNotification('Failed to save recipe.', 'error');
+                } finally {
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        // ==========================================
         // DIET: DASHBOARD OBSERVERS & RENDER
         // ==========================================
         let unsubscribeMeals = null;
@@ -2301,7 +2639,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!user) return showNotification("Please log in.", "error");
 
                 elements.btnAddWater.disabled = true;
-                elements.btnAddWater.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+                elements.btnAddWater.innerHTML = '<i class="ri-drop-fill animate-droplet-fall"></i>';
 
                 const today = new Date().toISOString().split('T')[0];
                 const result = await dietService.addWater(db, user.uid, today, 250);
@@ -2336,7 +2674,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 elements.btnSubWater.disabled = true;
-                elements.btnSubWater.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+                elements.btnSubWater.innerHTML = '<i class="ri-drop-fill animate-droplet-rise"></i>';
 
                 const today = new Date().toISOString().split('T')[0];
                 const result = await dietService.addWater(db, user.uid, today, -250);
@@ -2378,6 +2716,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const curMax = data.filter(d => d.exercise === ex).reduce((m, c) => Math.max(m, c.weight), 0);
             const isPR = nw.weight > curMax;
             try {
+                const submitBtn = elements.form.querySelector('button[type="submit"]');
+                const origTxt = submitBtn.innerHTML;
+                const dumbbellSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:inline-block; animation: icon-pump 0.6s ease-in-out; margin-right: 6px; vertical-align: middle;"><path d="M6 5V19H4V16H2V8H4V5H6ZM18 5V19H20V16H22V8H20V5H18ZM16 11V13H8V11H16Z"></path></svg>`;
+                submitBtn.innerHTML = dumbbellSVG + ' Logged!';
+                submitBtn.disabled = true;
+                if (navigator.vibrate) navigator.vibrate(50);
+
                 const id = await addWorkoutToServer(nw); data.push({ ...nw, id }); updateAllUI();
 
                 // Check Routine Progress
@@ -2396,8 +2741,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     triggerConfetti();
                     playBeep();
                     showNotification(`🏆 NEW PR: ${formatWeight(nw.weight)} ${getUnitLabel()}!`, "success");
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
                 } else {
                     showNotification("Added!", "info");
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 }
 
                 elements.form.reps.value = '';
@@ -2405,7 +2752,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.form.weight.value = '';
                 update1RM();
                 if (!isCustomInput) { const trigger = document.querySelector('.custom-select-trigger'); if (trigger) trigger.textContent = 'Select an exercise'; }
-            } catch (e) { }
+                
+                setTimeout(() => {
+                    submitBtn.innerHTML = origTxt;
+                    submitBtn.disabled = false;
+                }, 1200);
+            } catch (e) {
+                const submitBtn = elements.form.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = "Add Workout";
+                submitBtn.disabled = false;
+            }
         });
 
         elements.chartTabs.forEach(t => t.addEventListener('click', () => {
@@ -2417,12 +2773,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const chartsDiv = document.querySelector('.chart-container');
 
             if (type === 'awards') {
-                chartsDiv.classList.add('hidden');
-                medalsDiv.classList.remove('hidden');
-                if (gamificationModule) gamificationModule.renderRewards(medalsDiv);
+                if (chartsDiv) chartsDiv.classList.add('hidden');
+                if (medalsDiv) {
+                    medalsDiv.classList.remove('hidden');
+                    if (gamificationModule) gamificationModule.renderRewards(medalsDiv);
+                }
             } else {
-                medalsDiv.classList.add('hidden');
-                chartsDiv.classList.remove('hidden');
+                if (medalsDiv) medalsDiv.classList.add('hidden');
+                if (chartsDiv) chartsDiv.classList.remove('hidden');
                 currentChartType = type;
                 updateChart();
             }
@@ -2585,19 +2943,112 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Avatar Upload
+        // Avatar Upload with Cropper.js
         const fileInput = document.getElementById('avatar-upload');
         const uploadBtn = document.getElementById('btn-upload-avatar');
         const emojiBtn = document.getElementById('btn-emoji-avatar');
+        
+        // Cropper elements
+        const modalCropAvatar = document.getElementById('modal-crop-avatar');
+        const cropTarget = document.getElementById('crop-target');
+        const btnCropCancel = document.getElementById('btn-crop-cancel');
+        const btnCropUse = document.getElementById('btn-crop-use');
+        const btnRotateLeft = document.getElementById('btn-crop-rotate-left');
+        const btnRotateRight = document.getElementById('btn-crop-rotate-right');
+        const cropErrorMsg = document.getElementById('crop-error-msg');
+        
+        let cropperInstance = null;
 
-        if (uploadBtn && fileInput) {
+        if (uploadBtn && fileInput && modalCropAvatar) {
             uploadBtn.addEventListener('click', () => fileInput.click());
+            
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                        userPreferences.avatar = ev.target.result;
+                        // Open modal
+                        modalCropAvatar.classList.remove('hidden');
+                        cropErrorMsg.style.display = 'none';
+                        cropTarget.src = ev.target.result;
+                        
+                        if (cropperInstance) {
+                            cropperInstance.destroy();
+                        }
+                        
+                        // Initialize cropper
+                        cropperInstance = new Cropper(cropTarget, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            dragMode: 'move',
+                            checkOrientation: true,
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            btnCropCancel.addEventListener('click', () => {
+                if (cropperInstance) {
+                    cropperInstance.destroy();
+                    cropperInstance = null;
+                }
+                modalCropAvatar.classList.add('hidden');
+                fileInput.value = ''; // allow re-selecting same file
+            });
+            
+            btnRotateLeft.addEventListener('click', () => {
+                if (cropperInstance) cropperInstance.rotate(-90);
+            });
+            
+            btnRotateRight.addEventListener('click', () => {
+                if (cropperInstance) cropperInstance.rotate(90);
+            });
+            
+            btnCropUse.addEventListener('click', () => {
+                if (!cropperInstance) return;
+                
+                // Set loading state
+                const originalText = btnCropUse.innerHTML;
+                btnCropUse.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing...';
+                btnCropUse.disabled = true;
+                cropErrorMsg.style.display = 'none';
+                
+                const canvas = cropperInstance.getCroppedCanvas({ width: 512, height: 512 });
+                if (!canvas) {
+                    cropErrorMsg.textContent = 'Failed to crop image.';
+                    cropErrorMsg.style.display = 'block';
+                    btnCropUse.innerHTML = originalText;
+                    btnCropUse.disabled = false;
+                    return;
+                }
+                
+                // Attempt to compress
+                let quality = 0.8;
+                
+                const processBlob = (blob) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const base64Data = ev.target.result;
+                        // Approximate size in bytes (Base64 is ~4/3 of binary size)
+                        const sizeKB = (base64Data.length * 0.75) / 1024;
+                        
+                        if (sizeKB > 400 && quality > 0.4) {
+                            // Retry with lower quality
+                            quality -= 0.2;
+                            canvas.toBlob(processBlob, 'image/jpeg', quality);
+                            return;
+                        } else if (sizeKB > 1000) {
+                            // Failsafe against absolute limit
+                            cropErrorMsg.textContent = 'Image too large. Please select a simpler image.';
+                            cropErrorMsg.style.display = 'block';
+                            btnCropUse.innerHTML = originalText;
+                            btnCropUse.disabled = false;
+                            return;
+                        }
+                        
+                        // Proceed to save
+                        userPreferences.avatar = base64Data;
                         userPreferences.avatarType = 'image';
                         applyAvatar(userPreferences.avatar, 'image');
                         savePreferences();
@@ -2606,14 +3057,45 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (currentUserProfile && auth.currentUser) {
                             currentUserProfile.avatar = userPreferences.avatar;
                             currentUserProfile.avatarType = 'image';
+                            
                             setDoc(doc(db, "users", auth.currentUser.uid), {
                                 avatar: userPreferences.avatar,
                                 avatarType: 'image'
-                            }, { merge: true });
+                            }, { merge: true }).then(() => {
+                                // Success
+                                showNotification("Profile photo updated successfully", "success");
+                                if (cropperInstance) {
+                                    cropperInstance.destroy();
+                                    cropperInstance = null;
+                                }
+                                modalCropAvatar.classList.add('hidden');
+                                fileInput.value = '';
+                                btnCropUse.innerHTML = originalText;
+                                btnCropUse.disabled = false;
+                            }).catch((err) => {
+                                console.error('Error saving avatar:', err);
+                                cropErrorMsg.textContent = 'Failed to upload. Please try again.';
+                                cropErrorMsg.style.display = 'block';
+                                btnCropUse.innerHTML = originalText;
+                                btnCropUse.disabled = false;
+                            });
+                        } else {
+                            // Not logged in, just close modal
+                            showNotification("Profile photo updated successfully", "success");
+                            if (cropperInstance) {
+                                cropperInstance.destroy();
+                                cropperInstance = null;
+                            }
+                            modalCropAvatar.classList.add('hidden');
+                            fileInput.value = '';
+                            btnCropUse.innerHTML = originalText;
+                            btnCropUse.disabled = false;
                         }
                     };
-                    reader.readAsDataURL(file);
-                }
+                    reader.readAsDataURL(blob);
+                };
+                
+                canvas.toBlob(processBlob, 'image/jpeg', quality);
             });
         }
 
@@ -3068,26 +3550,119 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     let historyWeeklyCalsChart = null;
     let historyWeeklyProteinChart = null;
+    let currentDietHistoryDate = new Date().toISOString().split('T')[0];
+    let currentDietHistoryMealFilter = '';
 
     const renderDietDailyHistory = async () => {
         const user = auth.currentUser;
         if (!user) return;
 
-        const date = document.getElementById('diet-history-date').value;
+        const date = currentDietHistoryDate;
         const result = await dietService.getMealsByDate(db, user.uid, date);
         const waterResult = await dietService.getWaterByDate(db, user.uid, date);
 
         const calGoal = userPreferences.calorieTarget || 2000;
+        const controlsContainer = document.getElementById('diet-history-controls');
 
+        // 1. Generate Dates for Scroller (Last 14 days)
+        const dateItems = [];
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        for (let i = 0; i < 14; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const iso = d.toISOString().split('T')[0];
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayNum = d.getDate();
+            dateItems.push({ iso, dayName, dayNum });
+        }
+
+        // 2. Build Controls HTML
+        const mealsList = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
+        controlsContainer.innerHTML = `
+            <div class="filter-group">
+                <label for="history-filter-meal">Filter by Meal</label>
+                <select id="history-filter-meal">
+                    <option value="">All Meals</option>
+                    ${mealsList.map(m => `<option value="${m}" ${m === currentDietHistoryMealFilter ? 'selected' : ''}>${m}</option>`).join('')}
+                </select>
+            </div>
+
+            <div class="date-scroller-container">
+                <div class="date-scroller" id="diet-history-date-scroller">
+                    ${dateItems.map(item => `
+                        <div class="date-item ${item.iso === currentDietHistoryDate ? 'active' : ''}" data-date="${item.iso}">
+                            <span class="day-name">${item.dayName}</span>
+                            <span class="day-number">${item.dayNum}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="calendar-picker-wrapper">
+                    <button class="btn-open-calendar" id="btn-diet-history-calendar" title="Pick specific date">
+                        <i class="ri-calendar-line"></i>
+                    </button>
+                    <input type="date" id="diet-history-filter-date-input" value="${currentDietHistoryDate}" style="position:absolute; opacity:0; pointer-events:none; right:0; bottom:0;">
+                </div>
+            </div>
+            
+            <div class="history-status-bar" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <span class="history-status-text">
+                    ${currentDietHistoryMealFilter ? `Showing <strong>${currentDietHistoryMealFilter}</strong> on ` : `Showing meals on `}
+                    <strong>${new Date(currentDietHistoryDate).toLocaleDateString()}</strong>
+                </span>
+                ${currentDietHistoryMealFilter ? `<button class="btn-clear-filters" id="btn-clear-diet-history-filters"><i class="ri-close-line"></i> Clear</button>` : ''}
+            </div>
+        `;
+
+        // 3. APPLY CUSTOM DROPDOWN STYLE
+        const mealSelect = document.getElementById('history-filter-meal');
+        applyCustomDropdown(mealSelect);
+
+        // 4. Attach Control Listeners
+        mealSelect.addEventListener('change', (e) => {
+            currentDietHistoryMealFilter = e.target.value;
+            renderDietDailyHistory();
+        });
+        
+        document.querySelectorAll('#diet-history-date-scroller .date-item').forEach(item => {
+            item.addEventListener('click', () => {
+                currentDietHistoryDate = item.getAttribute('data-date');
+                renderDietDailyHistory();
+            });
+        });
+
+        const calBtn = document.getElementById('btn-diet-history-calendar');
+        const dateInput = document.getElementById('diet-history-filter-date-input');
+        if (calBtn) calBtn.addEventListener('click', () => dateInput.showPicker());
+        dateInput.addEventListener('change', (e) => {
+            currentDietHistoryDate = e.target.value;
+            renderDietDailyHistory();
+        });
+        
+        const clearBtn = document.getElementById('btn-clear-diet-history-filters');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                currentDietHistoryMealFilter = '';
+                renderDietDailyHistory();
+            });
+        }
+
+        // 5. Render Data
         if (result.success) {
+            let filteredMeals = result.meals;
+            if (currentDietHistoryMealFilter) {
+                filteredMeals = filteredMeals.filter(m => m.mealType === currentDietHistoryMealFilter);
+            }
+
             let tCals = 0, tPro = 0, tCarb = 0, tFat = 0;
             const mealList = document.getElementById('history-meal-list');
             mealList.innerHTML = '';
 
-            if (result.meals.length === 0) {
-                mealList.innerHTML = '<div class="dh-meal-empty">No meals logged on this date.</div>';
+            if (filteredMeals.length === 0) {
+                mealList.innerHTML = '<div class="dh-meal-empty">No meals logged for this selection.</div>';
             } else {
-                result.meals.forEach(m => {
+                filteredMeals.forEach(m => {
                     tCals += (m.calories || 0); tPro += (m.protein || 0); tCarb += (m.carbs || 0); tFat += (m.fat || 0);
                     const card = document.createElement('div');
                     card.className = 'dh-meal-card';
@@ -3140,7 +3715,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             console.error("Error loading daily history", result.error);
-            document.getElementById('history-meal-list').innerHTML = '<div class="dh-meal-empty">No meals logged on this date.</div>';
+            document.getElementById('history-meal-list').innerHTML = '<div class="dh-meal-empty">No meals logged for this selection.</div>';
             document.getElementById('history-daily-cals').textContent = 0;
             document.getElementById('history-daily-protein').textContent = '0g';
             document.getElementById('history-daily-carbs').textContent = '0g';
@@ -3417,25 +3992,50 @@ document.addEventListener('DOMContentLoaded', () => {
             if (user) {
                 // User is signed in
                 hideLogin();
-                showNotification(`Welcome back, ${user.displayName || user.email}!`);
+                
+                // Show persistent syncing toast
+                showNotification("Syncing data...", "info", true);
+                
                 updateDataStatus();
+
+                // Track all initial fetches
+                const fetchPromises = [];
 
                 // Load Gamification & Routines Data
                 if (routinesModule && routinesModule.loadRoutinesFromServer) {
-                    await routinesModule.loadRoutinesFromServer(user.uid);
+                    fetchPromises.push(routinesModule.loadRoutinesFromServer(user.uid));
                 }
                 if (gamificationModule && gamificationModule.loadGamificationFromServer) {
-                    await gamificationModule.loadGamificationFromServer(user.uid);
+                    fetchPromises.push(gamificationModule.loadGamificationFromServer(user.uid));
                 }
 
                 // Initialize Social Profile
-                if (window.initUserProfile) await window.initUserProfile(user);
+                if (window.initUserProfile) {
+                    fetchPromises.push(window.initUserProfile(user));
+                }
 
-                // Load Data
-                await loadDataFromServer();
+                // Load Workout and Bodyweight Data
+                fetchPromises.push(loadDataFromServer());
+
+                // Diet dashboard listeners & cache
+                if (window.updateDietDashboard) {
+                    fetchPromises.push(Promise.resolve().then(() => window.updateDietDashboard()));
+                }
+                if (window.loadPastDietPlans) {
+                    fetchPromises.push(Promise.resolve().then(() => window.loadPastDietPlans()));
+                }
+
+                // Wait for all fetches to resolve/reject
+                await Promise.allSettled(fetchPromises);
+
+                // Hide syncing toast
+                hideNotification();
+                
+                // Show welcome back after sync completes
+                showNotification(`Welcome back, ${user.displayName || user.email}!`);
+
                 updateAllUI();
-                if (window.updateDietDashboard) window.updateDietDashboard(); // Arms listeners immediately on auth — mode-agnostic
-                if (window.loadPastDietPlans) window.loadPastDietPlans();
+                
                 // Trigger an initial render of Diet History if the function is exposed or we simulate a click on the active tab
                 const activeDietBtn = document.querySelector('.dh-toggle-btn.active');
                 if (activeDietBtn) {

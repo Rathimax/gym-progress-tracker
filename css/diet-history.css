@@ -4,6 +4,12 @@
 
 #view-diet-history.active-view {
   display: block !important;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* ── Segmented Toggle ── */
@@ -25,11 +31,11 @@
   left: 4px;
   width: calc(50% - 4px);
   height: calc(100% - 8px);
-  background: linear-gradient(135deg, #f97316, #f43f5e);
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
   border-radius: 11px;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--accent-start) 35%, transparent);
 }
 
 .dh-toggle-track.right {
@@ -105,9 +111,9 @@
 }
 
 .dh-date-arrow:hover {
-  background: rgba(249, 115, 22, 0.15);
-  border-color: rgba(249, 115, 22, 0.4);
-  color: #f97316;
+  background: color-mix(in srgb, var(--accent-start) 15%, transparent);
+  border-color: color-mix(in srgb, var(--accent-start) 40%, transparent);
+  color: var(--accent-start);
   transform: scale(1.05);
 }
 
@@ -135,7 +141,7 @@
 }
 
 .dh-date-display i {
-  color: #f97316;
+  color: var(--accent-start);
   font-size: 1rem;
   flex-shrink: 0;
 }
@@ -169,20 +175,20 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(244, 63, 94, 0.15));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-start) 20%, transparent), color-mix(in srgb, var(--accent-end) 15%, transparent));
   border-radius: 14px;
   margin-bottom: 0.5rem;
 }
 
 .dh-hero-icon i {
   font-size: 1.5rem;
-  color: #f97316;
+  color: var(--accent-start);
 }
 
 .dh-hero-value {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #f97316, #f43f5e);
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -213,10 +219,10 @@
 
 .dh-calorie-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f97316, #f43f5e);
+  background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
   border-radius: 100px;
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-start) 40%, transparent);
 }
 
 .dh-calorie-bar-text {
@@ -397,7 +403,7 @@
 .dh-meal-kcal {
   font-size: 1.2rem;
   font-weight: 800;
-  color: #f97316;
+  color: var(--accent-start);
   white-space: nowrap;
 }
 
@@ -549,6 +555,9 @@
 /* ── Animation ── */
 .diet-history-container {
   animation: dhFadeUp 0.4s ease forwards;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes dhFadeUp {
@@ -585,17 +594,31 @@
     min-width: 140px;
   }
 
+  .dh-summary-card {
+    padding: 1rem;
+    border-radius: 16px;
+    margin-bottom: 1.25rem;
+  }
+
   .dh-hero-icon {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
   }
 
   .dh-hero-icon i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .dh-hero-value {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
+  }
+
+  .dh-calorie-bar-wrap {
+    margin: 0.75rem 0 1rem;
+  }
+
+  .dh-calorie-bar-text {
+    font-size: 0.65rem;
   }
 
   .dh-summary-macros {
@@ -605,31 +628,30 @@
   }
 
   .dh-macro {
-    padding: 8px 4px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    gap: 2px;
   }
 
   .dh-macro i {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .dh-macro-val {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .dh-macro-label {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
   }
 
   .dh-meal-card {
-    padding: 0.85rem 1rem;
-    flex-direction: column;
-    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    align-items: center;
   }
 
   .dh-meal-right {
-    margin-left: 0;
-    width: 100%;
-    justify-content: space-between;
+    margin-left: 0.75rem;
   }
 
   .dh-weekly-grid {
@@ -665,21 +687,21 @@
   }
 
   .dh-weekly-stat {
-    padding: 0.85rem 0.5rem;
-    border-radius: 12px;
+    padding: 0.6rem 0.4rem;
+    border-radius: 10px;
   }
 
   .dh-weekly-stat i {
-    font-size: 1.1rem;
-    margin-bottom: 4px;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
   }
 
   .dh-weekly-val {
-    font-size: 1.15rem;
+    font-size: 0.95rem;
   }
 
   .dh-weekly-label {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
   }
 
   .dh-chart-card {
@@ -694,6 +716,10 @@
 
   .dh-chart-wrap {
     height: 180px;
+  }
+
+  #view-diet-history.active-view {
+    padding-bottom: 80px; /* Space for bottom nav */
   }
 }
 

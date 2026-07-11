@@ -340,50 +340,6 @@ button.refresh-btn:hover {
   gap: 1rem;
 }
 
-@media (max-width: 600px) {
-  .weekly-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-  
-  .weekly-stat {
-    padding: 0.6rem 0.4rem;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-  }
-
-  .weekly-stat-value {
-    font-size: 1.2rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-  }
-
-  .weekly-stat-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-    margin-top: 0.2rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 0.2rem;
-  }
-  
-  .weekly-stat-label i {
-    font-size: 0.8rem;
-  }
-}
-
-
-
 .weekly-stat {
   background: var(--input-bg);
   border-radius: 20px;
@@ -417,6 +373,58 @@ button.refresh-btn:hover {
   color: var(--text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+  #weekly-summary-card {
+    padding: 1rem;
+  }
+  
+  #weekly-summary-card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .weekly-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .weekly-stat {
+    padding: 0.5rem 0.2rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+  }
+
+  .weekly-stat-value {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    margin-bottom: 0.1rem;
+  }
+
+  .weekly-stat-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+  
+  .weekly-stat-label i {
+    font-size: 0.65rem;
+  }
 }
 
 /* ── Custom Confirm Modal ── */

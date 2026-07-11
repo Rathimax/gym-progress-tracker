@@ -371,10 +371,6 @@
   .lm-meal-pills {
     grid-template-columns: 1fr 1fr;
   }
-
-  .lm-macros-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Light Mode */

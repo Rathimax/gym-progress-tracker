@@ -580,11 +580,14 @@
     font-size: 0.82rem;
   }
 
-  .fs-cam-orb, .fs-drop-formats, .fs-glow {
+  .fs-cam-orb,
+  .fs-drop-formats,
+  .fs-glow {
     display: none;
   }
 
-  .fs-dropzone, .fs-dropzone:hover {
+  .fs-dropzone,
+  .fs-dropzone:hover {
     padding: 0;
     border: none;
     background: transparent;
@@ -726,3 +729,103 @@ body:not(.dark-mode) .fs-macro-unit {
   color: var(--text-muted, #64748b);
 }
 
+/* =========================================
+   PREMIUM SOURCE CARDS (CAMERA & GALLERY)
+   ========================================= */
+.fs-source-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 1.5rem 1rem !important;
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-sm) !important;
+  color: var(--text) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.fs-source-btn:hover {
+  transform: none !important;
+}
+
+.fs-source-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* Icons */
+.fs-source-icon-wrap {
+  background: transparent !important;
+  box-shadow: none !important;
+  margin-bottom: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.fs-source-btn i {
+  font-size: 1.5rem !important;
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Titles and Subtitles */
+.fs-source-title {
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.fs-source-subtitle {
+  font-size: 0.65rem !important;
+  font-weight: 500 !important;
+  color: var(--text-light) !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Revert custom light/dark overrides */
+body:not(.dark-mode) .fs-source-title {
+  color: var(--text-primary, #1e293b) !important;
+}
+
+body:not(.dark-mode) .fs-source-subtitle {
+  color: var(--text-muted, #64748b) !important;
+}
+
+/* Features list card updates */
+.fs-feat {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.3s ease !important;
+}
+
+.fs-feat:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(6, 182, 212, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.06) !important;
+}
+
+/* Desktop-Only Dropzone Updates */
+@media (min-width: 769px) {
+  .fs-dropzone {
+    background: linear-gradient(185deg, var(--card-bg), rgba(6, 182, 212, 0.02)) !important;
+    border: 2px dashed rgba(6, 182, 212, 0.25) !important;
+  }
+  
+  .fs-dropzone:hover {
+    border-color: rgba(6, 182, 212, 0.6) !important;
+    box-shadow: 0 15px 45px rgba(6, 182, 212, 0.12) !important;
+  }
+}

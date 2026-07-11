@@ -204,3 +204,10 @@ body.dark-mode .ripple-element {
   }
 }
 
+/* Remove red glow from Friend Code buttons and make it a standard UI shadow */
+#btn-copy-code,
+#btn-add-friend {
+  box-shadow: var(--shadow-btn);
+}
+
+
