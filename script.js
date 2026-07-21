@@ -2305,12 +2305,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const result = await dietService.addMeal(db, user.uid, today, mealData);
 
                     if (result.success) {
+                        if (gamificationModule) gamificationModule.logDailyDiet(today);
                         showNotification(`Logged ${mealData.calories} kcal for ${mealData.mealType}! 🍎`);
                         elements.dietForm.reset();
                         elements.dietMealType.value = "Breakfast"; // Reset selected opt
                         if (typeof applyCustomDropdown === 'function') applyCustomDropdown(elements.dietMealType);
                         // Re-arm realtime listeners so Dashboard reflects the new meal instantly
                         if (window.updateDietDashboard) window.updateDietDashboard();
+                        if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
+                        checkDietGamificationAsync();
                     } else {
                         throw new Error(result.error);
                     }
@@ -2426,9 +2429,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             };
                             const logResult = await dietService.addMeal(db, user.uid, today, mealData);
                             if (logResult.success) {
+                                if (gamificationModule) gamificationModule.logDailyDiet(today);
                                 showNotification(`Logged ${recipe.recipeName} successfully! 🍎`, 'success');
                                 // Update dashboard
                                 if (window.updateDietDashboard) window.updateDietDashboard();
+                                if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
+                                checkDietGamificationAsync();
                                 // Redirect to dashboard
                                 document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
                             } else {
@@ -2654,6 +2660,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         showNotification("Added 250ml water! 💧");
                     }
+                    checkDietGamificationAsync();
                 } else {
                     showNotification("Failed to add water.", "error");
                 }
@@ -3466,11 +3473,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     protein: isNaN(pro) ? 0 : pro,
                     carbs: isNaN(carb) ? 0 : carb,
                     fat: isNaN(fat) ? 0 : fat,
-                    mealType: 'Snack' // Defaulting to Snack for AI scans since you can't infer intent directly
+                    mealType: 'Snack', // Defaulting to Snack for AI scans since you can't infer intent directly
+                    scannedViaAI: true
                 };
 
                 await dietService.addMeal(db, user.uid, today, payloadObj);
                 showNotification(`Added ${displayFoodName} via AI successfully!`, 'success');
+                if (gamificationModule) {
+                    gamificationModule.logAIScan();
+                    gamificationModule.logDailyDiet(today);
+                }
+                if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
+                checkDietGamificationAsync();
 
                 // Clean Up Form
                 elements.btnCancelScan.click();
@@ -3707,6 +3721,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const id = e.currentTarget.dataset.id;
                     if (confirm("Delete this meal?")) {
                         await dietService.deleteMeal(db, user.uid, date, id);
+                        if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
                         renderDietDailyHistory();
                         showNotification("Meal deleted.", "info");
                     }
@@ -3727,10 +3742,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (barText) barText.textContent = `0 / ${calGoal} kcal`;
         }
     };
+    let weeklyDietCache = null;
+    let weeklyDietCacheTime = 0;
+
+    window.clearWeeklyDietCache = () => {
+        weeklyDietCache = null;
+        weeklyDietCacheTime = 0;
+    };
 
     const renderDietWeeklyHistory = async () => {
         const user = auth.currentUser;
         if (!user) return;
+        
+        // Use cache if it's less than 5 minutes old
+        const now = Date.now();
+        if (weeklyDietCache && (now - weeklyDietCacheTime < 300000)) {
+            // Data is cached, skip the loading banner
+            renderWeeklyData(weeklyDietCache);
+            return;
+        }
+
         const insightsBanner = document.getElementById('diet-weekly-insights');
         insightsBanner.innerHTML = `<i class="ri-loader-4-line spin" style="margin-right:0.5rem;"></i> Loading analytics...`;
 
@@ -3738,8 +3769,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await dietService.getWeeklyDietData(db, user.uid);
             if (!res.success) throw new Error(res.error);
 
-            const dataArr = res.data; // Array of 7 days, older to newer
+            weeklyDietCache = res.data;
+            weeklyDietCacheTime = now;
+            renderWeeklyData(res.data);
+            
+        } catch (error) {
+            console.error("Render weekly history error:", error);
+            insightsBanner.innerHTML = `<i class="ri-error-warning-line" style="color: #f43f5e; margin-right:0.5rem;"></i> <span>Failed to load weekly analytics.</span>`;
+        }
+    };
 
+    const renderWeeklyData = (dataArr) => {
+            const insightsBanner = document.getElementById('diet-weekly-insights');
             let sumCals = 0, sumPro = 0;
             let highestPro = -1, highestProDay = "-";
             let lowestCal = 99999, lowestCalDay = "-";
@@ -3841,12 +3882,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             insightsBanner.innerHTML = `<i class="ri-lightbulb-flash-line" style="margin-right:0.5rem;"></i> <span>${insightText}</span>`;
-
-        } catch (error) {
-            console.error("Render weekly history error:", error);
-            insightsBanner.innerHTML = `<i class="ri-error-warning-line" style="color: #f43f5e; margin-right:0.5rem;"></i> <span>Failed to load weekly analytics.</span>`;
-        }
-    };
+    }; // End of renderWeeklyData
 
     const initDietHistory = () => {
         const btnDaily = document.getElementById('btn-diet-daily');
@@ -3934,7 +3970,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 9. INIT
+    // 9. DIET GAMIFICATION
+    // ==========================================
+    const checkDietGamificationAsync = async () => {
+        if (!gamificationModule) return;
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+            const weeklyDataRes = await dietService.getWeeklyDietData(db, user.uid, 14);
+            if (weeklyDataRes.success) {
+                gamificationModule.checkDietMilestones(weeklyDataRes.data, userPreferences.dietMacros);
+            }
+        } catch (e) {
+            console.error("Error checking diet milestones", e);
+        }
+    };
+
+    const initDietGamification = () => {
+        const dietBadgesNavs = document.querySelectorAll('.nav-item[data-target="view-diet-badges"]');
+        dietBadgesNavs.forEach(nav => {
+            nav.addEventListener('click', () => {
+                const container = document.getElementById('diet-medals-container');
+                if (gamificationModule && container) {
+                    gamificationModule.renderRewards(container, 'diet');
+                }
+            });
+        });
+    };
+
+    // ==========================================
+    // 10. INIT
     // ==========================================
     const init = async () => {
         applyCustomDropdown(elements.exerciseSelect);
@@ -3942,6 +4007,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         initAIFoodScanner(); // Initialize diet analyzer listeners
         initDietHistory();   // Initialize Diet History view and charts
+        initDietGamification(); // Initialize Diet Badges
 
         setupEventListeners();
         initAuth(); // New Auth Flow
@@ -4282,7 +4348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (welcome) welcome.remove();
 
         const div = document.createElement('div');
-        div.className = `dc-msg ${sender}`;
+        div.className = `ai-message ${sender}`;
         let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
         formatted = formatted.replace(/\n/g, '<br/>');
@@ -4293,9 +4359,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dcShowTyping = () => {
         const div = document.createElement('div');
-        div.className = 'dc-typing';
+        div.className = 'ai-message bot typing-indicator';
         div.id = 'dc-typing';
-        div.innerHTML = '<span class="dc-typing-dot"></span><span class="dc-typing-dot"></span><span class="dc-typing-dot"></span>';
+        div.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
         dcMessages.appendChild(div);
         dcMessages.scrollTop = dcMessages.scrollHeight;
     };

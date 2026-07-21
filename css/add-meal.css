@@ -57,12 +57,12 @@
 /* Responsive Scaling for Mobile */
 @media (max-width: 768px) {
   .add-meal-toggle {
+    width: fit-content;
+    margin: 0 auto 0.5rem auto;
     padding: 3px;
-    margin-bottom: 1rem;
-    max-width: 380px;
   }
   .add-meal-toggle-btn {
-    padding: 0.4rem 0.5rem;
+    padding: 8px 16px;
     font-size: 0.78rem;
     gap: 4px;
   }

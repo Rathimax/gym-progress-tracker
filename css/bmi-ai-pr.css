@@ -122,8 +122,10 @@ button.refresh-btn:hover {
   display: flex !important;
   flex-direction: column !important;
   height: calc(100vh - 160px) !important;
-  /* Adjust based on nav + bottom bar sizes */
-  margin: 0 !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  width: 100% !important;
   border-radius: 20px;
   overflow: hidden;
   padding: 1rem !important;
@@ -131,7 +133,7 @@ button.refresh-btn:hover {
 
 @media (max-width: 768px) {
   .ai-chat-container {
-    height: calc(100vh - 150px) !important;
+    height: 65vh !important;
   }
 }
 
@@ -234,22 +236,23 @@ button.refresh-btn:hover {
 
 /* ── Mobile: AI tab fills full available height ── */
 @media (max-width: 768px) {
-  #view-ai {
+  #view-ai, #view-diet-ai-coach {
     display: flex;
     flex-direction: column;
   }
 
-  #view-ai .card {
+  #view-ai .card, #view-diet-ai-coach .card {
     padding: 0.8rem; /* smaller padding for AI card to maximize space */
   }
 
-  #view-ai .card-wide {
+  #view-ai .card-wide, #view-diet-ai-coach .card-wide {
     flex: 1;
-    height: calc(100dvh - 65px - 65px - 2rem) !important;
+    height: 65vh !important;
   }
 
   .ai-chat-container {
-    padding: 0 !important;
+    padding: 0.8rem !important;
+    margin: 0 auto !important;
   }
 
   .ai-message {
@@ -262,10 +265,20 @@ button.refresh-btn:hover {
     font-size: 0.85rem;
   }
 
-  #ai-chat-send {
+  #ai-chat-send, #dc-send-btn {
     width: 44px;
     height: 44px;
     font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #ai-chat-send i, #dc-send-btn i {
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
   }
 
   .ai-input-area {

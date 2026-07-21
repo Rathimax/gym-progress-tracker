@@ -305,6 +305,12 @@ td:first-child {
     font-size: 0.65rem;
   }
 
+  .filter-group .custom-select-trigger {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 14px;
+  }
+
   .history-filters-grid {
     grid-template-columns: 1fr;
   }

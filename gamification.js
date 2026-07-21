@@ -38,8 +38,26 @@ export const MEDALS = [
 
     // Existing Legacy
     { id: 'routine_complete', name: 'Routine Master', desc: 'Completed a full routine', icon: 'ri-trophy-line', tier: 'medium' },
-    { id: 'volume_10k', name: 'Volume Hunter', desc: 'Accumulated 10k volume', icon: 'ri-bar-chart-box-line', tier: 'hard' }
+    { id: 'volume_10k', name: 'Volume Hunter', desc: 'Accumulated 10k volume', icon: 'ri-bar-chart-box-line', tier: 'hard' },
+    
+    // --- NEW WORKOUT BADGES ---
+    { id: 'century_club', name: 'Century Club', desc: 'Lifted a total of 100,000kg lifetime', icon: 'ri-weight-fill', tier: 'hard' },
+    { id: 'versatile_lifter', name: 'Versatile Lifter', desc: 'Logged 10 different exercise types', icon: 'ri-shuffle-fill', tier: 'medium' },
+    { id: 'rest_day_respect', name: 'Rest Day Respect', desc: 'Worked out after exactly 1 rest day', icon: 'ri-zzz-fill', tier: 'easy' },
+
+    // --- DIET & NUTRITION ---
+    { id: 'first_meal', name: 'First Bite', desc: 'Logged your very first meal', icon: 'ri-restaurant-line', tier: 'easy', category: 'diet' },
+    { id: 'hydration_hero', name: 'Hydration Hero', desc: 'Hit water target 5 days in a row', icon: 'ri-drop-fill', tier: 'easy', category: 'diet' },
+    { id: 'aquaman', name: 'Aquaman', desc: 'Hit water target 14 days in a row', icon: 'ri-ship-fill', tier: 'hard', category: 'diet' },
+    { id: 'protein_master', name: 'Protein Master', desc: 'Hit protein goal within 5g for a week', icon: 'ri-restaurant-fill', tier: 'hard', category: 'diet' },
+    { id: 'calorie_commander', name: 'Calorie Commander', desc: 'Hit daily calorie goal within 50kcal for 5 days', icon: 'ri-scales-3-fill', tier: 'hard', category: 'diet' },
+    { id: 'mindful_scanner', name: 'Mindful Scanner', desc: 'Scanned 10 meals using AI', icon: 'ri-camera-lens-fill', tier: 'medium', category: 'diet' },
+    { id: 'ai_power_user', name: 'AI Power User', desc: 'Scanned 30 meals using AI', icon: 'ri-robot-2-fill', tier: 'hard', category: 'diet' },
+    { id: 'diet_streak_10', name: 'Nutrition Habit', desc: 'Logged meals for 10 consecutive days', icon: 'ri-calendar-check-fill', tier: 'medium', category: 'diet' },
+    { id: 'consistent_fueler', name: 'Consistent Fueler', desc: 'Logged meals for 14 consecutive days', icon: 'ri-fire-fill', tier: 'hard', category: 'diet' },
+    { id: 'diet_club_50', name: 'Half Century Fuel', desc: 'Logged meals for 50 distinct days', icon: 'ri-medal-fill', tier: 'hard', category: 'diet' }
 ];
+
 
 const MUSCLE_GROUPS = {
     'Chest': ['Push Up', 'Chest Press', 'Incline Dumbbell Press', 'Chest Fly', 'Bench Press'],
@@ -53,6 +71,7 @@ const MUSCLE_GROUPS = {
 export const initGamification = (db, auth) => {
     // State
     let unlockedMedals = [];
+    let dietStats = { aiScansCount: 0 };
 
     const loadGamificationFromServer = async (uid) => {
         if (!uid) return;
@@ -66,11 +85,20 @@ export const initGamification = (db, auth) => {
                     await setDoc(doc(db, 'userGamification', uid), { unlockedMedals: parsed }, { merge: true });
                 }
             }
+            
+            const statsStored = localStorage.getItem('gymDietStats');
+            if (statsStored) dietStats = JSON.parse(statsStored);
 
             const docSnap = await getDoc(doc(db, 'userGamification', uid));
-            if (docSnap.exists() && docSnap.data().unlockedMedals) {
-                unlockedMedals = docSnap.data().unlockedMedals;
-                localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals)); // Keep backup
+            if (docSnap.exists()) {
+                if (docSnap.data().unlockedMedals) {
+                    unlockedMedals = docSnap.data().unlockedMedals;
+                    localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals)); // Keep backup
+                }
+                if (docSnap.data().dietStats) {
+                    dietStats = docSnap.data().dietStats;
+                    localStorage.setItem('gymDietStats', JSON.stringify(dietStats));
+                }
             }
         } catch (e) {
             console.error("Failed to load medals from server, falling back to local:", e);
@@ -88,20 +116,23 @@ export const initGamification = (db, auth) => {
     const saveToServer = async () => {
         if (auth.currentUser) {
             try {
-                await setDoc(doc(db, 'userGamification', auth.currentUser.uid), { unlockedMedals }, { merge: true });
+                await setDoc(doc(db, 'userGamification', auth.currentUser.uid), { unlockedMedals, dietStats }, { merge: true });
                 localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+                localStorage.setItem('gymDietStats', JSON.stringify(dietStats));
             } catch (e) {
                 console.error("Failed to save medals:", e);
                 localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+                localStorage.setItem('gymDietStats', JSON.stringify(dietStats));
             }
         } else {
             localStorage.setItem('gymMedals', JSON.stringify(unlockedMedals));
+            localStorage.setItem('gymDietStats', JSON.stringify(dietStats));
         }
     };
 
     const showUnlock = (medal) => {
         if (!modal) return;
-        title.textContent = "New Medal Unlocked!";
+        title.textContent = "New Badge Unlocked!";
         desc.innerHTML = `You earned <strong>${medal.name}</strong><br>${medal.desc}`;
         icon.innerHTML = `<i class="${medal.icon}"></i>`;
 
@@ -113,8 +144,8 @@ export const initGamification = (db, auth) => {
 
     const showDetails = (medal, isUnlocked) => {
         if (!modal) return;
-        title.textContent = isUnlocked ? "Medal Details" : "Locked Medal";
-        desc.innerHTML = `<strong>${medal.name}</strong><br>${medal.desc}<br><br>${isUnlocked ? '<i class="ri-checkbox-circle-fill"></i> Achieved' : '<i class="ri-lock-fill"></i> Keep going!'}`;
+        title.textContent = isUnlocked ? "Badge Details" : "Locked Badge";
+        desc.innerHTML = `<strong>${medal.name}</strong><br>${medal.desc}<br><br>${isUnlocked ? '<i class="ri-checkbox-circle-fill" style="color:var(--success);"></i> Achieved' : '<i class="ri-lock-fill"></i> Keep going!'}`;
         icon.innerHTML = `<i class="${medal.icon}"></i>`;
         
         const btn = document.getElementById('medal-btn');
@@ -132,6 +163,31 @@ export const initGamification = (db, auth) => {
         saveToServer();
         showUnlock(medal);
         return true;
+    };
+    
+    const logAIScan = () => {
+        dietStats.aiScansCount = (dietStats.aiScansCount || 0) + 1;
+        saveToServer();
+        if (dietStats.aiScansCount >= 10) {
+            unlock('mindful_scanner');
+        }
+        if (dietStats.aiScansCount >= 30) {
+            unlock('ai_power_user');
+        }
+    };
+
+    const logDailyDiet = (dateStr) => {
+        if (!dietStats.lastLoggedDay || dietStats.lastLoggedDay !== dateStr) {
+            dietStats.distinctDaysLogged = (dietStats.distinctDaysLogged || 0) + 1;
+            dietStats.lastLoggedDay = dateStr;
+            saveToServer();
+        }
+        
+        unlock('first_meal');
+        
+        if (dietStats.distinctDaysLogged >= 50) {
+            unlock('diet_club_50');
+        }
     };
 
     const getDates = (data) => {
@@ -166,7 +222,7 @@ export const initGamification = (db, auth) => {
                 total: MEDALS.length
             };
         },
-        renderRewards: (container) => {
+        renderRewards: (container, filterCategory = 'workout') => {
             if (!container) return;
             container.innerHTML = ''; // Clear container
 
@@ -177,8 +233,11 @@ export const initGamification = (db, auth) => {
             ];
 
             tiers.forEach(tier => {
-                // Filter medals for this tier
-                const tierMedals = MEDALS.filter(m => m.tier === tier.id);
+                // Filter medals for this tier and category
+                const tierMedals = MEDALS.filter(m => {
+                    const cat = m.category || 'workout';
+                    return m.tier === tier.id && cat === filterCategory;
+                });
                 if (tierMedals.length === 0) return;
 
                 // Sort: Unlocked first, then by ID
@@ -226,12 +285,18 @@ export const initGamification = (db, auth) => {
             // 1. First Log
             if (history.length === 1) unlock('first_workout');
 
-            // 2. Streaks
+            // 2. Streaks & Rest Days
             const dates = getDates(history);
             const streak = countConsecutiveDays(dates);
             if (streak >= 3) unlock('consistency_3');
             if (streak >= 7) unlock('consistency_7');
             if (streak >= 30) unlock('streak_30');
+            
+            if (dates.length >= 2) {
+                const diffTime = Math.abs(dates[dates.length - 1] - dates[dates.length - 2]);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays === 2) unlock('rest_day_respect');
+            }
 
             // 3. Time Based (Requires timestamp)
             if (currentWorkout.timestamp) {
@@ -262,6 +327,7 @@ export const initGamification = (db, auth) => {
             // 7. Variety
             const uniqueExercises = new Set(history.map(h => h.exercise));
             if (uniqueExercises.size >= 5) unlock('explorer');
+            if (uniqueExercises.size >= 10) unlock('versatile_lifter');
 
             // 8. Leg Day
             const legExercises = MUSCLE_GROUPS['Legs'];
@@ -293,7 +359,58 @@ export const initGamification = (db, auth) => {
             // 14. Volume Hunter (Requires total volume tracking, simplified here)
                 const totalVolume = history.reduce((s, w) => s + (w.weight * w.reps * w.sets), 0);
                 if (totalVolume >= 10000) unlock('volume_10k');
+                if (totalVolume >= 100000) unlock('century_club');
 
+        },
+        logAIScan,
+        logDailyDiet,
+        checkDietMilestones: (weeklyData, targetMacros) => {
+            if (!weeklyData || weeklyData.length === 0) return;
+            
+            // weeklyData is from getWeeklyDietData: array of { date, calories, protein, carbs, fat, waterMl }
+            // Sort by date ascending
+            const sortedData = [...weeklyData].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // 1. Consistent Fueler & Streaks
+            const daysLogged = sortedData.filter(d => d.calories > 0).map(d => new Date(d.date));
+            const logStreak = countConsecutiveDays(daysLogged);
+            if (logStreak >= 10) unlock('diet_streak_10');
+            if (logStreak >= 14) unlock('consistent_fueler');
+
+            // 2. Hydration Hero: 5 days hitting water target
+            const waterTarget = targetMacros?.water || 2500;
+            const daysWaterMet = sortedData.filter(d => d.waterMl >= waterTarget).map(d => new Date(d.date));
+            if (countConsecutiveDays(daysWaterMet) >= 5) {
+                unlock('hydration_hero');
+            }
+
+            // 3. Protein Master & Calorie Commander
+            if (targetMacros) {
+                if (targetMacros.protein) {
+                    const targetPro = targetMacros.protein;
+                    const daysProteinMet = sortedData.filter(d => {
+                        return Math.abs(d.protein - targetPro) <= 5;
+                    }).map(d => new Date(d.date));
+                    if (countConsecutiveDays(daysProteinMet) >= 7) {
+                        unlock('protein_master');
+                    }
+                }
+                
+                if (targetMacros.calories) {
+                    const targetCal = targetMacros.calories;
+                    const daysCaloriesMet = sortedData.filter(d => {
+                        return Math.abs(d.calories - targetCal) <= 50;
+                    }).map(d => new Date(d.date));
+                    if (countConsecutiveDays(daysCaloriesMet) >= 5) {
+                        unlock('calorie_commander');
+                    }
+                }
+            }
+            
+            // 4. Aquaman
+            if (countConsecutiveDays(daysWaterMet) >= 14) {
+                unlock('aquaman');
+            }
         }
     };
 };

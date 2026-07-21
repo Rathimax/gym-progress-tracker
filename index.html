@@ -366,8 +366,7 @@
     <ul id="sidebar-diet" class="nav-links hidden-mode">
       <li class="nav-item active" data-target="view-diet-dashboard"><span class="icon">
           <svg class="diet-hub-icon" viewBox="0 0 24 24" width="1.0em" height="1.0em" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            style="vertical-align: middle; margin-top: -2px;">
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1.5" />
             <rect x="14" y="3" width="7" height="7" rx="1.5" />
             <rect x="3" y="14" width="7" height="7" rx="1.5" />
@@ -376,8 +375,7 @@
           </svg></span> <span class="label">Dashboard</span>
       </li>
       <li class="nav-item" data-target="view-diet-add-meal"><span class="icon">
-          <svg class="ramen-icon" viewBox="0 0 64 64" width="1.25em" height="1.25em"
-            style="vertical-align: middle; margin-top: -2px;">
+          <svg class="ramen-icon" viewBox="0 0 64 64" width="1.25em" height="1.25em">
             <path d="M32 36L30 22l8 8 10-8-2 14" fill="none" stroke="currentColor" stroke-width="4"
               stroke-linecap="round" stroke-linejoin="round" />
             <circle cx="36" cy="32" r="2.5" fill="currentColor" />
@@ -399,8 +397,7 @@
       </li>
       <li class="nav-item" data-target="view-diet-history"><span class="icon">
           <svg class="diet-history-icon" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            style="vertical-align: middle; margin-top: -2px;">
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
             <path d="M12 9v3l1.5 1.5" stroke-width="1.5" />
             <path d="M4 4v16" />
@@ -413,6 +410,9 @@
       </li>
       <li class="nav-item" data-target="view-diet-ai-coach"><span class="icon"><i class="ri-user-heart-line"></i></span>
         <span class="label">AI Diet Coach</span>
+      </li>
+      <li class="nav-item" data-target="view-diet-badges"><span class="icon"><i class="ri-medal-fill"></i></span>
+        <span class="label">Badges</span>
       </li>
       <li class="nav-item" data-target="view-diet-settings"><span class="icon"><i class="ri-settings-4-line"></i></span>
         <span class="label">Settings</span>
@@ -722,7 +722,7 @@
 
     <!-- VIEW 2: AI ASSISTANT -->
     <div id="view-ai" class="view-section">
-      <div class="card card-wide" style="height: 70vh; display: flex; flex-direction: column;">
+      <div class="card card-wide ai-chat-container">
         <h2><span class="icon"><i class="ri-sparkling-fill"></i></span><span>F<em>AI</em>T</span></h2>
         <div id="ai-chat-messages"
           style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 12px; background: rgba(0,0,0,0.02)">
@@ -737,7 +737,7 @@
           <input type="text" id="ai-chat-input" placeholder="Ask about your progress or workouts..."
             style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);" />
           <button id="ai-chat-send"
-            style="width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i
+            style="display: inline-flex; align-items: center; justify-content: center; width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i
               class="ri-send-plane-fill"></i></button>
         </div>
       </div>
@@ -1431,21 +1431,14 @@
     <!-- DIET: Dashboard -->
     <div id="view-diet-dashboard" class="view-section active-view">
       <div class="dd-page">
-        <!-- Hero Header (Compact) -->
-        <div class="dd-hero dd-hero-compact">
-          <div class="dd-hero-icon"><i class="ri-dashboard-2-fill"></i></div>
-          <div>
-            <h2 class="dd-hero-title">Diet Dashboard</h2>
-            <p class="dd-hero-sub">Monitor your daily nutrition goals</p>
-          </div>
-        </div>
+
 
         <!-- Dashboard Grid -->
         <div class="dd-grid">
 
           <!-- Calories Summary Card -->
           <div class="dd-card dd-card--calories">
-            <h3 class="dd-card-title"><i class="ri-pie-chart-2-fill" style="color:#0ea5e9;"></i> Daily Summary</h3>
+            <h2><span class="icon"><i class="ri-pie-chart-2-fill"></i></span> Daily Summary</h2>
             <div class="dd-cal-display">
               <div class="calorie-ring-container">
                 <svg class="calorie-ring" viewBox="0 0 100 100">
@@ -1525,14 +1518,7 @@
     <!-- DIET: Add Meal (unified Log + Scan) -->
     <div id="view-diet-add-meal" class="view-section">
 
-      <!-- Hero Header -->
-      <div class="lm-hero" style="margin-bottom: 0.6rem;">
-        <div class="lm-hero-icon"><i class="ri-restaurant-fill"></i></div>
-        <div>
-          <h2 class="lm-hero-title">Add Meal</h2>
-          <p class="lm-hero-sub">Track your nutrition — every meal counts</p>
-        </div>
-      </div>
+
 
       <!-- Sub-mode Toggle -->
       <div class="add-meal-toggle">
@@ -1556,6 +1542,7 @@
 
             <!-- Form Card -->
             <div class="lm-card">
+              <h2><span class="icon"><i class="ri-restaurant-fill"></i></span> Add Meal</h2>
               <form id="diet-log-form" class="lm-form">
 
                 <!-- Meal Type Pills -->
@@ -1837,13 +1824,7 @@
 
     <!-- DIET: History -->
     <div id="view-diet-history" class="view-section">
-      <div class="dd-hero dd-hero-compact" style="margin-top: 0.5rem;">
-        <div class="dd-hero-icon"><i class="ri-history-fill"></i></div>
-        <div>
-          <h2 class="dd-hero-title">Diet History</h2>
-          <p class="dd-hero-sub">Review your daily logs and weekly analytics.</p>
-        </div>
-      </div>
+
 
       <!-- Premium Segmented Toggle -->
       <div class="dh-segmented-toggle">
@@ -1854,54 +1835,59 @@
 
       <!-- ===== DAILY VIEW ===== -->
       <div id="diet-daily-container" class="diet-history-container">
+        <div class="card card-wide">
+          <h2><span class="icon"><i class="ri-history-fill"></i></span> Diet History</h2>
 
-        <!-- Diet History Dynamic Controls -->
-        <div id="diet-history-controls" style="margin-bottom: 1.5rem;"></div>
+          <!-- Diet History Dynamic Controls -->
+          <div id="diet-history-controls" style="margin-bottom: 2rem;"></div>
 
-        <!-- Premium Glass Summary Card -->
-        <div class="dh-summary-card">
-          <div class="dh-summary-hero">
-            <div class="dh-hero-icon"><i class="ri-fire-fill"></i></div>
-            <div class="dh-hero-value" id="history-daily-cals">0</div>
-            <div class="dh-hero-label">Calories</div>
-          </div>
-          <!-- Calorie Progress Bar -->
-          <div class="dh-calorie-bar-wrap">
-            <div class="dh-calorie-bar">
-              <div class="dh-calorie-bar-fill" id="dh-calorie-bar-fill" style="width: 0%"></div>
+          <!-- Daily Summary Stats -->
+          <div style="margin-bottom: 2rem;">
+            <div class="dh-summary-hero">
+              <div class="dh-hero-icon"><i class="ri-fire-fill"></i></div>
+              <div class="dh-hero-value" id="history-daily-cals">0</div>
+              <div class="dh-hero-label">Calories Consumed</div>
             </div>
-            <div class="dh-calorie-bar-text" id="dh-calorie-bar-text">0 / 2000 kcal</div>
-          </div>
-          <div class="dh-summary-macros">
-            <div class="dh-macro" data-color="blue">
-              <i class="ri-boxing-fill"></i>
-              <span class="dh-macro-val" id="history-daily-protein">0g</span>
-              <span class="dh-macro-label">Protein</span>
-            </div>
-            <div class="dh-macro" data-color="purple">
-              <i class="ri-bread-fill"></i>
-              <span class="dh-macro-val" id="history-daily-carbs">0g</span>
-              <span class="dh-macro-label">Carbs</span>
-            </div>
-            <div class="dh-macro" data-color="pink">
-              <i class="ri-drop-fill"></i>
-              <span class="dh-macro-val" id="history-daily-fat">0g</span>
-              <span class="dh-macro-label">Fat</span>
-            </div>
-            <div class="dh-macro" data-color="cyan">
-              <i class="ri-goblet-fill"></i>
-              <span class="dh-macro-val" id="history-daily-water">0ml</span>
-              <span class="dh-macro-label">Water</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- Meal List -->
-        <div class="dh-meals-header">
-          <h3><i class="ri-restaurant-line"></i> Logged Meals</h3>
-        </div>
-        <div id="history-meal-list" class="dh-meal-list">
-          <div class="dh-meal-empty">No meals logged yet. Select a date above.</div>
+            <!-- Calorie Progress Bar -->
+            <div class="dh-calorie-bar-wrap">
+              <div class="dh-calorie-bar">
+                <div class="dh-calorie-bar-fill" id="dh-calorie-bar-fill" style="width: 0%"></div>
+              </div>
+              <div class="dh-calorie-bar-text" id="dh-calorie-bar-text">0 / 2000 kcal</div>
+            </div>
+
+            <div class="dh-summary-macros">
+              <div class="dh-macro" data-color="blue">
+                <i class="ri-boxing-fill"></i>
+                <span class="dh-macro-val" id="history-daily-protein">0g</span>
+                <span class="dh-macro-label">Protein</span>
+              </div>
+              <div class="dh-macro" data-color="purple">
+                <i class="ri-bread-fill"></i>
+                <span class="dh-macro-val" id="history-daily-carbs">0g</span>
+                <span class="dh-macro-label">Carbs</span>
+              </div>
+              <div class="dh-macro" data-color="pink">
+                <i class="ri-drop-fill"></i>
+                <span class="dh-macro-val" id="history-daily-fat">0g</span>
+                <span class="dh-macro-label">Fat</span>
+              </div>
+              <div class="dh-macro" data-color="cyan">
+                <i class="ri-goblet-fill"></i>
+                <span class="dh-macro-val" id="history-daily-water">0ml</span>
+                <span class="dh-macro-label">Water</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Meal List -->
+          <div class="dh-meals-header">
+            <h3><i class="ri-restaurant-line"></i> Logged Meals</h3>
+          </div>
+          <div id="history-meal-list" class="dh-meal-list">
+            <div class="dh-meal-empty">No meals logged yet. Select a date above.</div>
+          </div>
         </div>
       </div>
 
@@ -1957,61 +1943,53 @@
 
     <!-- DIET: AI Diet Coach -->
     <div id="view-diet-ai-coach" class="view-section">
-      <div class="dc-container">
-        <!-- Coach Header -->
-        <div class="dc-header">
-          <div class="dc-header-left">
-            <div class="dc-avatar"><i class="ri-sparkling-2-fill"></i></div>
-            <div>
-              <h2 class="dc-title">Diet Coach</h2>
-              <div class="dc-status" id="dc-status">Loading context...</div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Chat Messages -->
-        <div class="dc-messages" id="dc-messages">
-          <div class="dc-welcome">
-            <div class="dc-welcome-icon"><i class="ri-sparkling-2-fill"></i></div>
-            <h3>Hi! I'm your Diet Coach 🥗</h3>
-            <p>Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your
-              real
-              data.</p>
+      <div class="card card-wide ai-chat-container">
+        <h2>
+          <span class="icon"><i class="ri-sparkling-fill"></i></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.2;">
+             <span>Diet Coach</span>
+             <span id="dc-status" style="font-size: 0.8rem; font-weight: 500; color: var(--accent-end); margin-top: 2px;">Loading context...</span>
+          </span>
+        </h2>
+        <div id="dc-messages"
+          style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 12px; background: rgba(0,0,0,0.02)">
+          <div class="dc-welcome ai-message bot"
+            style="align-self: flex-start; background: var(--input-bg); padding: 1rem; border-radius: 12px; max-width: 80%; line-height: 1.5;">
+            Hi! I'm your Diet Coach 🥗<br/><br/>
+            Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your real data.
           </div>
         </div>
-
-        <!-- Input Bar -->
-        <div class="dc-input-bar">
-          <input type="text" id="dc-input" placeholder="Ask about your nutrition..." autocomplete="off">
-          <button id="dc-send-btn"><i class="ri-send-plane-2-fill"></i></button>
+        <div class="ai-input-area"
+          style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+          <input type="text" id="dc-input" placeholder="Ask about your nutrition..." autocomplete="off"
+            style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);" />
+          <button id="dc-send-btn"
+            style="display: inline-flex; align-items: center; justify-content: center; width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i class="ri-send-plane-fill"></i></button>
         </div>
       </div>
     </div>
 
     <!-- DIET: Settings -->
-    <div id="view-diet-settings" class="view-section">
-
-      <!-- Page Header -->
-      <div class="ds-header">
-        <div class="ds-header-icon"><i class="ri-settings-4-fill"></i></div>
-        <div>
-          <h2 class="ds-header-title">Diet Settings</h2>
-          <p class="ds-header-sub">Configure your nutrition targets and AI coaching preferences</p>
+    <!-- Diet Badges -->
+    <div id="view-diet-badges" class="view-section">
+      <div class="card card-wide">
+        <h2><span class="icon"><i class="ri-medal-fill"></i></span> Nutrition Badges</h2>
+        <div id="diet-medals-container">
+          <!-- Rendered via gamification.js / script.js -->
         </div>
       </div>
+    </div>
+
+    <!-- Diet Settings -->
+    <div id="view-diet-settings" class="view-section">
+
+
 
       <div class="ds-grid">
 
         <!-- Nutrition Goals -->
         <div class="ds-card ds-card--goals">
-          <div class="ds-card-header">
-            <div class="ds-card-icon ds-card-icon--orange"><i class="ri-heart-pulse-fill"></i></div>
-            <div>
-              <h3>Nutrition Goals</h3>
-              <p class="ds-card-sub">Daily targets used in analytics &amp; AI context</p>
-            </div>
-          </div>
+          <h2><span class="icon"><i class="ri-heart-pulse-fill"></i></span> Nutrition Goals</h2>
 
           <div class="ds-fields">
             <div class="ds-field">
@@ -2067,13 +2045,7 @@
 
         <!-- AI Personalization -->
         <div class="ds-card ds-card--ai">
-          <div class="ds-card-header">
-            <div class="ds-card-icon ds-card-icon--purple"><i class="ri-robot-2-fill"></i></div>
-            <div>
-              <h3>AI Coach</h3>
-              <p class="ds-card-sub">Customize your Diet Coach personality</p>
-            </div>
-          </div>
+          <h2><span class="icon"><i class="ri-robot-2-fill"></i></span> AI Coach</h2>
 
           <div class="ds-fields">
             <div class="ds-field ds-field--full">
@@ -2216,6 +2188,10 @@
       <div class="nav-item ripple" data-target="view-diet-ai-coach">
         <span class="icon"><i class="ri-user-heart-line"></i></span>
         <span class="label">Coach</span>
+      </div>
+      <div class="nav-item ripple" data-target="view-diet-badges">
+        <span class="icon"><i class="ri-medal-fill"></i></span>
+        <span class="label">Badges</span>
       </div>
       <div class="nav-item ripple" data-target="view-diet-settings">
         <span class="icon"><i class="ri-settings-4-line"></i></span>
@@ -2514,7 +2490,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=48"></script>
+  <script type="module" src="script.js?v=64"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

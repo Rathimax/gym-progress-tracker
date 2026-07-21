@@ -114,12 +114,7 @@
 
 /* Calorie Card Details */
 .dd-card--calories {
-  justify-content: center;
-  align-items: center;
-}
-
-.dd-card--calories .dd-card-title {
-  align-self: flex-start;
+  /* Removed justify-content: center and align-items: center so children align normally (h2 stretches, content starts at top) */
 }
 
 .dd-cal-display {

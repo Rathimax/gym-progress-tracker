@@ -18,10 +18,6 @@
   overflow: visible;
 }
 
-.card:hover {
-  background-color: var(--card-hover-bg);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-}
 
 .card-wide {
   grid-column: 1 / -1;

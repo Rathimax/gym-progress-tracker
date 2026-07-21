@@ -186,13 +186,13 @@ export const deleteMeal = async (db, uid, date, mealId) => {
     }
 };
 
-export const getWeeklyDietData = async (db, uid) => {
+export const getWeeklyDietData = async (db, uid, numDays = 7) => {
     if (!uid) throw new Error("Authentication required: uid is missing.");
 
-    // Generate dates for the last 7 days (including today) in chronological order
+    // Generate dates for the last N days (including today) in chronological order
     const dates = [];
     const today = new Date();
-    for (let i = 6; i >= 0; i--) {
+    for (let i = numDays - 1; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
         dates.push(formatDate(d));
