@@ -1,0 +1,174 @@
+/* ==========================================
+   SPEEDOMETER-STYLE RATE LIMIT GAUGE
+   ========================================== */
+
+.speedometer-widget {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.85rem;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.speedometer-widget:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.speedometer-svg-container {
+    position: relative;
+    width: 44px;
+    height: 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.speedometer-svg {
+    width: 44px;
+    height: 32px;
+    overflow: visible;
+}
+
+.gauge-bg-arc {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.12);
+    stroke-width: 4.5;
+    stroke-linecap: round;
+}
+
+.gauge-fill-arc {
+    fill: none;
+    stroke-width: 4.5;
+    stroke-linecap: round;
+    stroke-dasharray: 63; /* circumference of r=20 semi-arc (pi * 20 ≈ 62.8) */
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+}
+
+.gauge-needle {
+    transform-origin: 22px 24px;
+    transform: rotate(90deg); /* Range: -90deg (0 left) to +90deg (5 left) */
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gauge-center-cap {
+    fill: var(--text, #f8fafc);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+}
+
+/* Color States */
+.gauge-state-green .gauge-fill-arc {
+    stroke: url(#gauge-grad-green);
+    filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
+}
+.gauge-state-amber .gauge-fill-arc {
+    stroke: url(#gauge-grad-amber);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+}
+.gauge-state-red .gauge-fill-arc {
+    stroke: url(#gauge-grad-red);
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
+}
+
+/* Text Readout Info */
+.speedometer-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.15;
+}
+
+.speedometer-readout {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text, #f8fafc);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.speedometer-num {
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: var(--font-mono, monospace);
+    transition: color 0.3s ease;
+}
+
+.gauge-state-green .speedometer-num { color: #10b981; }
+.gauge-state-amber .speedometer-num { color: #f59e0b; }
+.gauge-state-red .speedometer-num   { color: #ef4444; }
+
+.speedometer-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-light, #94a3b8);
+    opacity: 0.85;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE ENHANCEMENTS
+   ========================================== */
+
+@media (max-width: 600px) {
+    .ai-chat-header {
+        gap: 0.5rem;
+    }
+
+    .speedometer-widget {
+        gap: 0.45rem;
+        padding: 0.28rem 0.6rem;
+        border-radius: 10px;
+    }
+
+    .speedometer-svg-container,
+    .speedometer-svg {
+        width: 36px;
+        height: 26px;
+    }
+
+    .speedometer-readout {
+        font-size: 0.75rem;
+        gap: 2px;
+    }
+
+    .speedometer-num {
+        font-size: 0.85rem;
+    }
+
+    .speedometer-label {
+        font-size: 0.52rem;
+        letter-spacing: 0.3px;
+    }
+}
+
+@media (max-width: 400px) {
+    .speedometer-widget {
+        padding: 0.22rem 0.45rem;
+        gap: 0.35rem;
+    }
+
+    .speedometer-svg-container,
+    .speedometer-svg {
+        width: 32px;
+        height: 23px;
+    }
+
+    .speedometer-num {
+        font-size: 0.8rem;
+    }
+
+    .speedometer-label {
+        font-size: 0.48rem;
+    }
+}

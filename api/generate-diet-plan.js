@@ -1,9 +1,17 @@
+import { checkRateLimit } from './rateLimit.js';
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ success: false, error: 'Method Not Allowed' });
     }
 
     try {
+        const rateLimitResult = await checkRateLimit(req, 'generate-diet-plan');
+        if (!rateLimitResult.allowed) {
+            res.setHeader('Retry-After', rateLimitResult.retryAfter ?? 60);
+            return res.status(429).json({ success: false, error: rateLimitResult.message || 'Too Many Requests' });
+        }
+
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
             console.error('[generate-diet-plan] GEMINI_API_KEY is not set.');
@@ -86,7 +94,7 @@ Return ONLY a STRICT JSON object with no markdown fences, no preamble, and no ex
         if (!aiRes.ok) {
             const errorText = await aiRes.text();
             console.error(`[generate-diet-plan] Gemini API returned non-OK status ${aiRes.status}:`, errorText);
-            return res.status(aiRes.status).json({
+            return res.status(502).json({
                 success: false,
                 error: `Gemini API error (${aiRes.status})`,
                 details: errorText

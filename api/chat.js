@@ -1,9 +1,26 @@
+import { checkRateLimit } from './rateLimit.js';
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
     try {
+        const rateLimitResult = await checkRateLimit(req, 'chat');
+        const limitVal = rateLimitResult.limit ?? 5;
+        const remainingVal = rateLimitResult.remaining ?? 5;
+
+        res.setHeader('X-RateLimit-Limit', limitVal);
+        res.setHeader('X-RateLimit-Remaining', remainingVal);
+
+        if (!rateLimitResult.allowed) {
+            res.setHeader('Retry-After', rateLimitResult.retryAfter ?? 60);
+            return res.status(429).json({
+                error: rateLimitResult.message || 'Too Many Requests',
+                rateLimit: { remaining: 0, limit: limitVal }
+            });
+        }
+
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
             return res.status(500).json({ error: 'API key not configured' });
@@ -39,12 +56,17 @@ export default async function handler(req, res) {
         if (!response.ok) {
             const errorText = await response.text();
             console.error("Gemini API Error:", errorText);
-            return res.status(response.status).json({ error: 'Failed to fetch from Gemini API', details: errorText });
+            return res.status(502).json({
+                error: 'AI service is temporarily unavailable. Please try again in a moment.',
+                details: errorText,
+                rateLimit: { remaining: remainingVal, limit: limitVal }
+            });
         }
 
         const data = await response.json();
         return res.status(200).json({
-            text: data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't generate a response."
+            text: data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't generate a response.",
+            rateLimit: { remaining: remainingVal, limit: limitVal }
         });
 
     } catch (error) {

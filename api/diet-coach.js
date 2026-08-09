@@ -1,9 +1,17 @@
+import { checkRateLimit } from './rateLimit.js';
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
     try {
+        const rateLimitResult = await checkRateLimit(req, 'diet-coach');
+        if (!rateLimitResult.allowed) {
+            res.setHeader('Retry-After', rateLimitResult.retryAfter ?? 60);
+            return res.status(429).json({ error: rateLimitResult.message || 'Too Many Requests' });
+        }
+
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
             console.error('API key missing');
@@ -75,7 +83,7 @@ COACHING RULES:
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Gemini Diet Coach Error:', errorText);
-            return res.status(response.status).json({ error: 'Failed to fetch', details: errorText });
+            return res.status(502).json({ error: 'AI service is temporarily unavailable. Please try again in a moment.', details: errorText });
         }
 
         const data = await response.json();

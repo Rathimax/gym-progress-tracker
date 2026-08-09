@@ -1891,7 +1891,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                     specialRequirements: specialReq
                                 })
                             });
-                            if (!res.ok) throw new Error('API failed');
+                            if (!res.ok) {
+                                if (res.status === 429) {
+                                    const errData = await res.json().catch(() => ({}));
+                                    throw new Error(errData.error || 'You have reached the rate limit try again after 10 minutes');
+                                }
+                                throw new Error('API failed');
+                            }
                             const data = await res.json();
                             if (data.success && data.planData) {
                                 parsedData = data.planData;
@@ -3375,6 +3381,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (!aiResponse.ok) {
+                    if (aiResponse.status === 429) {
+                        const errData = await aiResponse.json().catch(() => ({}));
+                        throw new Error(errData.error || 'You have reached the rate limit try again after 10 minutes');
+                    }
                     throw new Error('AI Engine failed to parse image. Please try another clearer image.');
                 }
 
@@ -3534,7 +3544,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify(body)
                     });
 
-                    if (!resp.ok) throw new Error('AI refinement failed.');
+                    if (!resp.ok) {
+                        if (resp.status === 429) {
+                            const errData = await resp.json().catch(() => ({}));
+                            throw new Error(errData.error || 'You have reached the rate limit try again after 10 minutes');
+                        }
+                        throw new Error('AI refinement failed.');
+                    }
 
                     const payload = await resp.json();
                     if (!payload.success || !payload.data) throw new Error('Invalid refinement payload.');
@@ -4310,9 +4326,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const typingEl = document.getElementById(typingId);
             if (typingEl) typingEl.remove();
-            if (!response.ok) { appendMessage("Sorry, I'm having trouble connecting.", 'bot'); return; }
+
+            // Extract rate limit headers for speedometer
+            const remHeader = response.headers.get('X-RateLimit-Remaining');
+            const limitHeader = response.headers.get('X-RateLimit-Limit');
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                if (errData.rateLimit) {
+                    updateSpeedometerGauge(errData.rateLimit.remaining, errData.rateLimit.limit);
+                } else if (remHeader !== null) {
+                    updateSpeedometerGauge(parseInt(remHeader, 10), parseInt(limitHeader || '5', 10));
+                }
+
+                if (response.status === 429) {
+                    updateSpeedometerGauge(0, 5);
+                    appendMessage(errData.error || 'You have reached the rate limit, try again after 10 minutes', 'bot');
+                } else if (response.status === 502) {
+                    appendMessage(errData.error || 'AI service is temporarily unavailable. Please try again in a moment.', 'bot');
+                } else {
+                    appendMessage("Sorry, I'm having trouble connecting. Please try again.", 'bot');
+                }
+                return;
+            }
 
             const result = await response.json();
+            if (result.rateLimit) {
+                updateSpeedometerGauge(result.rateLimit.remaining, result.rateLimit.limit);
+            } else if (remHeader !== null) {
+                updateSpeedometerGauge(parseInt(remHeader, 10), parseInt(limitHeader || '5', 10));
+            }
+
             let formattedText = result.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
             formattedText = formattedText.replace(/\n/g, '<br/>');
@@ -4322,6 +4366,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const typingEl = document.getElementById(typingId);
             if (typingEl) typingEl.remove();
             appendMessage("An error occurred. Ensure you are running on a server.", 'bot');
+        }
+    };
+
+    // ==========================================
+    // SPEEDOMETER RATE LIMIT GAUGE HELPER
+    // ==========================================
+    let gaugeAutoRecoveryTimer = null;
+    const updateSpeedometerGauge = (remaining, maxLimit = 5) => {
+        const widgetEl = document.getElementById('ai-speedometer-widget');
+        const countEl = document.getElementById('speedometer-count');
+        const needleEl = document.getElementById('gauge-needle-line');
+        const fillPath = document.getElementById('gauge-fill-path');
+        if (!widgetEl || !countEl || !needleEl || !fillPath) return;
+
+        const rem = Math.max(0, Math.min(maxLimit, Number(remaining) ?? maxLimit));
+        countEl.textContent = rem;
+
+        // Needle rotation: 0 left = -90deg, 5 left = +90deg
+        const ratio = rem / maxLimit;
+        const angle = -90 + (ratio * 180);
+        needleEl.style.transform = `rotate(${angle}deg)`;
+
+        // Arc strokeDashoffset: Circumference = 63
+        const totalCircumference = 63;
+        const offset = totalCircumference * (1 - ratio);
+        fillPath.style.strokeDashoffset = `${offset}`;
+
+        // Color states
+        widgetEl.classList.remove('gauge-state-green', 'gauge-state-amber', 'gauge-state-red');
+        if (rem >= 4) {
+            widgetEl.classList.add('gauge-state-green');
+        } else if (rem >= 2) {
+            widgetEl.classList.add('gauge-state-amber');
+        } else {
+            widgetEl.classList.add('gauge-state-red');
+        }
+
+        // Smooth gradual tick back up over 60s
+        if (gaugeAutoRecoveryTimer) clearInterval(gaugeAutoRecoveryTimer);
+        if (rem < maxLimit) {
+            let currentRem = rem;
+            gaugeAutoRecoveryTimer = setInterval(() => {
+                currentRem++;
+                updateSpeedometerGauge(currentRem, maxLimit);
+                if (currentRem >= maxLimit) {
+                    clearInterval(gaugeAutoRecoveryTimer);
+                }
+            }, 12000);
         }
     };
 
@@ -4494,7 +4586,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dcRemoveTyping();
             if (!resp.ok) {
-                dcAppendMsg("Sorry, I'm having trouble connecting to the server.", 'bot');
+                const errData = await resp.json().catch(() => ({}));
+                if (resp.status === 429) {
+                    dcAppendMsg(errData.error || 'You have reached the rate limit, try again after 10 minutes', 'bot');
+                } else if (resp.status === 502) {
+                    dcAppendMsg(errData.error || 'AI service is temporarily unavailable. Please try again in a moment.', 'bot');
+                } else {
+                    dcAppendMsg("Sorry, I'm having trouble connecting to the server.", 'bot');
+                }
                 return;
             }
 

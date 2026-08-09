@@ -1,3 +1,5 @@
+import { checkRateLimit } from './rateLimit.js';
+
 export default async function handler(req, res) {
     // Only allow POST
     if (req.method !== 'POST') {
@@ -5,6 +7,12 @@ export default async function handler(req, res) {
     }
 
     try {
+        const rateLimitResult = await checkRateLimit(req, 'analyze-food');
+        if (!rateLimitResult.allowed) {
+            res.setHeader('Retry-After', rateLimitResult.retryAfter ?? 60);
+            return res.status(429).json({ success: false, error: rateLimitResult.message || 'Too Many Requests' });
+        }
+
         // 1. Validate API Key
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         console.log("ENV KEY EXISTS:", !!GEMINI_API_KEY);
@@ -25,6 +33,10 @@ export default async function handler(req, res) {
         }
         if (!mimeType) {
             return res.status(400).json({ success: false, error: 'Missing mimeType in request body.' });
+        }
+        // Guard against oversized payloads before calling Gemini (~3.7MB raw image after base64 encoding)
+        if (imageBase64.length > 5_000_000) {
+            return res.status(413).json({ success: false, error: 'Image is too large. Please use an image under ~3.7MB.' });
         }
 
         // 3. Build Gemini request
@@ -71,7 +83,7 @@ If there are multiple foods, combine their totals. If it's not food, set numeric
         if (!aiRes.ok) {
             const errorText = await aiRes.text();
             console.error(`[analyze-food] Gemini API returned non-OK status ${aiRes.status}:`, errorText);
-            return res.status(aiRes.status).json({
+            return res.status(502).json({
                 success: false,
                 error: `Gemini API error (${aiRes.status})`,
                 details: errorText

@@ -1,3 +1,5 @@
+import { checkRateLimit } from './rateLimit.js';
+
 export default async function handler(req, res) {
     // Only allow POST
     if (req.method !== 'POST') {
@@ -5,6 +7,12 @@ export default async function handler(req, res) {
     }
 
     try {
+        const rateLimitResult = await checkRateLimit(req, 'refine-food');
+        if (!rateLimitResult.allowed) {
+            res.setHeader('Retry-After', rateLimitResult.retryAfter ?? 60);
+            return res.status(429).json({ success: false, error: rateLimitResult.message || 'Too Many Requests' });
+        }
+
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
             console.error('[refine-food] GEMINI_API_KEY is not set in environment variables.');
@@ -84,7 +92,7 @@ Do not include any markdown, commentary, or text outside the JSON.`;
         if (!aiRes.ok) {
             const errorText = await aiRes.text();
             console.error(`[refine-food] Gemini API returned non-OK status ${aiRes.status}:`, errorText);
-            return res.status(aiRes.status).json({
+            return res.status(502).json({
                 success: false,
                 error: `Gemini API error (${aiRes.status})`,
                 details: errorText
