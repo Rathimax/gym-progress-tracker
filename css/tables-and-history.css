@@ -370,6 +370,11 @@ td:first-child {
     border: none;
   }
 
+  #history-list td:nth-of-type(3),
+  #history-list td:nth-of-type(5) {
+    padding-left: 2rem;
+  }
+
   #history-list td:nth-of-type(2)::before {
     content: "Reps: ";
     font-weight: 600;
@@ -396,8 +401,8 @@ td:first-child {
 
   #history-list td:last-child {
     position: absolute;
-    top: 1rem;
-    right: 1.2rem;
+    top: 0.35rem;
+    right: 0.8rem;
     width: auto;
     display: flex;
     align-items: center;
@@ -405,7 +410,7 @@ td:first-child {
   }
 
   #history-list td:last-child .delete-item-btn {
-    padding: 0.5rem 0.6rem;
+    padding: 0.45rem 0.55rem;
     background: var(--input-bg);
     border: 1px solid var(--card-border);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);

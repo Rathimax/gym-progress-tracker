@@ -140,7 +140,6 @@ body:not(.dark-mode) .dh-meal-empty {
 body:not(.dark-mode) .dh-meal-card {
   background: var(--card-bg);
   border-color: var(--glass-border);
-  border-left-color: #6366f1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
