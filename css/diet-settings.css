@@ -546,3 +546,18 @@
   }
 }
 
+/* Ensure Diet Settings AI Coach heading remains on one line */
+.ds-card h2,
+.ds-card--ai h2 {
+  white-space: nowrap !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+}
+
+.ds-card h2 span,
+.ds-card--ai h2 span {
+  white-space: nowrap !important;
+}
+
+

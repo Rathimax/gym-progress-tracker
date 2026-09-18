@@ -244,18 +244,37 @@ body.mode-compact .history-date table th {
   gap: 8px;
 }
 
+.unit-labels {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transform: translateY(6px);
+}
+
 .unit-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-light);
-  opacity: 0.5;
+  opacity: 0.45;
   transition: 0.3s;
+  letter-spacing: 0.3px;
+  line-height: 1;
 }
 
 .unit-label.active {
   color: var(--accent-end);
   opacity: 1;
 }
+
+.unit-divider {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  opacity: 0.3;
+  line-height: 1;
+}
+
+
+
 
 /* Generic Form Switch */
 .switch {
@@ -353,6 +372,10 @@ body.mode-compact .history-date table th {
   
   .switch input:checked+.form-switch::after {
     transform: translateX(18px);
+  }
+
+  .unit-labels {
+    transform: translateY(4px);
   }
 
   #strength-standard-select {

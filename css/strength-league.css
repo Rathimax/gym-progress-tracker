@@ -293,3 +293,153 @@
         font-size: 0.65rem;
     }
 }
+
+/* Multi-Tier Consolidated Celebration Modal */
+.multi-tier-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeInModal 0.3s ease-out forwards;
+    overscroll-behavior: contain;
+}
+
+.multi-tier-modal {
+    background: var(--card-bg, #121826);
+    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.12));
+    border-radius: 24px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.8rem 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: popInModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    position: relative;
+    text-align: center;
+}
+
+.multi-tier-header {
+    margin-bottom: 1.2rem;
+}
+
+.multi-tier-icon {
+    font-size: 2.8rem;
+    color: #FFD700;
+    margin-bottom: 0.3rem;
+    display: inline-block;
+}
+
+.multi-tier-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    margin: 0 0 0.35rem 0;
+    color: var(--text, #ffffff);
+    -webkit-text-fill-color: var(--text, #ffffff);
+}
+
+.multi-tier-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light, #94a3b8);
+    margin: 0;
+}
+
+.multi-tier-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    overflow-y: auto;
+    max-height: 42vh;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.multi-tier-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--input-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text, #f8fafc);
+    text-align: left;
+    gap: 0.8rem;
+}
+
+.multi-tier-item .ex-name {
+    flex: 1;
+    word-break: break-word;
+}
+
+.multi-tier-btn {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 14px;
+    background: var(--accent-gradient, linear-gradient(135deg, #f7797d, #FBD786, #C6FFDD));
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: none;
+    transition: transform 0.15s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.multi-tier-btn:hover {
+    opacity: 0.95;
+    box-shadow: none;
+}
+
+.multi-tier-btn:active {
+    transform: scale(0.97);
+}
+
+.multi-tier-overlay.closing {
+    animation: fadeOutOverlay 0.25s forwards ease-out;
+}
+
+.multi-tier-overlay.closing .multi-tier-modal {
+    animation: popOutModal 0.25s forwards cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popInModal {
+    from { transform: scale(0.85) translateY(15px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOutOverlay {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes popOutModal {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+

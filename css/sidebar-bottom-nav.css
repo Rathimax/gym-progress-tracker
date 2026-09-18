@@ -107,7 +107,7 @@ body {
   background: var(--accent-gradient);
   color: var(--accent-text, #fff);
   font-weight: 700;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  box-shadow: none !important;
 }
 
 /* 3. Header Adjustment */
@@ -269,9 +269,23 @@ header {
 .view-section.active-view {
   display: grid !important;
   gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   animation: glassFocusIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: opacity, transform, filter;
 }
+
+@media (max-width: 850px) {
+  .view-section.active-view {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
 

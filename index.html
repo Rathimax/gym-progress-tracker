@@ -53,9 +53,9 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=66">
-  <link rel="stylesheet" href="css/strength-league.css">
-  <link rel="stylesheet" href="css/ai-speedometer.css">
+  <link rel="stylesheet" href="style.css?v=120">
+  <link rel="stylesheet" href="css/strength-league.css?v=6">
+  <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
 </head>
 
 <body>
@@ -200,6 +200,20 @@
     </div>
   </div>
 
+  <!-- AI Rate Limit Modal -->
+  <div id="ai-rate-limit-overlay" class="confirm-overlay hidden">
+    <div class="confirm-modal rate-limit-modal" style="text-align: center; max-width: 350px; padding: 1.75rem 1.5rem; border-radius: 24px;">
+      <div class="confirm-icon rate-limit-icon" style="color: var(--accent-end, #f7797d); font-size: 2.6rem; margin-bottom: 0.5rem; text-shadow: none; filter: none;">
+        <i class="ri-sparkling-fill" style="text-shadow: none; filter: none;"></i>
+      </div>
+      <h3 style="margin-bottom: 0.5rem; font-weight: 800; font-size: 1.15rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI Request Limit</h3>
+      <p style="font-size: 0.9rem; color: var(--text, #f8fafc); margin-bottom: 1.4rem; line-height: 1.5;">You are allowed <strong>5 AI requests per minute</strong>.</p>
+      <div class="confirm-actions" style="display: flex; justify-content: center;">
+        <button id="btn-rate-limit-ok" class="btn-primary" style="min-width: 140px; padding: 0.75rem 1.75rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: var(--accent-gradient); color: white; border: none; cursor: pointer; box-shadow: none;">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Create Recipe Modal -->
   <div id="recipe-modal-overlay" class="confirm-overlay hidden">
     <div class="confirm-modal"
@@ -235,12 +249,24 @@
           </div>
           <div>
             <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem;"
-              for="recipe-weight-input">Serving Weight</label>
-            <div style="position: relative; display: flex; align-items: center;">
-              <input type="number" id="recipe-weight-input" placeholder="e.g., 100 (optional)" min="0"
-                style="width: 100%; padding: 10.5px 35px 10.5px 12px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text); font-family: inherit; font-size: 0.9rem; box-sizing: border-box; outline: none; height: 42px;">
-              <span
-                style="position: absolute; right: 12px; font-size: 0.85rem; color: var(--text-light); font-weight: 600;">g</span>
+              for="recipe-weight-input">Serving Size</label>
+            <div class="recipe-serving-row">
+              <input type="number" id="recipe-weight-input" placeholder="Weight" min="0" step="any" class="recipe-serving-input">
+              <div class="recipe-unit-wrapper">
+                <select id="recipe-weight-unit" class="recipe-unit-select no-search">
+                  <option value="g" selected>g</option>
+                  <option value="kg">kg</option>
+                  <option value="oz">oz</option>
+                  <option value="lbs">lbs</option>
+                  <option value="ml">ml</option>
+                  <option value="L">L</option>
+                  <option value="cup">cup</option>
+                  <option value="tbsp">tbsp</option>
+                  <option value="tsp">tsp</option>
+                  <option value="piece">piece</option>
+                  <option value="serving">serving</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -347,9 +373,6 @@
       </li>
       <li class="nav-item" data-target="view-ai"><span class="icon"><i class="ri-robot-2-fill"></i></span> <span
           class="label">AI Assistant</span></li>
-      <li class="nav-item" data-target="view-history"><span class="icon"><i class="ri-calendar-todo-line"></i></span>
-        <span class="label">History</span>
-      </li>
       <li class="nav-item" data-target="view-achievements"><span class="icon"><i class="ri-trophy-line"></i></span>
         <span class="label">Awards</span>
       </li>
@@ -433,8 +456,14 @@
     <div class="mode-toggle-container">
       <div class="mode-toggle" id="global-mode-toggle">
         <div class="slider exercise" id="mode-slider"></div>
-        <button class="toggle-btn active" data-mode="exercise">Exercise</button>
-        <button class="toggle-btn" data-mode="diet">Diet</button>
+        <button class="toggle-btn active" data-mode="exercise">
+          <span class="toggle-icon exercise-icon"></span>
+          <span>Exercise</span>
+        </button>
+        <button class="toggle-btn" data-mode="diet">
+          <span class="toggle-icon diet-icon"></span>
+          <span>Diet</span>
+        </button>
       </div>
     </div>
 
@@ -464,15 +493,16 @@
         <div id="routine-checklist" class="checklist-grid"></div>
       </div>
 
-      <!-- Log Workout -->
-      <div class="card card-log-workout">
+      <div class="home-top-grid">
+        <!-- Log Workout -->
+        <div class="card card-log-workout">
         <div
-          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:2px solid var(--card-border); padding-bottom:0.75rem;">
-          <h2 style="border:none; margin:0; padding:0;"><span class="icon"><i class="ri-edit-circle-fill"></i></span>
+          style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; border-bottom:2px solid var(--card-border); padding-bottom:0.75rem;">
+          <h2 style="border:none; margin:0; padding:0; min-width:0;"><span class="icon"><i class="ri-edit-circle-fill"></i></span>
             Log Workout</h2>
           <button id="btn-open-routines"
-            style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-end); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px;">
-            <span><i class="ri-folder-open-fill"></i></span> Load Routine
+            style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-end); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
+            <span class="routine-btn-icon"></span> Load Routine
           </button>
         </div>
         <form id="workout-form">
@@ -679,7 +709,7 @@
                 class="ri-add-line"></i></button>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
             <div>
               <label for="reps" style="margin-top: 1.25rem;">Reps:</label>
               <input type="number" id="reps" step="1" required placeholder="e.g., 10" />
@@ -694,7 +724,7 @@
 
           <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
 
-          <label for="duration-minutes">Estimated Duration:</label>
+          <label for="duration-minutes">Estimated Duration: <span class="label-optional">(optional)</span></label>
           <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
               placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59"
               placeholder="Secs" /></div>
@@ -704,10 +734,10 @@
       </div>
 
       <!-- Body Weight -->
-      <div class="card card-compact">
+      <div class="card card-compact" id="card-bodyweight">
         <h2><span class="icon"><i class="ri-scales-3-fill"></i></span> Body Weight Tracker</h2>
         <form id="bw-form" class="inline-form">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
             <input type="number" id="bw-input" step="0.1" placeholder="Weight (kg)" required />
             <input type="date" id="bw-date" required />
           </div>
@@ -720,79 +750,6 @@
         </div>
       </div>
     </div>
-
-    <!-- VIEW 2: AI ASSISTANT -->
-    <div id="view-ai" class="view-section">
-      <div class="card card-wide ai-chat-container">
-        <div class="ai-chat-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
-          <h2 style="margin:0; display:flex; align-items:center; gap:0.5rem;">
-            <span class="icon"><i class="ri-sparkling-fill"></i></span>
-            <span>F<em>AI</em>T</span>
-          </h2>
-
-          <!-- SPEEDOMETER RATE LIMIT GAUGE -->
-          <div id="ai-speedometer-widget" class="speedometer-widget gauge-state-green" title="Exercise AI Rate Limit: 5 requests per minute">
-            <div class="speedometer-svg-container">
-              <svg class="speedometer-svg" viewBox="0 0 44 32">
-                <defs>
-                  <linearGradient id="gauge-grad-green" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#10b981" />
-                    <stop offset="100%" stop-color="#06b6d4" />
-                  </linearGradient>
-                  <linearGradient id="gauge-grad-amber" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#f59e0b" />
-                    <stop offset="100%" stop-color="#eab308" />
-                  </linearGradient>
-                  <linearGradient id="gauge-grad-red" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#ef4444" />
-                    <stop offset="100%" stop-color="#dc2626" />
-                  </linearGradient>
-                </defs>
-
-                <!-- Background Track Arc -->
-                <path class="gauge-bg-arc" d="M 6,24 A 16,16 0 0,1 38,24" />
-
-                <!-- Filled Active Arc -->
-                <path id="gauge-fill-path" class="gauge-fill-arc" d="M 6,24 A 16,16 0 0,1 38,24" />
-
-                <!-- Needle Pointer -->
-                <line id="gauge-needle-line" class="gauge-needle" x1="22" y1="24" x2="22" y2="9" stroke="var(--text, #f8fafc)" stroke-width="2" stroke-linecap="round" />
-
-                <!-- Center Cap -->
-                <circle class="gauge-center-cap" cx="22" cy="24" r="3" />
-              </svg>
-            </div>
-
-            <div class="speedometer-info">
-              <div class="speedometer-readout">
-                <span id="speedometer-count" class="speedometer-num">5</span><span style="opacity:0.6; font-size:0.75rem;">/5</span>
-              </div>
-              <span class="speedometer-label">QUERIES LEFT</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="ai-chat-messages"
-          style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 12px; background: rgba(0,0,0,0.02)">
-          <div class="ai-message bot"
-            style="align-self: flex-start; background: var(--input-bg); padding: 1rem; border-radius: 12px; max-width: 80%; line-height: 1.5;">
-            Hello! I'm your FitTrack AI. I can analyze your workout history, suggest routines, and answer gym-related
-            questions. How can I help?
-          </div>
-        </div>
-        <div class="ai-input-area"
-          style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
-          <input type="text" id="ai-chat-input" placeholder="Ask about your progress or workouts..."
-            style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);" />
-          <button id="ai-chat-send"
-            style="display: inline-flex; align-items: center; justify-content: center; width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i
-              class="ri-send-plane-fill"></i></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 3: HISTORY -->
-    <div id="view-history" class="view-section">
 
       <!-- Weekly Summary Card -->
       <div id="weekly-summary-card" class="card card-wide">
@@ -817,10 +774,70 @@
         </div>
       </div>
 
-      <div class="card card-wide">
+      <!-- Workout History Card -->
+      <div class="card card-wide" id="workout-history-card">
         <h2><span class="icon"><i class="ri-history-line"></i></span> Workout History</h2>
         <div id="history-controls"></div>
         <div id="history-list"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: AI ASSISTANT -->
+    <div id="view-ai" class="view-section">
+      <div class="card card-wide ai-chat-container">
+        <div class="ai-chat-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+          <h2 style="margin:0; display:flex; align-items:center; gap:0.5rem;">
+            <span class="icon"><i class="ri-sparkling-fill"></i></span>
+            <span>F<em>AI</em>T</span>
+          </h2>
+
+          <!-- SLEEK AI QUOTA PILL BADGE -->
+          <div id="ai-speedometer-widget" class="ai-quota-badge gauge-state-theme" title="Exercise AI Rate Limit: 5 requests per minute (Click for details)" onclick="window.showRateLimitModal && window.showRateLimitModal()">
+            <div class="ai-quota-ring-wrap">
+              <svg class="ai-quota-ring-svg" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="quota-grad-theme" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#8b5cf6" />
+                    <stop offset="100%" stop-color="#f43f5e" />
+                  </linearGradient>
+                  <linearGradient id="quota-grad-amber" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f59e0b" />
+                    <stop offset="100%" stop-color="#fb923c" />
+                  </linearGradient>
+                  <linearGradient id="quota-grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ef4444" />
+                    <stop offset="100%" stop-color="#dc2626" />
+                  </linearGradient>
+                </defs>
+                <circle class="ai-quota-ring-bg" cx="12" cy="12" r="9.5" />
+                <circle id="gauge-fill-path" class="ai-quota-ring-fill" cx="12" cy="12" r="9.5" />
+              </svg>
+              <i class="ri-sparkling-fill ai-quota-icon"></i>
+            </div>
+            <div class="ai-quota-readout">
+              <span id="speedometer-count" class="ai-quota-num">5</span><span class="ai-quota-slash">/5</span>
+              <span class="ai-quota-label">queries</span>
+            </div>
+            <i class="ri-information-line ai-quota-info-icon" title="View rate limit details"></i>
+          </div>
+        </div>
+
+        <div id="ai-chat-messages"
+          style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 12px; background: rgba(0,0,0,0.02)">
+          <div class="ai-message bot"
+            style="align-self: flex-start; background: var(--input-bg); padding: 1rem; border-radius: 12px; max-width: 80%; line-height: 1.5;">
+            Hello! I'm your FitTrack AI. I can analyze your workout history, suggest routines, and answer gym-related
+            questions. How can I help?
+          </div>
+        </div>
+        <div class="ai-input-area"
+          style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+          <input type="text" id="ai-chat-input" placeholder="Ask about your progress or workouts..."
+            style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);" />
+          <button id="ai-chat-send"
+            style="display: inline-flex; align-items: center; justify-content: center; width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i
+              class="ri-send-plane-fill"></i></button>
+        </div>
       </div>
     </div>
 
@@ -864,14 +881,14 @@
     </div>
 
     <!-- VIEW: SOCIAL -->
+    <!-- VIEW: SOCIAL -->
     <div id="view-social" class="view-section hidden">
 
       <!-- Leaderboard -->
-      <div class="card fade-in" style="grid-column: 1 / -1;">
-        <div
-          style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-          <h3 style="margin: 0;">Leaderboard</h3>
-          <select id="leaderboard-exercise-select" class="dropdown" style="max-width: 100%;">
+      <div class="card fade-in card-wide" style="grid-column: 1 / -1;">
+        <div class="card-header-flex">
+          <h2><span class="icon"><i class="ri-trophy-fill"></i></span> Leaderboard</h2>
+          <select id="leaderboard-exercise-select" class="dropdown" style="width: auto; min-width: 170px; max-width: 220px;">
             <option value="">Select Exercise</option>
             <!-- Options populated via JS -->
           </select>
@@ -943,42 +960,6 @@
                 <td style="text-align: center;"><div class="skeleton-block" style="width: 40px; margin: 0 auto;"></div></td>
                 <td style="text-align: center;"><div class="skeleton-block" style="width: 40px; margin: 0 auto; border-radius: 12px;"></div></td>
               </tr>
-              <tr class="exercise-spacer"><td colspan="5"></td></tr>
-              <tr class="skeleton-row">
-                <td style="text-align: center;"><div class="skeleton-avatar" style="margin: 0 auto;"></div></td>
-                <td>
-                  <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
-                    <div class="skeleton-block" style="width: 16px; height: 16px;"></div>
-                    <div class="skeleton-block" style="width: 65px;"></div>
-                  </div>
-                </td>
-                <td>
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.3rem;">
-                    <div class="skeleton-block" style="width: 65px;"></div>
-                    <div class="skeleton-block" style="width: 55px;"></div>
-                  </div>
-                </td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 45px; margin: 0 auto;"></div></td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 55px; margin: 0 auto; border-radius: 12px;"></div></td>
-              </tr>
-              <tr class="exercise-spacer"><td colspan="5"></td></tr>
-              <tr class="skeleton-row">
-                <td style="text-align: center;"><div class="skeleton-avatar" style="margin: 0 auto;"></div></td>
-                <td>
-                  <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
-                    <div class="skeleton-block" style="width: 16px; height: 16px;"></div>
-                    <div class="skeleton-block" style="width: 80px;"></div>
-                  </div>
-                </td>
-                <td>
-                  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.3rem;">
-                    <div class="skeleton-block" style="width: 60px;"></div>
-                    <div class="skeleton-block" style="width: 60px;"></div>
-                  </div>
-                </td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 35px; margin: 0 auto;"></div></td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 45px; margin: 0 auto; border-radius: 12px;"></div></td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -986,38 +967,48 @@
 
       <!-- Pending Requests -->
       <div id="friend-requests-container" class="card fade-in">
-        <h3 style="margin-bottom: 1rem;"><i class="ri-user-add-line"></i> Friend Requests</h3>
-        <div id="friend-requests-list"
-          style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 250px; overflow-y: auto;">
-          <div style="text-align: center; color: var(--text-light); padding: 1rem 0;">No pending requests</div>
+        <h2><span class="icon"><i class="ri-user-add-fill"></i></span> Friend Requests</h2>
+        <div id="friend-requests-list" class="social-list-container">
+          <div class="social-empty-state">
+            <i class="ri-inbox-line"></i>
+            <span>No pending requests</span>
+          </div>
         </div>
       </div>
 
       <!-- Current Friends -->
       <div id="current-friends-container" class="card fade-in">
-        <h3 style="margin-bottom: 1rem;"><i class="ri-team-line"></i> Current Friends</h3>
-        <div id="current-friends-list"
-          style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 250px; overflow-y: auto;">
-          <div style="text-align: center; color: var(--text-light); padding: 1rem 0;">Loading friends...</div>
+        <div class="card-header-flex" style="margin-bottom: 0.75rem; padding-bottom: 0.75rem;">
+          <h2><span class="icon"><i class="ri-team-fill"></i></span> Current Friends</h2>
+          <button id="btn-manage-friends" class="manage-friends-btn" title="Manage Friends" aria-label="Manage Friends" style="display: none;">
+            <i class="ri-pencil-line"></i>
+          </button>
+        </div>
+        <div id="current-friends-list" class="social-list-container">
+          <div class="social-empty-state">
+            <i class="ri-team-line"></i>
+            <span>Loading friends...</span>
+          </div>
         </div>
       </div>
 
       <!-- Profile & Invite Card -->
-      <div class="card fade-in" style="text-align: center;">
-        <h3 style="margin-bottom: 0.5rem;">Your Friend Code</h3>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
-          <div id="my-friend-code"
-            style="font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; padding: 10px 20px; background: var(--bg-color); border-radius: 8px; border: 1px dashed var(--primary-color);">
-            ------</div>
-          <button id="btn-copy-code" class="btn-primary" style="padding: 10px 14px; width: auto; flex: 0 0 auto; min-width: 0; border-radius: 12px;"><i
-              class="ri-file-copy-line"></i></button>
+      <div class="card fade-in" id="friend-code-card">
+        <h2><span class="icon"><i class="ri-qr-code-fill"></i></span> Your Friend Code</h2>
+        <p class="setting-desc" style="text-align: center; margin-top: -0.2rem; margin-bottom: 1.2rem; font-size: 0.85rem;">Share your code or add friends to compare PRs</p>
+
+        <div class="friend-code-display-wrap">
+          <div id="my-friend-code" class="friend-code-box">------</div>
+          <button id="btn-copy-code" class="btn-primary copy-code-btn" title="Copy Friend Code">
+            <i class="ri-file-copy-line"></i>
+          </button>
         </div>
 
-        <div class="input-group" style="display: flex; gap: 0.5rem; margin-top: 1.5rem; text-align: left;">
-          <input type="text" id="add-friend-input" placeholder="Enter friend..." maxlength="6"
-            style="text-transform: uppercase; font-size: 0.85rem; padding: 0.5rem 0.8rem; min-width: 0;">
-          <button id="btn-add-friend" class="btn-primary"
-            style="font-size: 0.85rem; padding: 0.5rem 0.8rem; white-space: nowrap;">Send Request</button>
+        <div class="friend-add-input-group">
+          <input type="text" id="add-friend-input" class="pd-input" placeholder="ENTER FRIEND CODE" maxlength="6">
+          <button id="btn-add-friend" class="btn-primary">
+            <i class="ri-user-follow-line"></i> Send Request
+          </button>
         </div>
       </div>
 
@@ -1089,13 +1080,10 @@
 
           <!-- Height Unit Toggle -->
           <div class="unit-toggle-container">
-            <div class="unit-toggle-group">
-              <label class="unit-radio-label">
-                <input type="radio" name="bmi-height-unit" value="cm" checked> CM
-              </label>
-              <label class="unit-radio-label">
-                <input type="radio" name="bmi-height-unit" value="ft"> FT
-              </label>
+            <div class="pd-unit-toggle">
+              <input type="hidden" id="bmi-height-unit-val" value="cm">
+              <button type="button" class="pd-toggle-pill active" id="bmi-unit-cm-btn">CM</button>
+              <button type="button" class="pd-toggle-pill" id="bmi-unit-ft-btn">FT</button>
             </div>
           </div>
 
@@ -1118,7 +1106,7 @@
           <div id="bmi-category" style="font-weight: 600; color: var(--accent-end);">--</div>
           <button id="btn-generate-diet-plan" class="btn-primary"
             style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><i
-              class="ri-ai-generate"></i> Generate AI Diet Plan <button type="button" class="ai-rate-limit-info" style="background:none; border:none; color:inherit; margin-left:5px; cursor:pointer;" onclick="event.stopPropagation(); alert('You are allowed 5 AI requests per minute.')" title="AI Rate Limit Info"><i class="ri-information-line"></i></button></button>
+              class="ri-ai-generate"></i> Generate AI Diet Plan</button>
         </div>
       </div>
 
@@ -1193,13 +1181,10 @@
         <div class="calculator-grid">
           <!-- Unit Toggle -->
           <div class="unit-toggle-container">
-            <div class="unit-toggle-group">
-              <label class="unit-radio-label">
-                <input type="radio" name="bf-height-unit" value="cm" checked> CM
-              </label>
-              <label class="unit-radio-label">
-                <input type="radio" name="bf-height-unit" value="ft"> FT
-              </label>
+            <div class="pd-unit-toggle">
+              <input type="hidden" id="bf-height-unit-val" value="cm">
+              <button type="button" class="pd-toggle-pill active" id="bf-unit-cm-btn">CM</button>
+              <button type="button" class="pd-toggle-pill" id="bf-unit-ft-btn">FT</button>
             </div>
           </div>
 
@@ -1239,7 +1224,7 @@
           <!-- AI Diet Plan Generator from BF% -->
           <button id="btn-generate-diet-plan-bf" class="btn-primary"
             style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--accent-gradient); color: white; border: none; padding: 0.8rem; border-radius: 50px; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);">
-            <i class="ri-ai-generate"></i> Generate AI Diet Plan <button type="button" class="ai-rate-limit-info" style="background:none; border:none; color:inherit; margin-left:5px; cursor:pointer;" onclick="event.stopPropagation(); alert('You are allowed 5 AI requests per minute.')" title="AI Rate Limit Info"><i class="ri-information-line"></i></button>
+            <i class="ri-ai-generate"></i> Generate AI Diet Plan
           </button>
         </div>
       </div>
@@ -1323,9 +1308,10 @@
 
       <!-- Section 1: App Preferences -->
       <div class="card settings-card">
-        <h2><span class="icon"><i class="ri-equalizer-fill"></i></span> App Preferences</h2>        <div class="setting-item">
+        <h2><span class="icon"><i class="ri-equalizer-fill"></i></span> App Preferences</h2>
+        <div class="setting-item">
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-            <label class="setting-label" style="margin:0;">Dark Mode</label>
+            <label class="setting-label" style="margin:0;">Theme</label>
             <div class="switch">
               <input type="checkbox" id="theme-toggle" />
               <label for="theme-toggle" class="theme-toggle-label">
@@ -1336,15 +1322,6 @@
             </div>
           </div>
           <p class="setting-desc">Switch between light and dark themes.</p>
-        </div>
-
-        <div class="setting-item">
-          <label class="setting-label">Font Style</label>
-          <div class="segmented-control">
-            <button class="segment-btn active" data-font="modern">Modern</button>
-            <button class="segment-btn" data-font="tech">Tech</button>
-            <button class="segment-btn" data-font="classic">Classic</button>
-          </div>
         </div>
 
         <div class="setting-item">
@@ -1360,13 +1337,27 @@
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <label class="setting-label" style="margin:0;">Units</label>
             <div class="unit-toggle-wrapper">
-              <span id="unit-label-kg" class="unit-label active">KG</span>
-              <div class="switch"><input type="checkbox" id="unit-toggle" /><label for="unit-toggle"
-                  class="form-switch"></label></div>
-              <span id="unit-label-lbs" class="unit-label">LBS</span>
+              <span class="unit-labels">
+                <span id="unit-label-kg" class="unit-label active">KG</span>
+                <span class="unit-divider">/</span>
+                <span id="unit-label-lbs" class="unit-label">LBS</span>
+              </span>
+              <div class="switch">
+                <input type="checkbox" id="unit-toggle" />
+                <label for="unit-toggle" class="form-switch"></label>
+              </div>
             </div>
           </div>
           <p class="setting-desc">Display weights in Pounds.</p>
+        </div>
+
+        <div class="setting-item">
+          <label class="setting-label">Font Style</label>
+          <div class="segmented-control">
+            <button class="segment-btn active" data-font="modern">Modern</button>
+            <button class="segment-btn" data-font="tech">Tech</button>
+            <button class="segment-btn" data-font="classic">Classic</button>
+          </div>
         </div>
 
         <div class="setting-item">
@@ -1374,7 +1365,7 @@
             <label class="setting-label" style="margin:0; line-height: 1.3;">Strength Standard</label>
             <select id="strength-standard-select"
               style="width: auto; padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text); font-size: 0.85rem; font-weight: 600;">
-              <option value="average">Average</option>
+              <option value="average">Standard</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
@@ -1393,7 +1384,132 @@
         </div>
       </div>
 
-      <!-- Section 5: Data Management -->
+      <!-- Section 2: Personal Data -->
+      <div class="card settings-card" id="personal-data-card">
+        <h2><span class="icon"><i class="ri-user-heart-fill"></i></span> Personal Data</h2>
+        <p class="setting-desc">Saved to your profile and auto-filled across BMI, Body Fat %, Calorie, and AI Diet tools.</p>
+        
+        <form id="personal-data-form" onsubmit="event.preventDefault();">
+          <div class="pd-grid">
+            <!-- Gender -->
+            <div class="pd-field">
+              <div class="pd-label-row">
+                <label class="pd-label" for="pd-gender"><i class="ri-genderless-line"></i> Gender</label>
+              </div>
+              <select id="pd-gender" class="pd-input">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <!-- Age -->
+            <div class="pd-field">
+              <div class="pd-label-row">
+                <label class="pd-label" for="pd-age"><i class="ri-calendar-line"></i> Age</label>
+              </div>
+              <div class="pd-input-wrap">
+                <input type="number" id="pd-age" class="pd-input" placeholder="e.g. 25" min="10" max="120" />
+                <span class="pd-unit">yrs</span>
+              </div>
+            </div>
+
+            <!-- Height -->
+            <div class="pd-field">
+              <div class="pd-label-row">
+                <label class="pd-label" for="pd-height-cm"><i class="ri-ruler-line"></i> Height</label>
+                <div class="pd-unit-toggle">
+                  <button type="button" class="pd-toggle-pill active" id="pd-unit-cm-btn" data-unit="cm">CM</button>
+                  <button type="button" class="pd-toggle-pill" id="pd-unit-ft-btn" data-unit="ft">FT</button>
+                  <input type="hidden" id="pd-height-unit-val" value="cm" />
+                </div>
+              </div>
+              <div id="pd-height-cm-wrap" class="pd-input-wrap">
+                <input type="number" id="pd-height-cm" class="pd-input" placeholder="Height in cm" min="50" max="260" step="0.1" />
+                <span class="pd-unit">cm</span>
+              </div>
+              <div id="pd-height-ft-wrap" class="pd-ft-in-grid hidden">
+                <div class="pd-input-wrap">
+                  <input type="number" id="pd-height-ft" class="pd-input" placeholder="Feet" min="1" max="8" />
+                  <span class="pd-unit">ft</span>
+                </div>
+                <div class="pd-input-wrap">
+                  <input type="number" id="pd-height-in" class="pd-input" placeholder="Inches" min="0" max="11" step="0.1" />
+                  <span class="pd-unit">in</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Weight -->
+            <div class="pd-field">
+              <div class="pd-label-row">
+                <label class="pd-label" for="pd-weight"><i class="ri-scales-line"></i> Weight</label>
+              </div>
+              <div class="pd-input-wrap">
+                <input type="number" id="pd-weight" class="pd-input" placeholder="Weight" min="20" max="400" step="0.1" />
+                <span class="pd-unit" id="pd-weight-unit">kg</span>
+              </div>
+            </div>
+
+            <!-- Activity Level -->
+            <div class="pd-field pd-field-full">
+              <div class="pd-label-row">
+                <label class="pd-label" for="pd-activity"><i class="ri-run-line"></i> Activity Level</label>
+              </div>
+              <select id="pd-activity" class="pd-input">
+                <option value="sedentary">Sedentary (Little or no exercise)</option>
+                <option value="light">Lightly Active (1-3 days/week)</option>
+                <option value="moderate" selected>Moderately Active (3-5 days/week)</option>
+                <option value="very">Very Active (6-7 days/week)</option>
+                <option value="extra">Extremely Active (Physical job + intense training)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Circumferences Section for Body Fat % -->
+          <div class="pd-measurements-section">
+            <div class="pd-section-header">
+              <span class="pd-section-title"><i class="ri-tape-line"></i> Body Circumferences (for Body Fat %)</span>
+            </div>
+            <div class="pd-grid pd-measurements-grid" id="pd-measurements-grid">
+              <div class="pd-field">
+                <div class="pd-label-row">
+                  <label class="pd-label" for="pd-neck">Neck</label>
+                </div>
+                <div class="pd-input-wrap">
+                  <input type="number" id="pd-neck" class="pd-input" placeholder="Neck" min="15" max="80" step="0.1" />
+                  <span class="pd-unit">cm</span>
+                </div>
+              </div>
+              <div class="pd-field">
+                <div class="pd-label-row">
+                  <label class="pd-label" for="pd-waist">Waist</label>
+                </div>
+                <div class="pd-input-wrap">
+                  <input type="number" id="pd-waist" class="pd-input" placeholder="Waist" min="30" max="200" step="0.1" />
+                  <span class="pd-unit">cm</span>
+                </div>
+              </div>
+              <div class="pd-field hidden" id="pd-hip-field">
+                <div class="pd-label-row">
+                  <label class="pd-label" for="pd-hip">Hip <span style="font-size:0.75rem; color:var(--text-light); text-transform:none;">(Female)</span></label>
+                </div>
+                <div class="pd-input-wrap">
+                  <input type="number" id="pd-hip" class="pd-input" placeholder="Hip" min="30" max="200" step="0.1" />
+                  <span class="pd-unit">cm</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.8rem; justify-content: flex-end;">
+            <button type="button" id="btn-save-personal-data" class="btn-primary" disabled style="padding: 0.75rem 1.5rem; font-size: 0.95rem; border-radius: 12px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="ri-save-3-line"></i> Save Personal Data
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Section 3: Data Management -->
       <div class="card settings-card">
         <h2><span class="icon"><i class="ri-database-2-fill"></i></span> Data Management</h2>
         <div class="data-info-columns">
@@ -1490,6 +1606,12 @@
             <div class="dd-cal-display">
               <div class="calorie-ring-container">
                 <svg class="calorie-ring" viewBox="0 0 100 100">
+                  <defs>
+                    <linearGradient id="calorie-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="var(--accent-start)" />
+                      <stop offset="100%" stop-color="var(--accent-end)" />
+                    </linearGradient>
+                  </defs>
                   <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
                   <circle class="ring-progress" id="calorie-progress-ring" cx="50" cy="50" r="45"
                     style="stroke-dasharray: 283; stroke-dashoffset: 283;"></circle>
@@ -1513,24 +1635,24 @@
           <div class="dd-col">
             <!-- Macros Card -->
             <div class="dd-card dd-card--macros">
-              <h3 class="dd-card-title"><i class="ri-bar-chart-horizontal-fill" style="color:#8b5cf6;"></i> Macros</h3>
+              <h2><span class="icon"><i class="ri-bar-chart-horizontal-fill"></i></span> Macros</h2>
               <div class="dd-macro-list">
                 <div class="macro-row">
                   <div class="macro-label"><span>Protein</span> <span id="diet-protein-val"
-                      style="font-weight: 700;">0g</span></div>
+                      style="font-weight: 700;">0 / 120g</span></div>
                   <div class="macro-bar-bg">
                     <div class="macro-bar-fill protein-fill" id="diet-protein-bar" style="width: 0%;"></div>
                   </div>
                 </div>
                 <div class="macro-row">
                   <div class="macro-label"><span>Carbs</span> <span id="diet-carbs-val"
-                      style="font-weight: 700;">0g</span></div>
+                      style="font-weight: 700;">0 / 200g</span></div>
                   <div class="macro-bar-bg">
                     <div class="macro-bar-fill carbs-fill" id="diet-carbs-bar" style="width: 0%;"></div>
                   </div>
                 </div>
                 <div class="macro-row">
-                  <div class="macro-label"><span>Fat</span> <span id="diet-fat-val" style="font-weight: 700;">0g</span>
+                  <div class="macro-label"><span>Fat</span> <span id="diet-fat-val" style="font-weight: 700;">0 / 67g</span>
                   </div>
                   <div class="macro-bar-bg">
                     <div class="macro-bar-fill fat-fill" id="diet-fat-bar" style="width: 0%;"></div>
@@ -1541,10 +1663,10 @@
 
             <!-- Water Tracker Card -->
             <div class="dd-card dd-card--water">
-              <div class="dd-water-header">
-                <h3 class="dd-card-title"><i class="ri-drop-fill" style="color:#0ea5e9;"></i> Water Intake</h3>
-                <div class="water-val" id="diet-water-val">0 / 2500 ml</div>
-              </div>
+              <h2 class="dd-water-heading">
+                <span class="dd-heading-left"><span class="icon"><i class="ri-drop-fill"></i></span> Water Intake</span>
+                <span class="water-val" id="diet-water-val">0 / 2500 ml</span>
+              </h2>
               <div class="macro-bar-bg water-bg">
                 <div class="macro-bar-fill water-fill" id="diet-water-bar" style="width: 0%;"></div>
               </div>
@@ -1571,13 +1693,19 @@
       <!-- Sub-mode Toggle -->
       <div class="add-meal-toggle">
         <button class="add-meal-toggle-btn active" data-subview="manual">
-          <i class="ri-edit-line"></i> Manual Entry
+          <span class="add-meal-icon manual-icon"></span>
+          <span class="toggle-label-full">Manual Entry</span>
+          <span class="toggle-label-short">Manual</span>
         </button>
         <button class="add-meal-toggle-btn" data-subview="recipes">
-          <i class="ri-folder-open-line"></i> Recipes
+          <span class="add-meal-icon recipes-icon"></span>
+          <span class="toggle-label-full">Recipes</span>
+          <span class="toggle-label-short">Recipes</span>
         </button>
         <button class="add-meal-toggle-btn" data-subview="ai-scan">
-          <i class="ri-camera-lens-line"></i> AI Scan
+          <span class="add-meal-icon ai-scan-icon"></span>
+          <span class="toggle-label-full">AI Scan</span>
+          <span class="toggle-label-short">Scan</span>
         </button>
       </div>
 
@@ -1590,7 +1718,7 @@
 
             <!-- Form Card -->
             <div class="lm-card">
-              <h2><span class="icon"><i class="ri-restaurant-fill"></i></span> Add Meal</h2>
+              <h2><span class="add-meal-heading-icon manual-icon"></span> Add Meal</h2>
               <form id="diet-log-form" class="lm-form">
 
                 <!-- Meal Type Pills -->
@@ -1686,14 +1814,15 @@
       </div> <!-- end subview-manual -->
 
       <!-- SUB-VIEW: Recipes -->
+      <style>
+        @import url('./css/add-meal.css?v=57');
+      </style>
       <div id="subview-recipes" class="add-meal-subview">
-        <div class="recipes-page" style="padding: 1rem 0;">
-          <div class="recipes-header"
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 10px;">
-            <h3 style="font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 6px;"><i
-                class="ri-folder-open-line" style="color: var(--accent-start);"></i> Saved Recipes</h3>
+        <div class="card card-wide">
+          <div class="recipes-card-header">
+            <h2><span class="add-meal-heading-icon recipes-icon"></span> Saved Recipes</h2>
             <button class="btn-primary" id="btn-create-recipe-modal"
-              style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 8px; width: auto; box-shadow: var(--shadow-btn);">
+              style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 10px; width: auto; white-space: nowrap;">
               <i class="ri-add-line"></i> Create Recipe
             </button>
           </div>
@@ -1706,166 +1835,166 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- SUB-VIEW: AI Scan -->
+      </div>      <!-- SUB-VIEW: AI Scan -->
       <div id="subview-ai-scan" class="add-meal-subview">
+        <div class="card card-wide">
+          <h2><span class="add-meal-heading-icon ai-scan-icon"></span> AI Food Scan</h2>
 
-        <!-- DIET: AI Food Scan -->
-        <div id="view-diet-ai-scan">
-          <div class="fs-page">
+          <!-- DIET: AI Food Scan -->
+          <div id="view-diet-ai-scan">
+            <div class="fs-page">
 
-            <!-- Upload Zone — The Centerpiece -->
-            <div class="fs-dropzone-wrapper">
-              <div class="fs-glow"></div>
-              <div id="ai-scan-upload-zone" class="fs-dropzone">
-                <input type="file" id="ai-scan-file-input-cam" accept="image/*" capture="environment"
-                  class="hidden-file-input" style="display:none;">
-                <input type="file" id="ai-scan-file-input-gal" accept="image/*" class="hidden-file-input"
-                  style="display:none;">
-                <div class="fs-dropzone-inner">
-                  <div class="fs-cam-orb" style="margin-bottom: 1rem;">
-                    <i class="ri-camera-lens-fill"></i>
-                    <div class="fs-cam-pulse"></div>
-                    <div class="fs-cam-pulse fs-cam-pulse--delay"></div>
+              <!-- Upload Zone -->
+              <div class="fs-dropzone-wrapper">
+                <div id="ai-scan-upload-zone" class="fs-dropzone">
+                  <input type="file" id="ai-scan-file-input-cam" accept="image/*" capture="environment"
+                    class="hidden-file-input" style="display:none;">
+                  <input type="file" id="ai-scan-file-input-gal" accept="image/*" class="hidden-file-input"
+                    style="display:none;">
+                  <div class="fs-dropzone-inner">
+                    <div class="fs-cam-orb" style="margin-bottom: 1rem;">
+                      <i class="ri-camera-lens-fill"></i>
+                      <div class="fs-cam-pulse"></div>
+                      <div class="fs-cam-pulse fs-cam-pulse--delay"></div>
+                    </div>
+                    <div class="fs-source-buttons"
+                      style="display:flex; gap:15px; justify-content:center; margin-bottom:10px; position:relative; z-index:10; width: 100%;">
+                      <button type="button" class="fs-source-btn fs-source-btn--cam" id="btn-scan-cam">
+                        <div class="fs-source-icon-wrap">
+                          <i class="ri-camera-fill"></i>
+                        </div>
+                        <span class="fs-source-title">Camera</span>
+                        <span class="fs-source-subtitle">Take a photo</span>
+                      </button>
+                      <button type="button" class="fs-source-btn fs-source-btn--gal" id="btn-scan-gal">
+                        <div class="fs-source-icon-wrap">
+                          <i class="ri-image-fill"></i>
+                        </div>
+                        <span class="fs-source-title">Gallery</span>
+                        <span class="fs-source-subtitle">Choose from gallery</span>
+                      </button>
+                    </div>
+                    <p class="fs-drop-formats">Supports PNG, JPG, HEIC • Max 5 MB</p>
                   </div>
-                  <div class="fs-source-buttons"
-                    style="display:flex; gap:15px; justify-content:center; margin-bottom:10px; position:relative; z-index:10; width: 100%;">
-                    <button type="button" class="fs-source-btn fs-source-btn--cam" id="btn-scan-cam">
-                      <div class="fs-source-icon-wrap">
-                        <i class="ri-camera-fill"></i>
-                      </div>
-                      <span class="fs-source-title">Camera</span>
-                      <span class="fs-source-subtitle">Take a photo</span>
-                    </button>
-                    <button type="button" class="fs-source-btn fs-source-btn--gal" id="btn-scan-gal">
-                      <div class="fs-source-icon-wrap">
-                        <i class="ri-image-fill"></i>
-                      </div>
-                      <span class="fs-source-title">Gallery</span>
-                      <span class="fs-source-subtitle">Choose from gallery</span>
-                    </button>
-                  </div>
-                  <p class="fs-drop-formats">Supports PNG, JPG, HEIC • Max 5 MB</p>
+                  <!-- Preview -->
+                  <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
                 </div>
-                <!-- Preview -->
-                <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
-              </div>
-              <button class="fs-analyze-btn" id="btn-analyze-food" style="display: none;">
-                <i class="ri-sparkling-2-fill"></i> Analyze with AI
-              </button>
-            </div>
-
-            <!-- Feature Pills -->
-            <div class="fs-features">
-              <div class="fs-feat">
-                <div class="fs-feat-icon fs-feat-icon--speed"><i class="ri-flashlight-fill"></i></div>
-                <div>
-                  <span class="fs-feat-title">Instant</span>
-                  <span class="fs-feat-desc">Results in seconds</span>
-                </div>
-              </div>
-              <div class="fs-feat">
-                <div class="fs-feat-icon fs-feat-icon--accuracy"><i class="ri-focus-3-fill"></i></div>
-                <div>
-                  <span class="fs-feat-title">Accurate</span>
-                  <span class="fs-feat-desc">AI-powered analysis</span>
-                </div>
-              </div>
-              <div class="fs-feat">
-                <div class="fs-feat-icon fs-feat-icon--smart"><i class="ri-brain-fill"></i></div>
-                <div>
-                  <span class="fs-feat-title">Smart</span>
-                  <span class="fs-feat-desc">Learns your meals</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Loading State -->
-            <div id="ai-scan-loader" class="fs-loader hidden">
-              <div class="fs-loader-ring"></div>
-              <p class="fs-loader-text">Analyzing nutritional content...</p>
-              <p class="fs-loader-sub">Our AI is identifying ingredients and estimating macros</p>
-            </div>
-
-            <!-- Results -->
-            <div id="ai-scan-results" class="fs-results hidden">
-              <div class="fs-results-header">
-                <div class="fs-results-icon"><i class="ri-checkbox-circle-fill"></i></div>
-                <div>
-                  <h3>Confirm Nutritional Data</h3>
-                  <p class="fs-results-sub">Review and adjust the AI estimates before saving</p>
-                </div>
-              </div>
-
-              <div class="fs-results-fields">
-                <div class="fs-result-field fs-result-field--wide">
-                  <label for="scan-food-name"><i class="ri-restaurant-line"></i> Detected Food</label>
-                  <input type="text" id="scan-food-name" required>
-                </div>
-
-                <div class="fs-result-field fs-result-field--wide">
-                  <label for="scan-food-qty"><i class="ri-scales-3-line"></i> Estimated Quantity</label>
-                  <input type="text" id="scan-food-qty" required>
-                </div>
-
-                <div class="fs-result-field fs-result-field--wide">
-                  <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong
-                    (optional)</label>
-                  <textarea id="scan-correction-text" class="fs-correction-textarea" rows="2"
-                    placeholder="e.g., It's masala dosa, not plain dosa. It's only 8 momos, no noodles."></textarea>
-                  <div class="fs-correction-actions">
-                    <button type="button" class="fs-correction-btn" id="btn-refine-scan">
-                      <i class="ri-magic-line"></i> Refine macros
-                    </button>
-                  </div>
-                  <p class="fs-correction-hint">We’ll adjust the macros using this note while keeping your photo.</p>
-                </div>
-
-                <div class="fs-result-field fs-macro-card fs-macro-card--cal">
-                  <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
-                  <div class="fs-macro-input-wrap">
-                    <input type="number" id="scan-calories" min="0" required>
-                    <span class="fs-macro-unit">kcal</span>
-                  </div>
-                </div>
-
-                <div class="fs-result-field fs-macro-card fs-macro-card--prot">
-                  <label for="scan-protein"><i class="ri-droplet-fill"></i> Protein</label>
-                  <div class="fs-macro-input-wrap">
-                    <input type="number" id="scan-protein" min="0" step="0.1" required>
-                    <span class="fs-macro-unit">g</span>
-                  </div>
-                </div>
-
-                <div class="fs-result-field fs-macro-card fs-macro-card--carb">
-                  <label for="scan-carbs"><i class="ri-leaf-fill"></i> Carbs</label>
-                  <div class="fs-macro-input-wrap">
-                    <input type="number" id="scan-carbs" min="0" step="0.1" required>
-                    <span class="fs-macro-unit">g</span>
-                  </div>
-                </div>
-
-                <div class="fs-result-field fs-macro-card fs-macro-card--fat">
-                  <label for="scan-fat"><i class="ri-heart-fill"></i> Fat</label>
-                  <div class="fs-macro-input-wrap">
-                    <input type="number" id="scan-fat" min="0" step="0.1" required>
-                    <span class="fs-macro-unit">g</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="fs-actions">
-                <button class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">Cancel</button>
-                <button class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
-                  <i class="ri-check-line"></i> Save Meal
+                <button class="fs-analyze-btn" id="btn-analyze-food" style="display: none;">
+                  <i class="ri-sparkling-2-fill"></i> Analyze with AI
                 </button>
               </div>
+
+              <!-- Feature Pills -->
+              <div class="fs-features">
+                <div class="fs-feat fs-feat--speed">
+                  <div class="fs-feat-icon fs-feat-icon--speed"><i class="ri-flashlight-fill"></i></div>
+                  <div>
+                    <span class="fs-feat-title">Instant</span>
+                    <span class="fs-feat-desc">Results in seconds</span>
+                  </div>
+                </div>
+                <div class="fs-feat fs-feat--accuracy">
+                  <div class="fs-feat-icon fs-feat-icon--accuracy"><i class="ri-focus-3-fill"></i></div>
+                  <div>
+                    <span class="fs-feat-title">Accurate</span>
+                    <span class="fs-feat-desc">AI-powered analysis</span>
+                  </div>
+                </div>
+                <div class="fs-feat fs-feat--smart">
+                  <div class="fs-feat-icon fs-feat-icon--smart"><i class="ri-brain-fill"></i></div>
+                  <div>
+                    <span class="fs-feat-title">Smart</span>
+                    <span class="fs-feat-desc">Learns your meals</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Loading State -->
+              <div id="ai-scan-loader" class="fs-loader hidden">
+                <div class="fs-loader-ring"></div>
+                <p class="fs-loader-text">Analyzing nutritional content...</p>
+                <p class="fs-loader-sub">Our AI is identifying ingredients and estimating macros</p>
+              </div>
+
+              <!-- Results -->
+              <div id="ai-scan-results" class="fs-results hidden">
+                <div class="fs-results-header">
+                  <div class="fs-results-icon"><i class="ri-checkbox-circle-fill"></i></div>
+                  <div>
+                    <h3>Confirm Nutritional Data</h3>
+                    <p class="fs-results-sub">Review and adjust the AI estimates before saving</p>
+                  </div>
+                </div>
+
+                <div class="fs-results-fields">
+                  <div class="fs-result-field fs-result-field--wide">
+                    <label for="scan-food-name"><i class="ri-restaurant-line"></i> Detected Food</label>
+                    <input type="text" id="scan-food-name" required>
+                  </div>
+
+                  <div class="fs-result-field fs-result-field--wide">
+                    <label for="scan-food-qty"><i class="ri-scales-3-line"></i> Estimated Quantity</label>
+                    <input type="text" id="scan-food-qty" required>
+                  </div>
+
+                  <div class="fs-result-field fs-result-field--wide">
+                    <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong
+                      (optional)</label>
+                    <textarea id="scan-correction-text" class="fs-correction-textarea" rows="2"
+                      placeholder="e.g., It's masala dosa, not plain dosa. It's only 8 momos, no noodles."></textarea>
+                    <div class="fs-correction-actions">
+                      <button type="button" class="fs-correction-btn" id="btn-refine-scan">
+                        <i class="ri-magic-line"></i> Refine macros
+                      </button>
+                    </div>
+                    <p class="fs-correction-hint">We'll adjust the macros using this note while keeping your photo.</p>
+                  </div>
+
+                  <div class="fs-result-field fs-macro-card fs-macro-card--cal">
+                    <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
+                    <div class="fs-macro-input-wrap">
+                      <input type="number" id="scan-calories" min="0" required>
+                      <span class="fs-macro-unit">kcal</span>
+                    </div>
+                  </div>
+
+                  <div class="fs-result-field fs-macro-card fs-macro-card--prot">
+                    <label for="scan-protein"><i class="ri-droplet-fill"></i> Protein</label>
+                    <div class="fs-macro-input-wrap">
+                      <input type="number" id="scan-protein" min="0" step="0.1" required>
+                      <span class="fs-macro-unit">g</span>
+                    </div>
+                  </div>
+
+                  <div class="fs-result-field fs-macro-card fs-macro-card--carb">
+                    <label for="scan-carbs"><i class="ri-leaf-fill"></i> Carbs</label>
+                    <div class="fs-macro-input-wrap">
+                      <input type="number" id="scan-carbs" min="0" step="0.1" required>
+                      <span class="fs-macro-unit">g</span>
+                    </div>
+                  </div>
+
+                  <div class="fs-result-field fs-macro-card fs-macro-card--fat">
+                    <label for="scan-fat"><i class="ri-heart-fill"></i> Fat</label>
+                    <div class="fs-macro-input-wrap">
+                      <input type="number" id="scan-fat" min="0" step="0.1" required>
+                      <span class="fs-macro-unit">g</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="fs-actions">
+                  <button class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">Cancel</button>
+                  <button class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
+                    <i class="ri-check-line"></i> Save Meal
+                  </button>
+                </div>
+              </div>
+
             </div>
-
           </div>
-        </div>
 
+        </div>
       </div> <!-- end subview-ai-scan -->
 
     </div> <!-- end view-diet-add-meal -->
@@ -1994,16 +2123,16 @@
       <div class="card card-wide ai-chat-container">
         <h2>
           <span class="icon"><i class="ri-sparkling-fill"></i></span>
-          <span style="display: flex; flex-direction: column; line-height: 1.2;">
-             <span style="display:inline-flex; align-items:center; gap:4px;">Diet Coach
-               <button type="button" title="You are allowed 5 AI requests per minute."
-                 onclick="alert('You are allowed 5 AI requests per minute.')"
-                 style="background:none; border:none; color:var(--text-light); cursor:pointer; font-size:0.8rem; padding:0; opacity:0.6; transition:opacity 0.2s; display:inline-flex; align-items:center;"
-                 onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+          <span style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0;">
+             <span style="display:inline-flex; align-items:center; gap:4px; white-space: nowrap;">Diet Coach
+               <button type="button" class="ai-rate-limit-btn"
+                 onclick="window.showRateLimitModal()"
+                 style="background:none; border:none; color:var(--text-light); cursor:pointer; font-size:0.85rem; padding:0 2px; opacity:0.75; transition:opacity 0.2s, color 0.2s; display:inline-flex; align-items:center;"
+                 onmouseover="this.style.opacity='1'; this.style.color='var(--accent-end)'" onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-light)'">
                  <i class="ri-information-line"></i>
                </button>
              </span>
-             <span id="dc-status" style="font-size: 0.8rem; font-weight: 500; color: var(--accent-end); margin-top: 2px;">Loading context...</span>
+             <span id="dc-status" style="font-size: 0.8rem; font-weight: 500; color: var(--accent-end); margin-top: 2px; white-space: nowrap;">Loading context...</span>
           </span>
         </h2>
         <div id="dc-messages"
@@ -2100,7 +2229,10 @@
 
         <!-- AI Personalization -->
         <div class="ds-card ds-card--ai">
-          <h2><span class="icon"><i class="ri-robot-2-fill"></i></span> AI Coach <button type="button" class="ai-rate-limit-info" style="background:none; border:none; color:inherit; margin-left:5px; cursor:pointer; font-size: 0.6em;" onclick="event.stopPropagation(); alert('You are allowed 5 AI requests per minute.')" title="AI Rate Limit Info"><i class="ri-information-line"></i></button></h2>
+          <h2>
+            <span class="icon"><i class="ri-robot-2-fill"></i></span>
+            <span>AI Coach</span>
+          </h2>
 
           <div class="ds-fields">
             <div class="ds-field ds-field--full">
@@ -2162,10 +2294,6 @@
       <div class="nav-item ripple" data-target="view-ai">
         <span class="icon"><i class="ri-robot-2-fill"></i></span>
         <span class="label">AI</span>
-      </div>
-      <div class="nav-item ripple" data-target="view-history">
-        <span class="icon"><i class="ri-calendar-todo-line"></i></span>
-        <span class="label">History</span>
       </div>
       <div class="nav-item ripple" data-target="view-achievements">
         <span class="icon"><i class="ri-trophy-line"></i></span>
@@ -2271,7 +2399,7 @@
   <div id="modal-routines" class="modal hidden">
     <div class="modal-content">
       <span class="close-modal" id="close-routines-modal">&times;</span>
-      <h2>Manage Routines</h2>
+      <h2><span class="routine-modal-icon"></span> Manage Routines</h2>
 
       <!-- List View -->
       <div id="routines-list-view">
@@ -2545,7 +2673,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=64"></script>
+  <script type="module" src="script.js?v=110"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

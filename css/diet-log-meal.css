@@ -285,18 +285,17 @@
   font-weight: 700;
   cursor: pointer;
   color: white;
-  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--accent-start) 30%, transparent);
+  background: var(--accent-start);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent-start) 30%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.25s ease;
+  transition: opacity 0.2s ease;
 }
 
 .lm-submit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 36px color-mix(in srgb, var(--accent-start) 40%, transparent);
+  opacity: 0.88;
 }
 
 /* Responsive */

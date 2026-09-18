@@ -20,6 +20,16 @@ html.dark-mode {
 
 
 /* History Table */
+.history-date {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1.5rem;
+}
+
 table {
   width: 100%;
   margin-top: 1rem;
@@ -470,25 +480,6 @@ td:first-child {
 
 .leaderboard-center-cell {
   text-align: center !important;
-  padding-left: 0.5rem !important;
-}
-
-
-@media (max-width: 768px) {
-  #social-leaderboard-table th, 
-  #social-leaderboard-table td {
-    padding: 0.6rem 0.2rem;
-  }
-  #social-leaderboard-table th {
-    font-size: 0.65rem;
-    letter-spacing: -0.5px;
-  }
-  #social-leaderboard-table td {
-    font-size: 0.75rem;
-  }
-  .leaderboard-center-cell {
-    padding-left: 0 !important;
-  }
 }
 
 .exercise-spacer {
@@ -529,10 +520,14 @@ td:first-child {
   overflow-x: hidden;
   /* slide OFF-SCREEN to the right using margin-left, not transform */
   margin-left: 100vw;
-  transition: margin-left 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  visibility: hidden;
+  pointer-events: none;
+  transition: margin-left 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.35s;
 }
 .podium-modal.active {
   margin-left: 0;
+  visibility: visible;
+  pointer-events: auto;
 }
 @media (max-width: 768px) {
   .podium-modal {
@@ -859,6 +854,604 @@ body.no-scroll {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* =========================================
+   SOCIAL & LEADERBOARD VIEW
+========================================= */
+#view-social.active-view {
+  align-content: start;
+}
+
+.social-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.social-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.social-empty-state i {
+  font-size: 2.2rem;
+  opacity: 0.35;
+  color: var(--accent-end);
+}
+
+.social-user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  gap: 0.75rem;
+}
+
+.social-user-item:hover {
+  border-color: rgba(var(--accent-end-rgb, 247, 121, 125), 0.3);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.social-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.social-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.social-user-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.manage-friends-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  font-size: 1.05rem !important;
+  background: var(--input-bg) !important;
+  color: var(--text-light) !important;
+  border: 1px solid var(--card-border) !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  flex: 0 0 auto !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+.manage-friends-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text) !important;
+  border-color: rgba(var(--accent-end-rgb, 247, 121, 125), 0.4) !important;
+  transform: translateY(-1px);
+}
+
+.manage-friends-btn.active {
+  background: var(--accent-gradient) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.social-btn-remove {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: fit-content !important;
+  padding: 6px 12px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  transition: all 0.2s ease;
+  display: none !important;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+#current-friends-container.is-managing .social-btn-remove {
+  display: inline-flex !important;
+  animation: fadeInPop 0.25s ease forwards;
+}
+
+@keyframes fadeInPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.social-btn-remove:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.social-btn-accept {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  padding: 6px 14px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: var(--accent-gradient);
+  color: #fff;
+  transition: all 0.2s ease;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+.social-btn-accept:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.social-btn-decline {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  padding: 6px 12px !important;
+  font-size: 0.8rem !important;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-light);
+  border: 1px solid var(--card-border);
+  transition: all 0.2s ease;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+.social-btn-decline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: var(--text-light);
+}
+
+.friend-code-display-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.friend-code-box {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-family: monospace, var(--font-primary);
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px dashed var(--accent-end);
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  user-select: all;
+}
+
+.copy-code-btn {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  font-size: 1.1rem !important;
+  flex-shrink: 0;
+}
+
+.friend-add-input-group {
+  display: flex !important;
+  gap: 0.6rem !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.friend-add-input-group input#add-friend-input,
+.friend-add-input-group input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  font-size: 0.85rem;
+  height: 42px !important;
+  padding: 0 0.85rem !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.friend-add-input-group button#btn-add-friend,
+.friend-add-input-group button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: fit-content !important;
+  height: 42px !important;
+  padding: 0 1.1rem !important;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Leaderboard Header & Dropdown Alignment */
+.card-header-flex {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 2px solid var(--card-border) !important;
+}
+
+.card-header-flex h2 {
+  margin: 0 !important;
+  padding: 0 !important;
+  border-bottom: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  line-height: 1 !important;
+  height: auto !important;
+}
+
+.card-header-flex h2 .icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.card-header-flex h2 .icon i {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+#leaderboard-exercise-select {
+  width: auto !important;
+  min-width: 170px !important;
+  max-width: 220px !important;
+  flex: 0 0 auto !important;
+  padding: 0 2.2rem 0 1rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--text) !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.card-header-flex .custom-select-wrapper {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 170px !important;
+  max-width: 220px !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.card-header-flex .custom-select-wrapper .custom-select-trigger {
+  padding: 0 1rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  line-height: 1 !important;
+  background: var(--input-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.5rem !important;
+}
+
+.card-header-flex .custom-select-wrapper .custom-select-trigger .trigger-text {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+}
+
+.card-header-flex .custom-select-wrapper .custom-select-trigger i {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+  font-size: 1.1rem !important;
+}
+
+/* Leaderboard Table Base Styling */
+#social-leaderboard-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+#social-leaderboard-table th {
+  padding: 0.85rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--card-border);
+  background: transparent;
+  white-space: nowrap;
+}
+
+#social-leaderboard-table td {
+  padding: 0.85rem 0.75rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+#social-leaderboard-table tr:hover:not(.skeleton-row):not(.exercise-spacer) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.leaderboard-name-cell .athlete-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVE STYLES FOR SOCIAL & LEADERBOARD (≤ 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Card Header & Filter on Mobile */
+  .card-header-flex {
+    margin-bottom: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .card-header-flex h2 {
+    font-size: 1.05rem !important;
+    gap: 0.35rem !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .card-header-flex h2 .icon {
+    font-size: 1.05rem !important;
+  }
+
+  .card-header-flex .custom-select-wrapper {
+    min-width: 125px !important;
+    max-width: 150px !important;
+  }
+
+  .card-header-flex .custom-select-wrapper .custom-select-trigger {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 0.6rem !important;
+    font-size: 0.74rem !important;
+    border-radius: 10px !important;
+    gap: 0.3rem !important;
+  }
+
+  .card-header-flex .custom-select-wrapper .custom-select-trigger i {
+    font-size: 0.9rem !important;
+  }
+
+  /* Leaderboard Table Container & Geometry on Mobile */
+  .leaderboard-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  #social-leaderboard-table {
+    width: 100% !important;
+    min-width: 100% !important;
+    table-layout: auto !important;
+  }
+
+  #social-leaderboard-table th {
+    font-size: 0.65rem !important;
+    padding: 0.45rem 0.2rem !important;
+    letter-spacing: 0.2px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  #social-leaderboard-table th:nth-child(2) {
+    text-align: left !important;
+    padding-left: 0.3rem !important;
+  }
+
+  #social-leaderboard-table th:nth-child(3) {
+    text-align: left !important;
+    padding-left: 0.2rem !important;
+  }
+
+  #social-leaderboard-table td {
+    font-size: 0.73rem !important;
+    padding: 0.48rem 0.2rem !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  #social-leaderboard-table td.leaderboard-exercise-td,
+  #social-leaderboard-table td:nth-child(2) {
+    text-align: left !important;
+    padding-left: 0.3rem !important;
+  }
+
+  .leaderboard-exercise-cell {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 3px !important;
+    max-width: 88px !important;
+  }
+
+  .leaderboard-exercise-name {
+    font-size: 0.71rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .leaderboard-icon {
+    width: 13px !important;
+    height: 13px !important;
+    margin-right: 2px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .leaderboard-icon.img-chest,
+  .leaderboard-icon.img-legs,
+  .leaderboard-icon.img-back {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #social-leaderboard-table td.leaderboard-name-cell,
+  #social-leaderboard-table td:nth-child(3) {
+    text-align: left !important;
+    padding-left: 0.2rem !important;
+    max-width: 82px !important;
+  }
+
+  .leaderboard-name-cell .athlete-name {
+    max-width: 82px !important;
+    font-size: 0.73rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+  }
+
+  .leaderboard-weight-cell {
+    font-weight: 700 !important;
+    font-size: 0.73rem !important;
+    white-space: nowrap !important;
+  }
+
+  .diff-pill {
+    padding: 2px 5px !important;
+    font-size: 0.63rem !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Friend cards on mobile */
+  .friend-code-box {
+    font-size: 1.15rem !important;
+    letter-spacing: 2px !important;
+    padding: 0.45rem 0.75rem !important;
+  }
+
+  .friend-add-input-group {
+    gap: 0.4rem !important;
+  }
+
+  .friend-add-input-group input#add-friend-input,
+  .friend-add-input-group input {
+    height: 38px !important;
+    font-size: 0.74rem !important;
+    padding: 0 0.55rem !important;
+    letter-spacing: 0.6px !important;
+  }
+
+  .friend-add-input-group button#btn-add-friend,
+  .friend-add-input-group button {
+    height: 38px !important;
+    font-size: 0.74rem !important;
+    padding: 0 0.75rem !important;
+    border-radius: 10px !important;
+  }
+
+  .social-user-item {
+    padding: 0.55rem 0.7rem !important;
+  }
+
+  .social-btn-remove {
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
+    height: 26px !important;
+  }
 }
 
 

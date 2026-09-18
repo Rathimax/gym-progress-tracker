@@ -27,6 +27,16 @@ export const initRoutines = (app, db, auth, elements) => {
     let localRoutines = [];
     let editingRoutineId = null; // null = creating new, id = editing existing
 
+    // Load initial local routines from storage
+    const storedRoutines = localStorage.getItem('gymRoutines');
+    if (storedRoutines) {
+        try {
+            localRoutines = JSON.parse(storedRoutines);
+        } catch (e) {
+            console.error("Failed to parse local gymRoutines:", e);
+        }
+    }
+
     // Listeners
     if (btnOpen) btnOpen.addEventListener('click', () => { modal.classList.remove('hidden'); });
     if (btnClose) btnClose.addEventListener('click', () => { modal.classList.add('hidden'); });
@@ -211,15 +221,15 @@ export const initRoutines = (app, db, auth, elements) => {
             const div = document.createElement('div');
             div.className = 'routine-card-item';
             div.innerHTML = `
-                <div class="routine-card-info" style="flex:1; cursor:pointer;">
-                    <strong>${routine.name}</strong>
-                    <span style="font-size:0.8rem; opacity:0.7;">${routine.exercises.length} Exercises</span>
+                <div class="routine-card-info">
+                    <h4 class="routine-card-name">${routine.name}</h4>
+                    <span class="routine-card-count"><i class="ri-list-check-2"></i> ${routine.exercises.length} ${routine.exercises.length === 1 ? 'Exercise' : 'Exercises'}</span>
                 </div>
-                <div class="routine-card-actions" style="display:flex; gap:0.4rem; flex-shrink:0;">
-                    <button class="btn-edit-routine" data-id="${routine.id}" title="Edit" style="width:auto; padding:0.3rem 0.7rem; font-size:0.8rem; background:var(--input-bg); color:var(--accent-end); border-radius:12px; box-shadow:none; border:1px solid var(--card-border);">
-                        <i class="ri-edit-line"></i>
+                <div class="routine-card-actions">
+                    <button class="btn-edit-routine" data-id="${routine.id}" title="Edit Routine">
+                        <i class="ri-pencil-line"></i>
                     </button>
-                    <button class="btn-delete-routine" data-id="${routine.id}" title="Delete" style="width:auto; padding:0.3rem 0.7rem; font-size:0.8rem; background:rgba(255,107,107,0.1); color:var(--danger); border-radius:12px; box-shadow:none; border:1px solid rgba(255,107,107,0.3);">
+                    <button class="btn-delete-routine" data-id="${routine.id}" title="Delete Routine">
                         <i class="ri-delete-bin-line"></i>
                     </button>
                 </div>
@@ -306,35 +316,103 @@ export const initRoutines = (app, db, auth, elements) => {
                 const select = document.getElementById('exercise-select');
                 const customInput = document.getElementById('exercise-text');
                 const toggleBtn = document.getElementById('toggle-input-btn');
-                
-                if (select) {
-                    const isStandard = Array.from(select.options).some(opt => opt.value === ex);
-                    
-                    if (isStandard) {
-                        // Standard exercise: ensure standard mode is active
-                        if (toggleBtn && toggleBtn.classList.contains('active')) {
-                            toggleBtn.click();
+                if (!select) return;
+
+                const exTrimmed = ex.trim().toLowerCase();
+                const wrapper = select.parentNode ? select.parentNode.querySelector('.custom-select-wrapper') : null;
+
+                // Find matching standard option (case-insensitive)
+                let standardOpt = null;
+                for (const opt of select.options) {
+                    if (opt.value && opt.value.trim().toLowerCase() === exTrimmed) {
+                        standardOpt = opt;
+                        break;
+                    }
+                }
+
+                if (standardOpt) {
+                    // Standard exercise: switch off custom input mode if active
+                    if (toggleBtn && toggleBtn.classList.contains('active')) {
+                        toggleBtn.click();
+                    } else if (customInput && !customInput.classList.contains('hidden')) {
+                        customInput.classList.add('hidden');
+                        customInput.removeAttribute('required');
+                        if (wrapper) wrapper.style.display = 'block';
+                        select.setAttribute('required', 'true');
+                    }
+
+                    // Set select value
+                    select.value = standardOpt.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    // Find matching custom-option in custom-select-wrapper and trigger click
+                    let optionHandled = false;
+                    if (wrapper) {
+                        const customOptions = wrapper.querySelectorAll('.custom-option');
+                        const targetVal = (standardOpt.value || standardOpt.textContent).trim().toLowerCase();
+                        for (const cOpt of customOptions) {
+                            // Match via data-value (set by applyCustomDropdown) — avoids icon text contamination
+                            const cVal = (cOpt.dataset.value || '').trim().toLowerCase();
+                            if (cVal === exTrimmed || cVal === targetVal) {
+                                cOpt.click();
+                                optionHandled = true;
+                                break;
+                            }
                         }
-                        select.value = ex;
-                        select.dispatchEvent(new Event('change', { bubbles: true }));
-                        const trigger = document.querySelector('.custom-select-trigger');
-                        if (trigger) trigger.textContent = ex;
-                    } else {
-                        // Custom exercise: ensure custom mode is active
-                        if (toggleBtn && !toggleBtn.classList.contains('active')) {
-                            toggleBtn.click();
-                        }
-                        if (customInput) {
-                            customInput.value = ex;
-                            // Trigger blur or input events if needed by script.js
-                            customInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        if (!optionHandled) {
+                            const triggerText = wrapper.querySelector('.trigger-text');
+                            if (triggerText) {
+                                triggerText.textContent = standardOpt.text || standardOpt.value;
+                            }
                         }
                     }
-                    
-                    document.querySelector('.card-log-workout').scrollIntoView({ behavior: 'smooth' });
-                    tag.style.transform = 'scale(1.1)';
-                    setTimeout(() => tag.style.transform = 'scale(1)', 200);
+
+                    // Ensure autoFill runs
+                    if (!optionHandled && typeof window.handleAutoFill === 'function') {
+                        window.handleAutoFill(standardOpt.value);
+                    }
+                } else {
+                    // Custom exercise: ensure custom input mode is active
+                    if (toggleBtn && !toggleBtn.classList.contains('active')) {
+                        toggleBtn.click();
+                    } else if (customInput && customInput.classList.contains('hidden')) {
+                        customInput.classList.remove('hidden');
+                        customInput.setAttribute('required', 'true');
+                        if (wrapper) wrapper.style.display = 'none';
+                        select.removeAttribute('required');
+                    }
+
+                    if (customInput) {
+                        customInput.value = ex;
+                        customInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        customInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        customInput.dispatchEvent(new Event('blur', { bubbles: true }));
+                        if (typeof window.handleAutoFill === 'function') {
+                            window.handleAutoFill(ex);
+                        }
+                    }
                 }
+
+                // Highlight active item visually in checklist
+                checklist.querySelectorAll('.checklist-item').forEach(item => item.classList.remove('selected'));
+                tag.classList.add('selected');
+
+                // Smooth scroll to Log Workout card
+                const logCard = document.querySelector('.card-log-workout');
+                if (logCard) {
+                    logCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                // Focus reps input so user can instantly log
+                const repsInput = document.getElementById('reps');
+                if (repsInput) {
+                    setTimeout(() => repsInput.focus(), 350);
+                }
+
+                tag.style.transform = 'scale(1.08)';
+                setTimeout(() => {
+                    tag.style.transform = 'scale(1)';
+                }, 200);
             });
 
             checklist.appendChild(tag);
@@ -368,6 +446,8 @@ export const initRoutines = (app, db, auth, elements) => {
         listView.classList.remove('hidden');
         if (btnSave) btnSave.textContent = 'Save Routine';
     });
+
+    renderList();
 
     return {
         loadRoutinesFromServer,

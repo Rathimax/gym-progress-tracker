@@ -314,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let prMap = {};
     let prDates = {};
     let showAllPRs = false;
+    let prListCollapsedHeight = 0;
     let currentChartType = 'weight';
     let analyticsChart = null;
     let isCustomInput = false;
@@ -658,6 +659,23 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCancel.onclick = closeModal;
         btnOk.onclick = () => { closeModal(); if (onOk) onOk(); };
         overlay.classList.remove('hidden');
+    };
+
+    window.showRateLimitModal = () => {
+        const overlay = document.getElementById('ai-rate-limit-overlay');
+        if (!overlay) return;
+        const btnOk = document.getElementById('btn-rate-limit-ok');
+        const closeModal = () => overlay.classList.add('hidden');
+        if (btnOk) btnOk.onclick = closeModal;
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeModal();
+        };
+        overlay.classList.remove('hidden');
+    };
+
+    window.hideRateLimitModal = () => {
+        const overlay = document.getElementById('ai-rate-limit-overlay');
+        if (overlay) overlay.classList.add('hidden');
     };
     let notificationTimer = null;
     const showNotification = (msg, type = 'success', persistent = false) => {
@@ -1018,7 +1036,14 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
-    const triggerTierUpCelebration = (tier, exercise) => {
+    let isCelebrationRunning = false;
+    const celebrationQueue = [];
+
+    const processCelebrationQueue = () => {
+        if (isCelebrationRunning || celebrationQueue.length === 0) return;
+        isCelebrationRunning = true;
+        const { tier, exercise } = celebrationQueue.shift();
+
         const overlay = document.createElement('div');
         overlay.className = `tier-up-celebration ${tier}`;
         const titles = {
@@ -1040,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 olympian: ['#D4AF37', '#ffffff'], inhuman: ['#FF1744', '#000000']
             };
             confetti({
-                particleCount: 150,
+                particleCount: 120,
                 spread: 70,
                 origin: { y: 0.6 },
                 colors: colors[tier] || ['#bbbbbb']
@@ -1049,8 +1074,116 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             overlay.classList.add('fade-out');
-            setTimeout(() => overlay.remove(), 500);
-        }, 3000);
+            setTimeout(() => {
+                overlay.remove();
+                isCelebrationRunning = false;
+                setTimeout(processCelebrationQueue, 250);
+            }, 500);
+        }, 2600);
+    };
+
+    const triggerTierUpCelebration = (tier, exercise) => {
+        celebrationQueue.push({ tier, exercise });
+        processCelebrationQueue();
+    };
+
+    const triggerMultiTierCelebration = (upgrades) => {
+        celebrationQueue.length = 0;
+        
+        const existing = document.getElementById('multi-tier-overlay');
+        if (existing) {
+            existing.remove();
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'multi-tier-overlay';
+        overlay.className = 'multi-tier-overlay';
+
+        const tierIcons = {
+            wood: 'ri-medal-line',
+            iron: 'ri-shield-fill',
+            gold: 'ri-trophy-fill',
+            diamond: 'ri-vip-diamond-fill',
+            netherite: 'ri-fire-fill',
+            olympian: 'ri-flashlight-fill',
+            inhuman: 'ri-skull-fill'
+        };
+
+        const listItems = upgrades.map(u => {
+            const icon = tierIcons[u.tier] || 'ri-medal-fill';
+            return `
+                <li class="multi-tier-item">
+                    <span class="ex-name">${u.exercise}</span>
+                    <span class="tier-badge ${u.tier}">
+                        <i class="${icon}"></i> ${u.tier.toUpperCase()}
+                    </span>
+                </li>
+            `;
+        }).join('');
+
+        overlay.innerHTML = `
+            <div class="multi-tier-modal">
+                <div class="multi-tier-header">
+                    <i class="ri-trophy-fill multi-tier-icon"></i>
+                    <h2 class="multi-tier-title">New Ranks Unlocked!</h2>
+                    <p class="multi-tier-subtitle">You achieved <strong>${upgrades.length}</strong> new strength rankings:</p>
+                </div>
+                <ul class="multi-tier-list">
+                    ${listItems}
+                </ul>
+                <button class="multi-tier-btn" id="btn-close-multi-tier">
+                    <i class="ri-check-line"></i> Awesome!
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        document.documentElement.classList.add('no-scroll');
+        document.body.classList.add('no-scroll');
+
+        const handleWheel = (e) => {
+            if (!e.target.closest('.multi-tier-list')) {
+                e.preventDefault();
+            }
+        };
+        const handleTouch = (e) => {
+            if (!e.target.closest('.multi-tier-list')) {
+                e.preventDefault();
+            }
+        };
+
+        overlay.addEventListener('wheel', handleWheel, { passive: false });
+        overlay.addEventListener('touchmove', handleTouch, { passive: false });
+
+        if (window.confetti) {
+            confetti({
+                particleCount: 160,
+                spread: 80,
+                origin: { y: 0.5 },
+                colors: ['#FFD700', '#FFA500', '#4FD8FF', '#f7797d', '#C6FFDD']
+            });
+        }
+
+        const closeModal = () => {
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
+            overlay.removeEventListener('wheel', handleWheel);
+            overlay.removeEventListener('touchmove', handleTouch);
+            overlay.classList.add('closing');
+            setTimeout(() => overlay.remove(), 250);
+        };
+
+        const closeBtn = overlay.querySelector('#btn-close-multi-tier');
+        if (closeBtn) {
+            closeBtn.onclick = closeModal;
+        }
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        };
     };
 
     let previousTiers = {}; // To detect new PR tier ups
@@ -1092,6 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayedPRs = showAllPRs ? sortedPRs : sortedPRs.slice(0, initialCount);
         
         let leaguesHtml = '';
+        const pendingTierUpgrades = [];
         
         if (userBw) {
             sortedPRs.forEach(([ex, wt]) => {
@@ -1101,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (prevTier && prevTier !== tierInfo.currentTier) {
                         const tierOrder = ["wood", "iron", "gold", "diamond", "netherite", "olympian", "inhuman"];
                         if (tierOrder.indexOf(tierInfo.currentTier) > tierOrder.indexOf(prevTier)) {
-                            triggerTierUpCelebration(tierInfo.currentTier, ex);
+                            pendingTierUpgrades.push({ tier: tierInfo.currentTier, exercise: ex });
                             // Also update firebase document
                             if (auth.currentUser) {
                                 setDoc(doc(db, `users/${auth.currentUser.uid}/exerciseTiers`, ex.replace(/\//g, '-')), {
@@ -1126,6 +1260,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             });
+        }
+
+        // Trigger celebrations based on count
+        if (pendingTierUpgrades.length > 2) {
+            triggerMultiTierCelebration(pendingTierUpgrades);
+        } else if (pendingTierUpgrades.length > 0) {
+            pendingTierUpgrades.forEach(u => triggerTierUpCelebration(u.tier, u.exercise));
         }
 
         elements.prList.innerHTML = displayedPRs.map(([ex, wt]) => {
@@ -1157,6 +1298,47 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const prSection = document.getElementById('pr-section');
+
+        // Manage scrollable mode and hint
+        const existingHint = document.getElementById('pr-scroll-hint');
+        if (existingHint) existingHint.remove();
+
+        if (showAllPRs && needsPagination) {
+            elements.prList.classList.add('scrollable');
+            if (prListCollapsedHeight > 0) {
+                elements.prList.style.height = prListCollapsedHeight + 'px';
+                elements.prList.style.maxHeight = prListCollapsedHeight + 'px';
+            }
+            const hint = document.createElement('div');
+            hint.id = 'pr-scroll-hint';
+            hint.className = 'pr-scroll-hint';
+            hint.innerHTML = '<i class="ri-arrow-down-line"></i> scroll down for more';
+            if (prSection) {
+                prSection.appendChild(hint);
+            } else {
+                elements.prList.after(hint);
+            }
+
+            // Hide hint automatically when user starts scrolling
+            elements.prList.onscroll = () => {
+                if (elements.prList.scrollTop > 10) {
+                    hint.classList.add('hidden');
+                }
+            };
+        } else {
+            elements.prList.classList.remove('scrollable');
+            elements.prList.style.height = '';
+            elements.prList.style.maxHeight = '';
+            elements.prList.scrollTop = 0;
+            elements.prList.onscroll = null;
+            requestAnimationFrame(() => {
+                if (elements.prList && !showAllPRs && elements.prList.offsetHeight > 0) {
+                    prListCollapsedHeight = elements.prList.offsetHeight;
+                }
+            });
+        }
+
         // Add Toggle Button if needed
         const existingBtn = document.getElementById('btn-toggle-prs');
         if (existingBtn) existingBtn.remove();
@@ -1170,12 +1352,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `Show All PRs (${sortedPRs.length}) <i class="ri-arrow-down-s-line"></i>`;
             
             toggleBtn.onclick = () => {
+                if (!showAllPRs && elements.prList && elements.prList.offsetHeight > 0) {
+                    prListCollapsedHeight = elements.prList.offsetHeight;
+                }
                 showAllPRs = !showAllPRs;
                 updatePRSection();
             };
             
-            // Append after the list
-            elements.prList.after(toggleBtn);
+            if (prSection) {
+                prSection.after(toggleBtn);
+            } else {
+                elements.prList.after(toggleBtn);
+            }
         }
     };
 
@@ -1366,7 +1554,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const optionsDiv = document.createElement('div'); optionsDiv.className = 'custom-options';
 
         // Search
-        if (selectElement.options.length > 5) {
+        if (selectElement.options.length > 5 && !selectElement.classList.contains('no-search') && selectElement.id !== 'recipe-weight-unit') {
             const sBox = document.createElement('div'); sBox.className = 'dropdown-search-container';
             const sInp = document.createElement('input'); 
             sInp.className = 'dropdown-search-input'; 
@@ -1389,6 +1577,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lbl = document.createElement('div'); lbl.className = 'custom-optgroup-label'; lbl.textContent = child.label; grp.appendChild(lbl);
                 Array.from(child.children).forEach(opt => {
                     const div = document.createElement('div'); div.className = 'custom-option'; div.style.display = 'flex'; div.style.alignItems = 'center';
+                    div.dataset.value = opt.value || opt.textContent.trim();
                     div.innerHTML = `${getIconHtml(opt)}${opt.textContent}`;
                     div.addEventListener('click', () => {
                         selectElement.value = opt.value; selectElement.dispatchEvent(new Event('change'));
@@ -1414,9 +1603,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 optionsDiv.appendChild(grp);
             } else if (child.tagName === 'OPTION') {
                 const div = document.createElement('div'); div.className = 'custom-option'; div.style.display = 'flex'; div.style.alignItems = 'center';
+                if (child.selected || child.value === selectElement.value) div.classList.add('selected');
+                div.dataset.value = child.value || child.textContent.trim();
                 div.innerHTML = `${getIconHtml(child)}${child.textContent}`;
                 div.addEventListener('click', () => {
                     selectElement.value = child.value; selectElement.dispatchEvent(new Event('change'));
+                    optionsDiv.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+                    div.classList.add('selected');
                     const textSpan = trigger.querySelector('.trigger-text');
                     if (textSpan) textSpan.innerHTML = `${getIconHtml(child)}${child.textContent}`; 
                     container.classList.remove('open');
@@ -1485,6 +1678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             update1RM();
         }
     };
+    window.handleAutoFill = handleAutoFill;
     const update1RM = () => {
         let w = parseFloat(elements.form.weight.value);
         const r = parseInt(elements.form.reps.value);
@@ -1501,6 +1695,272 @@ document.addEventListener('DOMContentLoaded', () => {
         } else elements.rmDisplay.classList.add('hidden');
     };
     const startTimer = (seconds) => { clearInterval(timerInterval); elements.timerDisplay.classList.remove('hidden'); elements.timerCancel.classList.remove('hidden'); elements.timerWidget.classList.add('timer-active'); let t = seconds; const tick = () => elements.timerDisplay.textContent = `${Math.floor(t / 60).toString().padStart(2, '0')}:${(t % 60).toString().padStart(2, '0')}`; tick(); timerInterval = setInterval(() => { t--; if (t < 0) { clearInterval(timerInterval); playBeep(); elements.timerWidget.classList.remove('timer-active'); showNotification("Time's up!", "info"); } else tick(); }, 1000); };
+
+    // ==========================================
+    // CALCULATION HELPERS & REAL-TIME AUTO-CALCULATORS
+    // ==========================================
+    const calculateBMI = (h, w) => {
+        const m = h / 100;
+        return (w / (m * m)).toFixed(1);
+    };
+
+    const getBMICategory = (bmi) => {
+        const b = parseFloat(bmi);
+        if (b < 18.5) return "Underweight";
+        if (b < 25) return "Normal weight";
+        if (b < 30) return "Overweight";
+        return "Obese";
+    };
+
+    const calculateBodyFat = (gender, h, w, n, hip) => {
+        let bf = 0;
+        try {
+            if (gender === 'male') {
+                if (w - n <= 0) return 0;
+                bf = 495 / (1.0324 - 0.19077 * Math.log10(w - n) + 0.15456 * Math.log10(h)) - 450;
+            } else {
+                if (w + hip - n <= 0) return 0;
+                bf = 495 / (1.29579 - 0.35004 * Math.log10(w + hip - n) + 0.22100 * Math.log10(h)) - 450;
+            }
+            return Math.max(0, bf).toFixed(1);
+        } catch (e) {
+            return 0;
+        }
+    };
+
+    const getBFCategory = (gender, bf) => {
+        bf = parseFloat(bf);
+        if (gender === 'male') {
+            if (bf < 6) return "Essential Fat";
+            if (bf < 14) return "Athletes";
+            if (bf < 18) return "Fitness";
+            if (bf < 25) return "Average";
+            return "Obese";
+        } else {
+            if (bf < 14) return "Essential Fat";
+            if (bf < 21) return "Athletes";
+            if (bf < 25) return "Fitness";
+            if (bf < 32) return "Average";
+            return "Obese";
+        }
+    };
+
+    const calculate1RM = (w, r) => {
+        const weight = parseFloat(w);
+        const reps = parseInt(r);
+
+        if (!weight || !reps || reps <= 0) return 0;
+        if (reps === 1) return Math.round(weight);
+
+        // Epley formula: 1RM = w * (1 + r/30)
+        return Math.round(weight * (1 + reps / 30));
+    };
+
+    const setBmiHeightUnit = (unit) => {
+        const isFt = (unit === 'ft');
+        const unitVal = document.getElementById('bmi-height-unit-val');
+        const cmBtn = document.getElementById('bmi-unit-cm-btn');
+        const ftBtn = document.getElementById('bmi-unit-ft-btn');
+        if (unitVal) unitVal.value = isFt ? 'ft' : 'cm';
+        if (cmBtn) cmBtn.classList.toggle('active', !isFt);
+        if (ftBtn) ftBtn.classList.toggle('active', isFt);
+
+        if (isFt) {
+            // Converting to FT: if CM is filled, convert to FT/IN
+            const cmVal = parseFloat(elements.bmiHeight ? elements.bmiHeight.value : 0) || 0;
+            if (cmVal > 0) {
+                const totalInches = cmVal / 2.54;
+                const ft = Math.floor(totalInches / 12);
+                const inc = Math.round(totalInches % 12);
+                if (elements.bmiHeightFt) elements.bmiHeightFt.value = ft;
+                if (elements.bmiHeightIn) elements.bmiHeightIn.value = inc;
+            }
+            if (elements.bmiHeightCmWrapper) elements.bmiHeightCmWrapper.classList.add('hidden');
+            if (elements.bmiHeightFtWrapper) {
+                elements.bmiHeightFtWrapper.classList.remove('hidden');
+                elements.bmiHeightFtWrapper.style.display = 'grid';
+            }
+        } else {
+            // Converting to CM: if FT/IN is filled, convert to CM
+            const ftVal = parseFloat(elements.bmiHeightFt ? elements.bmiHeightFt.value : 0) || 0;
+            const inVal = parseFloat(elements.bmiHeightIn ? elements.bmiHeightIn.value : 0) || 0;
+            if (ftVal > 0 || inVal > 0) {
+                const cmVal = Math.round(((ftVal * 12) + inVal) * 2.54);
+                if (elements.bmiHeight) elements.bmiHeight.value = cmVal;
+            }
+            if (elements.bmiHeightFtWrapper) {
+                elements.bmiHeightFtWrapper.classList.add('hidden');
+                elements.bmiHeightFtWrapper.style.display = 'none';
+            }
+            if (elements.bmiHeightCmWrapper) elements.bmiHeightCmWrapper.classList.remove('hidden');
+        }
+        autoCalculateBMI(false);
+    };
+
+    const setBfHeightUnit = (unit) => {
+        const isFt = (unit === 'ft');
+        const unitVal = document.getElementById('bf-height-unit-val');
+        const cmBtn = document.getElementById('bf-unit-cm-btn');
+        const ftBtn = document.getElementById('bf-unit-ft-btn');
+        if (unitVal) unitVal.value = isFt ? 'ft' : 'cm';
+        if (cmBtn) cmBtn.classList.toggle('active', !isFt);
+        if (ftBtn) ftBtn.classList.toggle('active', isFt);
+
+        if (isFt) {
+            // Converting to FT: if CM is filled, convert to FT/IN
+            const cmVal = parseFloat(elements.bfHeight ? elements.bfHeight.value : 0) || 0;
+            if (cmVal > 0) {
+                const totalInches = cmVal / 2.54;
+                const ft = Math.floor(totalInches / 12);
+                const inc = Math.round(totalInches % 12);
+                if (elements.bfHeightFt) elements.bfHeightFt.value = ft;
+                if (elements.bfHeightIn) elements.bfHeightIn.value = inc;
+            }
+            if (elements.bfHeightCmWrapper) elements.bfHeightCmWrapper.classList.add('hidden');
+            if (elements.bfHeightFtWrapper) elements.bfHeightFtWrapper.classList.remove('hidden');
+        } else {
+            // Converting to CM: if FT/IN is filled, convert to CM
+            const ftVal = parseFloat(elements.bfHeightFt ? elements.bfHeightFt.value : 0) || 0;
+            const inVal = parseFloat(elements.bfHeightIn ? elements.bfHeightIn.value : 0) || 0;
+            if (ftVal > 0 || inVal > 0) {
+                const cmVal = Math.round(((ftVal * 12) + inVal) * 2.54);
+                if (elements.bfHeight) elements.bfHeight.value = cmVal;
+            }
+            if (elements.bfHeightFtWrapper) elements.bfHeightFtWrapper.classList.add('hidden');
+            if (elements.bfHeightCmWrapper) elements.bfHeightCmWrapper.classList.remove('hidden');
+        }
+        autoCalculateBodyFat(false);
+    };
+
+    const autoCalculateBMI = (showErrors = false) => {
+        let h = 0;
+        const unitVal = document.getElementById('bmi-height-unit-val');
+        const unit = unitVal ? unitVal.value : 'cm';
+
+        if (unit === 'ft') {
+            const ft = parseFloat(elements.bmiHeightFt ? elements.bmiHeightFt.value : 0) || 0;
+            const inc = parseFloat(elements.bmiHeightIn ? elements.bmiHeightIn.value : 0) || 0;
+            if (ft > 0 || inc > 0) {
+                h = ((ft * 12) + inc) * 2.54;
+            }
+        } else {
+            h = parseFloat(elements.bmiHeight ? elements.bmiHeight.value : 0) || 0;
+        }
+
+        const w = parseFloat(elements.bmiWeight ? elements.bmiWeight.value : 0) || 0;
+
+        if (h > 0 && w > 0) {
+            const bmi = calculateBMI(h, w);
+            const cat = getBMICategory(bmi);
+            if (elements.bmiValue) elements.bmiValue.textContent = bmi;
+            if (elements.bmiCategory) elements.bmiCategory.textContent = cat;
+            if (elements.bmiResultsArea) elements.bmiResultsArea.classList.remove('hidden');
+
+            // Save snapshot for AI Plan
+            window.currentBmiSnapshot = {
+                bmi: bmi,
+                category: cat,
+                height: h,
+                weight: w,
+                age: userPreferences.age || 25,
+                sex: userPreferences.gender || 'Unknown'
+            };
+            return true;
+        } else {
+            if (showErrors) {
+                if (!h && !w) showNotification("Enter height & weight", "error");
+                else if (!h) showNotification("Enter height", "error");
+                else if (!w) showNotification("Enter weight", "error");
+            } else {
+                if (elements.bmiResultsArea) elements.bmiResultsArea.classList.add('hidden');
+            }
+            return false;
+        }
+    };
+
+    const autoCalculateBodyFat = (showErrors = false) => {
+        if (!elements.bfGender) return false;
+        const gender = elements.bfGender.value || 'male';
+        let h = 0;
+
+        const unitVal = document.getElementById('bf-height-unit-val');
+        const unit = unitVal ? unitVal.value : 'cm';
+
+        if (unit === 'ft') {
+            const ft = parseFloat(elements.bfHeightFt ? elements.bfHeightFt.value : 0) || 0;
+            const inc = parseFloat(elements.bfHeightIn ? elements.bfHeightIn.value : 0) || 0;
+            if (ft > 0 || inc > 0) {
+                h = ((ft * 12) + inc) * 2.54;
+            }
+        } else {
+            h = parseFloat(elements.bfHeight ? elements.bfHeight.value : 0) || 0;
+        }
+
+        const w = parseFloat(elements.bfWaist ? elements.bfWaist.value : 0) || 0;
+        const n = parseFloat(elements.bfNeck ? elements.bfNeck.value : 0) || 0;
+        const isFemale = gender === 'female';
+        const hip = (isFemale && elements.bfHip) ? (parseFloat(elements.bfHip.value) || 0) : 0;
+
+        const hasAllFields = (h > 0 && w > 0 && n > 0 && (!isFemale || hip > 0));
+
+        if (hasAllFields) {
+            const bf = calculateBodyFat(gender, h, w, n, hip);
+            if (bf && parseFloat(bf) > 0) {
+                const cat = getBFCategory(gender, bf);
+                if (elements.bfValue) {
+                    elements.bfValue.textContent = bf + "%";
+                    elements.bfValue.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-end') || '#f43f5e';
+                }
+                if (elements.bfCategory) elements.bfCategory.textContent = cat;
+                if (elements.bfResultsArea) elements.bfResultsArea.classList.remove('hidden');
+
+                // Save snapshot for AI Diet Plan
+                window.currentBmiSnapshot = {
+                    bmi: bf + ' (Body Fat %)',
+                    category: cat,
+                    height: h,
+                    weight: window.userPreferences?.weight || 70,
+                    age: window.userPreferences?.age || 25,
+                    sex: isFemale ? 'Female' : 'Male'
+                };
+                return true;
+            } else {
+                if (showErrors) showNotification("Invalid measurement values", "error");
+                return false;
+            }
+        } else {
+            if (showErrors) {
+                if (!h || !w || !n) showNotification("Enter all required fields", "error");
+                else if (isFemale && !hip) showNotification("Enter hip measurement", "error");
+            } else {
+                if (elements.bfResultsArea) elements.bfResultsArea.classList.add('hidden');
+            }
+            return false;
+        }
+    };
+
+    const autoCalculate1RM = (showErrors = false) => {
+        if (!elements.calcWeight || !elements.calcReps) return false;
+        const w = parseFloat(elements.calcWeight.value) || 0;
+        const r = parseInt(elements.calcReps.value) || 0;
+
+        if (w > 0 && r > 0) {
+            const max = calculate1RM(w, r);
+            if (elements.calcMaxDisplay) elements.calcMaxDisplay.textContent = `${max} ${getUnitLabel()}`;
+            if (elements.calcResultsArea) elements.calcResultsArea.classList.remove('hidden');
+            if (elements.percentageList) {
+                elements.percentageList.innerHTML = [95, 90, 85, 80, 75, 70, 65, 60].map(p => `<tr><td>${p}%</td><td>${Math.round(max * (p / 100))} ${getUnitLabel()}</td><td>~${Math.max(1, Math.round(30 * ((max / (max * (p / 100))) - 1)))} reps</td></tr>`).join('');
+            }
+            return true;
+        } else {
+            if (showErrors) {
+                showNotification("Enter values", "error");
+            } else {
+                if (elements.calcResultsArea) elements.calcResultsArea.classList.add('hidden');
+            }
+            return false;
+        }
+    };
 
     // ==========================================
     // 7. LISTENERS
@@ -1563,7 +2023,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show timer only on Home tab
             elements.timerWidget.style.display = target === 'view-home' ? '' : 'none';
 
-            if (item.dataset.target === 'view-settings') setTimeout(updateChart, 100);
+            if (item.dataset.target === 'view-settings') {
+                setTimeout(updateChart, 100);
+                if (typeof populatePersonalDataUI === 'function') populatePersonalDataUI();
+            }
+            if (item.dataset.target === 'view-tools' || item.dataset.target === 'view-ai') {
+                if (typeof syncPersonalDataToTools === 'function') syncPersonalDataToTools();
+            }
             if (item.dataset.target === 'view-achievements') updateAchievementsUI();
         }));
 
@@ -1622,79 +2088,40 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.exerciseText.addEventListener('blur', () => handleAutoFill(elements.exerciseText.value));
         elements.form.weight.addEventListener('input', update1RM); elements.form.reps.addEventListener('input', update1RM);
 
-        elements.btnCalculate.addEventListener('click', () => {
-            const w = parseFloat(elements.calcWeight.value);
-            const r = parseInt(elements.calcReps.value);
-            if (!w || !r) return showNotification("Enter values", "error");
-            const max = calculate1RM(w, r);
-            elements.calcMaxDisplay.textContent = `${max} ${getUnitLabel()}`;
-            elements.calcResultsArea.classList.remove('hidden');
-            elements.percentageList.innerHTML = [95, 90, 85, 80, 75, 70, 65, 60].map(p => `<tr><td>${p}%</td><td>${Math.round(max * (p / 100))} ${getUnitLabel()}</td><td>~${Math.max(1, Math.round(30 * ((max / (max * (p / 100))) - 1)))} reps</td></tr>`).join('');
-        });
+        // 1RM Real-time & Button Listeners
+        if (elements.calcWeight) elements.calcWeight.addEventListener('input', () => autoCalculate1RM(false));
+        if (elements.calcReps) elements.calcReps.addEventListener('input', () => autoCalculate1RM(false));
+        if (elements.btnCalculate) {
+            elements.btnCalculate.addEventListener('click', () => autoCalculate1RM(true));
+        }
 
-        // BMI Listener
+        // BMI Listener & Real-time Auto-Calculation
         if (elements.btnCalculateBMI) {
-            // Unit Toggle
-            elements.bmiUnitRadios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    if (e.target.value === 'ft') {
-                        elements.bmiHeightCmWrapper.classList.add('hidden');
-                        elements.bmiHeightFtWrapper.classList.remove('hidden');
-                        elements.bmiHeightFtWrapper.style.display = 'grid'; // Ensure grid layout
-                    } else {
-                        elements.bmiHeightFtWrapper.classList.add('hidden');
-                        elements.bmiHeightFtWrapper.style.display = 'none';
-                        elements.bmiHeightCmWrapper.classList.remove('hidden');
-                    }
-                });
+            // Unit Toggle Buttons
+            const bmiCmBtn = document.getElementById('bmi-unit-cm-btn');
+            const bmiFtBtn = document.getElementById('bmi-unit-ft-btn');
+            if (bmiCmBtn) bmiCmBtn.addEventListener('click', () => setBmiHeightUnit('cm'));
+            if (bmiFtBtn) bmiFtBtn.addEventListener('click', () => setBmiHeightUnit('ft'));
+
+            // Real-time live inputs
+            [elements.bmiHeight, elements.bmiHeightFt, elements.bmiHeightIn, elements.bmiWeight].forEach(inp => {
+                if (inp) inp.addEventListener('input', () => autoCalculateBMI(false));
             });
 
             // Refresh
             if (elements.bmiRefreshBtn) {
                 elements.bmiRefreshBtn.addEventListener('click', () => {
-                    elements.bmiHeight.value = '';
-                    elements.bmiHeightFt.value = '';
-                    elements.bmiHeightIn.value = '';
-                    elements.bmiWeight.value = '';
-                    elements.bmiResultsArea.classList.add('hidden');
+                    if (elements.bmiHeight) elements.bmiHeight.value = '';
+                    if (elements.bmiHeightFt) elements.bmiHeightFt.value = '';
+                    if (elements.bmiHeightIn) elements.bmiHeightIn.value = '';
+                    if (elements.bmiWeight) elements.bmiWeight.value = '';
+                    if (elements.bmiResultsArea) elements.bmiResultsArea.classList.add('hidden');
                     showNotification("BMI Calculator Reset", "info");
                 });
             }
 
             elements.btnCalculateBMI.addEventListener('click', () => {
-                let h = 0;
-                // Check unit
-                const unit = document.querySelector('input[name="bmi-height-unit"]:checked').value;
-
-                if (unit === 'ft') {
-                    const ft = parseFloat(elements.bmiHeightFt.value) || 0;
-                    const inc = parseFloat(elements.bmiHeightIn.value) || 0;
-                    if (!ft && !inc) return showNotification("Enter height", "error");
-                    // Convert to CM: (ft * 12 + in) * 2.54
-                    h = ((ft * 12) + inc) * 2.54;
-                } else {
-                    h = parseFloat(elements.bmiHeight.value);
-                }
-
-                const w = parseFloat(elements.bmiWeight.value);
-
-                if (!h || !w) return showNotification("Enter height & weight", "error");
-
-                const bmi = calculateBMI(h, w);
-                const cat = getBMICategory(bmi);
-                elements.bmiValue.textContent = bmi;
-                elements.bmiCategory.textContent = cat;
-                elements.bmiResultsArea.classList.remove('hidden');
-
-                // Save snapshot for AI Plan
-                window.currentBmiSnapshot = {
-                    bmi: bmi,
-                    category: cat,
-                    height: h,
-                    weight: w,
-                    age: userPreferences.age || 25,
-                    sex: userPreferences.gender || 'Unknown'
-                };
+                autoCalculateBMI(true);
             });
 
             // --- AI Diet Plan Logic ---
@@ -1957,70 +2384,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Body Fat Listener
+        // Body Fat Listener & Real-time Auto-Calculation
         if (elements.bfGender) {
             elements.bfGender.addEventListener('change', (e) => {
                 if (e.target.value === 'female') elements.bfFemaleInputs.classList.remove('hidden');
                 else elements.bfFemaleInputs.classList.add('hidden');
+                autoCalculateBodyFat(false);
             });
         }
 
-        // Body Fat Unit Toggle
-        if (elements.bfUnitRadios) {
-            elements.bfUnitRadios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    if (e.target.value === 'ft') {
-                        elements.bfHeightCmWrapper.classList.add('hidden');
-                        elements.bfHeightFtWrapper.classList.remove('hidden');
-                    } else {
-                        elements.bfHeightFtWrapper.classList.add('hidden');
-                        elements.bfHeightCmWrapper.classList.remove('hidden');
-                    }
-                });
-            });
-        }
+        // Body Fat Unit Toggle Buttons
+        const bfCmBtn = document.getElementById('bf-unit-cm-btn');
+        const bfFtBtn = document.getElementById('bf-unit-ft-btn');
+        if (bfCmBtn) bfCmBtn.addEventListener('click', () => setBfHeightUnit('cm'));
+        if (bfFtBtn) bfFtBtn.addEventListener('click', () => setBfHeightUnit('ft'));
+
+        // Real-time live inputs for Body Fat
+        [elements.bfHeight, elements.bfHeightFt, elements.bfHeightIn, elements.bfWaist, elements.bfNeck, elements.bfHip].forEach(inp => {
+            if (inp) inp.addEventListener('input', () => autoCalculateBodyFat(false));
+        });
 
         if (elements.btnCalculateBF) {
             elements.btnCalculateBF.addEventListener('click', () => {
-                const gender = elements.bfGender.value;
-                let h = 0;
-
-                // Check unit
-                const unit = document.querySelector('input[name="bf-height-unit"]:checked').value;
-
-                if (unit === 'ft') {
-                    const ft = parseFloat(elements.bfHeightFt.value) || 0;
-                    const inc = parseFloat(elements.bfHeightIn.value) || 0;
-                    h = ((ft * 12) + inc) * 2.54;
-                } else {
-                    h = parseFloat(elements.bfHeight.value);
-                }
-
-                const w = parseFloat(elements.bfWaist.value);
-                const n = parseFloat(elements.bfNeck.value);
-                const hip = elements.bfFemaleInputs.classList.contains('hidden') ? 0 : parseFloat(elements.bfHip.value);
-
-                if (!h || !w || !n) return showNotification("Enter all fields", "error");
-                if (gender === 'female' && !hip) return showNotification("Enter hip measurement", "error");
-
-                const bf = calculateBodyFat(gender, h, w, n, hip);
-
-                if (!bf || bf <= 0) return showNotification("Invalid inputs", "error");
-
-                // Save snapshot for AI Diet Plan
-                window.currentBmiSnapshot = {
-                    bmi: bf + ' (Body Fat %)',
-                    category: getBFCategory(gender, bf),
-                    height: h,
-                    weight: window.userPreferences?.weight || 70, // Fallback if missing
-                    age: window.userPreferences?.age || 25,
-                    sex: gender === 'male' ? 'Male' : 'Female'
-                };
-
-                elements.bfValue.textContent = bf + "%";
-                elements.bfValue.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-end'); // Use CSS variable color if possible, or js reference
-                elements.bfCategory.textContent = getBFCategory(gender, bf);
-                elements.bfResultsArea.classList.remove('hidden');
+                autoCalculateBodyFat(true);
             });
         }
 
@@ -2344,8 +2730,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const recipesListGrid = document.getElementById('recipes-list-grid');
 
         // Style the custom select for recipes
+        const recipeWeightUnit = document.getElementById('recipe-weight-unit');
         if (recipeMealType && typeof applyCustomDropdown === 'function') {
             applyCustomDropdown(recipeMealType);
+        }
+        if (recipeWeightUnit && typeof applyCustomDropdown === 'function') {
+            applyCustomDropdown(recipeWeightUnit);
         }
 
         const showRecipeModal = () => {
@@ -2360,6 +2750,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 recipeCreateForm.reset();
                 const weightInput = document.getElementById('recipe-weight-input');
                 if (weightInput) weightInput.value = '';
+                const weightUnit = document.getElementById('recipe-weight-unit');
+                if (weightUnit) {
+                    weightUnit.value = 'g';
+                    if (typeof applyCustomDropdown === 'function') {
+                        applyCustomDropdown(weightUnit);
+                    }
+                }
                 if (recipeMealType && typeof applyCustomDropdown === 'function') {
                     recipeMealType.value = "Snack";
                     applyCustomDropdown(recipeMealType);
@@ -2384,7 +2781,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.className = 'recipe-card';
                     card.innerHTML = `
                         <div class="recipe-card-header">
-                            <h4 class="recipe-name">${recipe.recipeName}${recipe.weight ? ` <span style="font-size: 0.8rem; color: var(--text-light); font-weight: normal;">(${recipe.weight}g)</span>` : ''}</h4>
+                            <h4 class="recipe-name">${recipe.recipeName}${recipe.weight ? ` <span style="font-size: 0.8rem; color: var(--text-light); font-weight: normal;">(${recipe.weight}${recipe.weightUnit || 'g'})</span>` : ''}</h4>
                             <span class="recipe-type" data-type="${recipe.mealType}">${recipe.mealType}</span>
                         </div>
                         <div class="recipe-macros">
@@ -2427,7 +2824,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const today = new Date().toISOString().split('T')[0];
                             const mealData = {
                                 mealType: recipe.mealType,
-                                foodName: recipe.weight ? `${recipe.recipeName} (${recipe.weight}g)` : recipe.recipeName,
+                                foodName: recipe.weight ? `${recipe.recipeName} (${recipe.weight}${recipe.weightUnit || 'g'})` : recipe.recipeName,
                                 calories: recipe.calories,
                                 protein: recipe.protein,
                                 carbs: recipe.carbs,
@@ -2502,12 +2899,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            recipesListGrid.innerHTML = `
-                <div class="recipes-empty" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
-                    <i class="ri-loader-4-line ri-spin" style="font-size: 2rem; color: var(--accent-start);"></i>
-                    <p style="margin-top: 0.5rem;">Loading recipes...</p>
-                </div>
-            `;
+            const skeletonCard = `
+                <div class="recipe-card recipe-skeleton">
+                  <div class="skel skel-line skel-title"></div>
+                  <div class="skel skel-chip"></div>
+                  <div class="recipe-macros" style="margin-top:1rem;">
+                    <div class="skel skel-block"></div>
+                    <div class="skel skel-block"></div>
+                    <div class="skel skel-block"></div>
+                    <div class="skel skel-block"></div>
+                  </div>
+                  <div class="skel skel-btn"></div>
+                </div>`;
+            recipesListGrid.innerHTML = skeletonCard + skeletonCard + skeletonCard;
 
             try {
                 const res = await dietService.getRecipes(db, user.uid);
@@ -2551,6 +2955,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     recipeName: document.getElementById('recipe-name-input').value.trim(),
                     mealType: recipeMealType.value,
                     weight: parseFloat(document.getElementById('recipe-weight-input').value) || 0,
+                    weightUnit: (document.getElementById('recipe-weight-unit') || {}).value || 'g',
                     calories: parseFloat(document.getElementById('recipe-calories-input').value) || 0,
                     protein: parseFloat(document.getElementById('recipe-protein-input').value) || 0,
                     carbs: parseFloat(document.getElementById('recipe-carbs-input').value) || 0,
@@ -2626,14 +3031,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.calorieProgressRing.style.strokeDashoffset = circleLength - (circleLength * pctCals / 100);
             }
 
-            // Approximate macro goals for 2000 cal: 150g Protein, 200g Carbs, 65g Fat
-            const pGoal = 150; const cGoal = 200; const fGoal = 67;
+            // Macro goals based on user targets or calorie target
+            const pGoal = (userPreferences.dietMacros && userPreferences.dietMacros.protein) || userPreferences.proteinTarget || 120;
+            const fGoal = (userPreferences.dietMacros && userPreferences.dietMacros.fat) || Math.round((goal * 0.25) / 9) || 67;
+            const cGoal = (userPreferences.dietMacros && userPreferences.dietMacros.carbs) || Math.round((goal - (pGoal * 4) - (fGoal * 9)) / 4) || 200;
 
-            if (elements.dietProteinVal) elements.dietProteinVal.textContent = Math.round(totalProtein) + 'g';
+            if (elements.dietProteinVal) elements.dietProteinVal.textContent = `${Math.round(totalProtein)} / ${pGoal}g`;
             if (elements.dietProteinBar) elements.dietProteinBar.style.width = Math.min(100, (totalProtein / pGoal) * 100) + '%';
-            if (elements.dietCarbsVal) elements.dietCarbsVal.textContent = Math.round(totalCarbs) + 'g';
+            if (elements.dietCarbsVal) elements.dietCarbsVal.textContent = `${Math.round(totalCarbs)} / ${cGoal}g`;
             if (elements.dietCarbsBar) elements.dietCarbsBar.style.width = Math.min(100, (totalCarbs / cGoal) * 100) + '%';
-            if (elements.dietFatVal) elements.dietFatVal.textContent = Math.round(totalFat) + 'g';
+            if (elements.dietFatVal) elements.dietFatVal.textContent = `${Math.round(totalFat)} / ${fGoal}g`;
             if (elements.dietFatBar) elements.dietFatBar.style.width = Math.min(100, (totalFat / fGoal) * 100) + '%';
         };
 
@@ -2764,7 +3171,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.form.sets.value = '';
                 elements.form.weight.value = '';
                 update1RM();
-                if (!isCustomInput) { const trigger = document.querySelector('.custom-select-trigger'); if (trigger) trigger.textContent = 'Select an exercise'; }
+                if (!isCustomInput) {
+                    const customContainer = elements.exerciseSelect.parentNode.querySelector('.custom-select-wrapper');
+                    const triggerText = customContainer ? customContainer.querySelector('.trigger-text') : null;
+                    if (triggerText) triggerText.textContent = 'Select an exercise';
+                }
                 
                 setTimeout(() => {
                     submitBtn.innerHTML = origTxt;
@@ -2907,6 +3318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAvatar(userPreferences.avatar, userPreferences.avatarType);
 
         setupPreferenceListeners();
+        initPersonalData();
     };
 
     const setupPreferenceListeners = () => {
@@ -3157,8 +3569,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update labels throughout app
         const inputs = document.querySelectorAll('label[for="weight"]');
         inputs.forEach(l => l.innerHTML = `Weight (${unit}):`);
-        const inputs2 = document.querySelectorAll('input[id*="weight"]');
+        const inputs2 = document.querySelectorAll('input[id*="weight"]:not(#recipe-weight-input)');
         inputs2.forEach(i => i.placeholder = unit === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)');
+
+        // Update personal data weight unit
+        const pdWeightUnit = document.getElementById('pd-weight-unit');
+        if (pdWeightUnit) pdWeightUnit.textContent = unit;
+        const pdWeightInput = document.getElementById('pd-weight');
+        if (pdWeightInput) pdWeightInput.placeholder = unit === 'lbs' ? 'Weight (lbs)' : 'Weight (kg)';
 
         // Refresh UI
         updateAllUI();
@@ -3192,6 +3610,527 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const savePreferences = () => {
         localStorage.setItem('appPreferences', JSON.stringify(userPreferences));
+    };
+
+    // ==========================================
+    // PERSONAL DATA MANAGEMENT & CROSS-TOOL AUTO-SYNC
+    // ==========================================
+
+    const getPersonalData = () => {
+        if (userPreferences.personalData && typeof userPreferences.personalData === 'object') {
+            return userPreferences.personalData;
+        }
+        const local = localStorage.getItem('personalData');
+        if (local) {
+            try {
+                userPreferences.personalData = JSON.parse(local);
+                return userPreferences.personalData;
+            } catch (e) {}
+        }
+        return {
+            gender: 'male',
+            age: '',
+            height: '',
+            heightUnit: 'cm',
+            heightFt: '',
+            heightIn: '',
+            weight: '',
+            activityLevel: 'moderate',
+            neck: '',
+            waist: '',
+            hip: ''
+        };
+    };
+
+    const updateSaveButtonState = () => {
+        const btnSave = document.getElementById('btn-save-personal-data');
+        if (!btnSave) return;
+        const pd = getPersonalData() || {};
+
+        const unitVal = document.getElementById('pd-height-unit-val');
+        const curGender = document.getElementById('pd-gender')?.value || 'male';
+        const curAge = document.getElementById('pd-age')?.value?.trim() || '';
+        const curUnit = unitVal?.value || 'cm';
+        const curHeightCm = document.getElementById('pd-height-cm')?.value?.trim() || '';
+        const curHeightFt = document.getElementById('pd-height-ft')?.value?.trim() || '';
+        const curHeightIn = document.getElementById('pd-height-in')?.value?.trim() || '';
+        const curWeight = document.getElementById('pd-weight')?.value?.trim() || '';
+        const curActivity = document.getElementById('pd-activity')?.value || 'moderate';
+        const curNeck = document.getElementById('pd-neck')?.value?.trim() || '';
+        const curWaist = document.getElementById('pd-waist')?.value?.trim() || '';
+        const curHip = document.getElementById('pd-hip')?.value?.trim() || '';
+
+        const savedGender = pd.gender || 'male';
+        const savedAge = (pd.age !== undefined && pd.age !== null && pd.age !== '') ? String(pd.age) : '';
+        const savedUnit = pd.heightUnit || 'cm';
+        const savedHeightCm = (pd.height !== undefined && pd.height !== null && pd.height !== '') ? String(pd.height) : '';
+        const savedHeightFt = (pd.heightFt !== undefined && pd.heightFt !== null && pd.heightFt !== '') ? String(pd.heightFt) : '';
+        const savedHeightIn = (pd.heightIn !== undefined && pd.heightIn !== null && pd.heightIn !== '') ? String(pd.heightIn) : '';
+        const savedWeight = (pd.weight !== undefined && pd.weight !== null && pd.weight !== '') ? String(pd.weight) : '';
+        const savedActivity = pd.activityLevel || 'moderate';
+        const savedNeck = (pd.neck !== undefined && pd.neck !== null && pd.neck !== '') ? String(pd.neck) : '';
+        const savedWaist = (pd.waist !== undefined && pd.waist !== null && pd.waist !== '') ? String(pd.waist) : '';
+        const savedHip = (pd.hip !== undefined && pd.hip !== null && pd.hip !== '') ? String(pd.hip) : '';
+
+        let isHeightChanged = false;
+        if (curUnit !== savedUnit) {
+            isHeightChanged = true;
+        } else if (curUnit === 'cm') {
+            isHeightChanged = (curHeightCm !== savedHeightCm);
+        } else {
+            isHeightChanged = (curHeightFt !== savedHeightFt || curHeightIn !== savedHeightIn);
+        }
+
+        const isChanged = (
+            curGender !== savedGender ||
+            curAge !== savedAge ||
+            isHeightChanged ||
+            curWeight !== savedWeight ||
+            curActivity !== savedActivity ||
+            curNeck !== savedNeck ||
+            curWaist !== savedWaist ||
+            (curGender === 'female' ? (curHip !== savedHip) : false)
+        );
+
+        btnSave.disabled = !isChanged;
+    };
+
+    const populatePersonalDataUI = () => {
+        const pd = getPersonalData();
+        const genderSelect = document.getElementById('pd-gender');
+        const ageInput = document.getElementById('pd-age');
+        const heightCmInput = document.getElementById('pd-height-cm');
+        const heightFtInput = document.getElementById('pd-height-ft');
+        const heightInInput = document.getElementById('pd-height-in');
+        const weightInput = document.getElementById('pd-weight');
+        const weightUnit = document.getElementById('pd-weight-unit');
+        const activitySelect = document.getElementById('pd-activity');
+        const neckInput = document.getElementById('pd-neck');
+        const waistInput = document.getElementById('pd-waist');
+        const hipInput = document.getElementById('pd-hip');
+        const hipField = document.getElementById('pd-hip-field');
+        const measurementsGrid = document.getElementById('pd-measurements-grid');
+        const heightCmWrap = document.getElementById('pd-height-cm-wrap');
+        const heightFtWrap = document.getElementById('pd-height-ft-wrap');
+        const cmBtn = document.getElementById('pd-unit-cm-btn');
+        const ftBtn = document.getElementById('pd-unit-ft-btn');
+        const unitVal = document.getElementById('pd-height-unit-val');
+
+        let heightCm = pd.height;
+        let heightFt = pd.heightFt;
+        let heightIn = pd.heightIn;
+
+        if (heightFt !== undefined || heightIn !== undefined) {
+            const ftNum = parseFloat(heightFt) || 0;
+            const inNum = parseFloat(heightIn) || 0;
+            if (ftNum > 0 || inNum > 0) {
+                if (!heightCm) heightCm = Math.round(((ftNum * 12) + inNum) * 2.54);
+            }
+        } else if (heightCm !== undefined) {
+            const cmNum = parseFloat(heightCm) || 0;
+            if (cmNum > 0) {
+                const totalIn = cmNum / 2.54;
+                if (heightFt === undefined) heightFt = Math.floor(totalIn / 12);
+                if (heightIn === undefined) heightIn = Math.round(totalIn % 12);
+            }
+        }
+
+        if (genderSelect && pd.gender) genderSelect.value = pd.gender;
+        if (ageInput && pd.age !== undefined) ageInput.value = pd.age;
+        if (heightCmInput && heightCm !== undefined) heightCmInput.value = heightCm;
+        if (heightFtInput && heightFt !== undefined) heightFtInput.value = heightFt;
+        if (heightInInput && heightIn !== undefined) heightInInput.value = heightIn;
+        if (weightInput && pd.weight !== undefined) weightInput.value = pd.weight;
+        if (weightUnit) weightUnit.textContent = userPreferences.units || 'kg';
+        if (activitySelect && pd.activityLevel) activitySelect.value = pd.activityLevel;
+        if (neckInput && pd.neck !== undefined) neckInput.value = pd.neck;
+        if (waistInput && pd.waist !== undefined) waistInput.value = pd.waist;
+        if (hipInput && pd.hip !== undefined) hipInput.value = pd.hip;
+
+        // Height unit toggle
+        const isFt = pd.heightUnit === 'ft';
+        if (unitVal) unitVal.value = isFt ? 'ft' : 'cm';
+        if (isFt) {
+            if (ftBtn) ftBtn.classList.add('active');
+            if (cmBtn) cmBtn.classList.remove('active');
+            if (heightCmWrap) heightCmWrap.classList.add('hidden');
+            if (heightFtWrap) heightFtWrap.classList.remove('hidden');
+        } else {
+            if (cmBtn) cmBtn.classList.add('active');
+            if (ftBtn) ftBtn.classList.remove('active');
+            if (heightFtWrap) heightFtWrap.classList.add('hidden');
+            if (heightCmWrap) heightCmWrap.classList.remove('hidden');
+        }
+
+        // Hip field visibility based on gender
+        const isFemale = (pd.gender === 'female');
+        if (hipField) {
+            if (isFemale) hipField.classList.remove('hidden');
+            else hipField.classList.add('hidden');
+        }
+        if (measurementsGrid) {
+            if (isFemale) measurementsGrid.classList.add('has-female');
+            else measurementsGrid.classList.remove('has-female');
+        }
+
+        updateSaveButtonState();
+    };
+
+    const syncPersonalDataToTools = () => {
+        const pd = getPersonalData();
+        if (!pd) return;
+
+        let heightCm = pd.height;
+        let heightFt = pd.heightFt;
+        let heightIn = pd.heightIn;
+
+        if (heightFt !== undefined || heightIn !== undefined) {
+            const ftNum = parseFloat(heightFt) || 0;
+            const inNum = parseFloat(heightIn) || 0;
+            if (ftNum > 0 || inNum > 0) {
+                if (!heightCm) heightCm = Math.round(((ftNum * 12) + inNum) * 2.54);
+            }
+        } else if (heightCm !== undefined) {
+            const cmNum = parseFloat(heightCm) || 0;
+            if (cmNum > 0) {
+                const totalIn = cmNum / 2.54;
+                if (heightFt === undefined) heightFt = Math.floor(totalIn / 12);
+                if (heightIn === undefined) heightIn = Math.round(totalIn % 12);
+            }
+        }
+
+        // 1. Sync to BMI Calculator
+        const bmiHeight = document.getElementById('bmi-height');
+        const bmiHeightFt = document.getElementById('bmi-height-ft');
+        const bmiHeightIn = document.getElementById('bmi-height-in');
+        const bmiWeight = document.getElementById('bmi-weight');
+
+        if (bmiHeight && heightCm) bmiHeight.value = heightCm;
+        if (bmiHeightFt && heightFt) bmiHeightFt.value = heightFt;
+        if (bmiHeightIn && heightIn !== undefined) bmiHeightIn.value = heightIn;
+        if (bmiWeight && pd.weight) bmiWeight.value = pd.weight;
+
+        setBmiHeightUnit(pd.heightUnit || 'cm');
+
+        // 2. Sync to Body Fat % Calculator
+        const bfGender = document.getElementById('bf-gender');
+        const bfHeight = document.getElementById('bf-height');
+        const bfHeightFt = document.getElementById('bf-height-ft');
+        const bfHeightIn = document.getElementById('bf-height-in');
+        const bfWaist = document.getElementById('bf-waist');
+        const bfNeck = document.getElementById('bf-neck');
+        const bfHip = document.getElementById('bf-hip');
+        const bfFemaleInputs = document.getElementById('bf-female-inputs');
+
+        if (bfGender && pd.gender) {
+            bfGender.value = pd.gender;
+            if (bfFemaleInputs) {
+                if (pd.gender === 'female') bfFemaleInputs.classList.remove('hidden');
+                else bfFemaleInputs.classList.add('hidden');
+            }
+        }
+
+        if (bfHeight && heightCm) bfHeight.value = heightCm;
+        if (bfHeightFt && heightFt) bfHeightFt.value = heightFt;
+        if (bfHeightIn && heightIn !== undefined) bfHeightIn.value = heightIn;
+        if (bfWaist && pd.waist) bfWaist.value = pd.waist;
+        if (bfNeck && pd.neck) bfNeck.value = pd.neck;
+        if (bfHip && pd.hip) bfHip.value = pd.hip;
+
+        setBfHeightUnit(pd.heightUnit || 'cm');
+
+        // 3. Sync to Calorie Questionnaire
+        const cqAge = document.getElementById('cq-age');
+        const cqGender = document.getElementById('cq-gender');
+        const cqHeightCm = document.getElementById('cq-height-cm');
+        const cqHeightFt = document.getElementById('cq-height-ft');
+        const cqHeightIn = document.getElementById('cq-height-in');
+        const cqWeight = document.getElementById('cq-weight');
+        const cqActivity = document.getElementById('cq-activity');
+        const cqCmRadio = document.querySelector('input[name="cq-height-unit"][value="cm"]');
+        const cqFtRadio = document.querySelector('input[name="cq-height-unit"][value="ft"]');
+        const cqCmWrap = document.getElementById('cq-height-cm-wrapper');
+        const cqFtWrap = document.getElementById('cq-height-ft-wrapper');
+
+        if (cqAge && pd.age) cqAge.value = pd.age;
+        if (cqGender && pd.gender) {
+            cqGender.value = pd.gender;
+            const cqGenderText = document.querySelector('#cq-gender-wrapper .custom-select-trigger span');
+            if (cqGenderText) cqGenderText.textContent = pd.gender.charAt(0).toUpperCase() + pd.gender.slice(1);
+        }
+        if (cqWeight && pd.weight) cqWeight.value = pd.weight;
+        if (cqActivity && pd.activityLevel) {
+            cqActivity.value = pd.activityLevel;
+            const cqActivityText = document.querySelector('#cq-activity-wrapper .custom-select-trigger span');
+            if (cqActivityText) {
+                const opt = document.querySelector(`#cq-activity-wrapper .custom-option[data-value="${pd.activityLevel}"]`);
+                if (opt) cqActivityText.textContent = opt.textContent;
+            }
+        }
+
+        if (cqHeightCm && heightCm) cqHeightCm.value = heightCm;
+        if (cqHeightFt && heightFt) cqHeightFt.value = heightFt;
+        if (cqHeightIn && heightIn !== undefined) cqHeightIn.value = heightIn;
+
+        if (pd.heightUnit === 'ft') {
+            if (cqFtRadio) cqFtRadio.checked = true;
+            if (cqCmWrap) cqCmWrap.classList.add('hidden');
+            if (cqFtWrap) cqFtWrap.classList.remove('hidden');
+        } else {
+            if (cqCmRadio) cqCmRadio.checked = true;
+            if (cqFtWrap) cqFtWrap.classList.add('hidden');
+            if (cqCmWrap) cqCmWrap.classList.remove('hidden');
+        }
+
+        // Auto-calculate BMI & Body Fat % immediately with auto-filled values
+        if (typeof autoCalculateBMI === 'function') autoCalculateBMI(false);
+        if (typeof autoCalculateBodyFat === 'function') autoCalculateBodyFat(false);
+    };
+
+    const savePersonalData = async (data, showToast = true) => {
+        userPreferences.personalData = { ...getPersonalData(), ...data };
+
+        // Keep top-level preferences in sync
+        if (data.weight) userPreferences.weight = parseFloat(data.weight);
+        if (data.age) userPreferences.age = parseInt(data.age);
+        if (data.gender) userPreferences.gender = data.gender;
+        if (data.activityLevel) userPreferences.activityLevel = data.activityLevel;
+
+        localStorage.setItem('personalData', JSON.stringify(userPreferences.personalData));
+        localStorage.setItem('appPreferences', JSON.stringify(userPreferences));
+
+        if (typeof auth !== 'undefined' && auth.currentUser) {
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await setDoc(userRef, { personalData: userPreferences.personalData }, { merge: true });
+                if (currentUserProfile) {
+                    currentUserProfile.personalData = userPreferences.personalData;
+                }
+            } catch (e) {
+                console.warn("Firestore personalData save warning:", e);
+            }
+        }
+
+        populatePersonalDataUI();
+        syncPersonalDataToTools();
+
+        if (showToast) {
+            showNotification("Personal data saved & synced across tools!", "success");
+        }
+    };
+
+    const initPersonalData = () => {
+        // Height unit toggle buttons (CM / FT)
+        const cmBtn = document.getElementById('pd-unit-cm-btn');
+        const ftBtn = document.getElementById('pd-unit-ft-btn');
+        const unitVal = document.getElementById('pd-height-unit-val');
+        const heightCmWrap = document.getElementById('pd-height-cm-wrap');
+        const heightFtWrap = document.getElementById('pd-height-ft-wrap');
+        const heightCmInput = document.getElementById('pd-height-cm');
+        const heightFtInput = document.getElementById('pd-height-ft');
+        const heightInInput = document.getElementById('pd-height-in');
+
+        const setHeightUnit = (unit) => {
+            if (unit === 'ft') {
+                if (ftBtn) ftBtn.classList.add('active');
+                if (cmBtn) cmBtn.classList.remove('active');
+                if (unitVal) unitVal.value = 'ft';
+                if (heightCmWrap) heightCmWrap.classList.add('hidden');
+                if (heightFtWrap) heightFtWrap.classList.remove('hidden');
+
+                // Convert CM to FT/IN if CM is filled
+                const cmVal = parseFloat(heightCmInput?.value) || 0;
+                if (cmVal > 0) {
+                    const totalInches = cmVal / 2.54;
+                    const feet = Math.floor(totalInches / 12);
+                    const inches = Math.round(totalInches % 12);
+                    if (heightFtInput) heightFtInput.value = feet;
+                    if (heightInInput) heightInInput.value = inches;
+                }
+            } else {
+                if (cmBtn) cmBtn.classList.add('active');
+                if (ftBtn) ftBtn.classList.remove('active');
+                if (unitVal) unitVal.value = 'cm';
+                if (heightFtWrap) heightFtWrap.classList.add('hidden');
+                if (heightCmWrap) heightCmWrap.classList.remove('hidden');
+
+                // Convert FT/IN to CM if FT/IN filled
+                const ftVal = parseFloat(heightFtInput?.value) || 0;
+                const inVal = parseFloat(heightInInput?.value) || 0;
+                if (ftVal > 0 || inVal > 0) {
+                    const cmVal = Math.round(((ftVal * 12) + inVal) * 2.54);
+                    if (heightCmInput) heightCmInput.value = cmVal;
+                }
+            }
+            updateSaveButtonState();
+        };
+
+        if (cmBtn) cmBtn.addEventListener('click', () => setHeightUnit('cm'));
+        if (ftBtn) ftBtn.addEventListener('click', () => setHeightUnit('ft'));
+
+        // Gender toggle for hip field
+        const genderSelect = document.getElementById('pd-gender');
+        const hipField = document.getElementById('pd-hip-field');
+        const measurementsGrid = document.getElementById('pd-measurements-grid');
+
+        const updateHipVisibility = () => {
+            const isFemale = (genderSelect?.value === 'female');
+            if (hipField) {
+                if (isFemale) hipField.classList.remove('hidden');
+                else hipField.classList.add('hidden');
+            }
+            if (measurementsGrid) {
+                if (isFemale) measurementsGrid.classList.add('has-female');
+                else measurementsGrid.classList.remove('has-female');
+            }
+        };
+
+        if (genderSelect) {
+            genderSelect.addEventListener('change', () => {
+                updateHipVisibility();
+                updateSaveButtonState();
+            });
+        }
+
+        // Remove error state and update button active state on input/change
+        document.querySelectorAll('#personal-data-form input, #personal-data-form select').forEach(el => {
+            el.addEventListener('input', () => {
+                el.classList.remove('pd-input-error');
+                updateSaveButtonState();
+            });
+            el.addEventListener('change', () => {
+                el.classList.remove('pd-input-error');
+                updateSaveButtonState();
+            });
+        });
+
+        // Save Button listener with full validation
+        const btnSave = document.getElementById('btn-save-personal-data');
+        if (btnSave) {
+            btnSave.addEventListener('click', () => {
+                // Clear any previous error styling
+                document.querySelectorAll('#personal-data-form .pd-input').forEach(el => el.classList.remove('pd-input-error'));
+
+                const gender = document.getElementById('pd-gender')?.value || 'male';
+                const ageInput = document.getElementById('pd-age');
+                const ageVal = ageInput?.value?.trim();
+                const weightInput = document.getElementById('pd-weight');
+                const weightVal = weightInput?.value?.trim();
+                const heightUnit = unitVal?.value || 'cm';
+                const heightCmInput = document.getElementById('pd-height-cm');
+                const heightCmVal = heightCmInput?.value?.trim();
+                const heightFtInput = document.getElementById('pd-height-ft');
+                const heightFtVal = heightFtInput?.value?.trim();
+                const heightInInput = document.getElementById('pd-height-in');
+                const heightInVal = heightInInput?.value?.trim();
+                const activityLevel = document.getElementById('pd-activity')?.value || 'moderate';
+                const neckInput = document.getElementById('pd-neck');
+                const neckVal = neckInput?.value?.trim();
+                const waistInput = document.getElementById('pd-waist');
+                const waistVal = waistInput?.value?.trim();
+                const hipInput = document.getElementById('pd-hip');
+                const hipVal = hipInput?.value?.trim();
+
+                // ── Strict Validation ──
+
+                // 1. Validate Age
+                const parsedAge = parseInt(ageVal);
+                if (!ageVal || isNaN(parsedAge) || parsedAge < 10 || parsedAge > 120) {
+                    if (ageInput) {
+                        ageInput.classList.add('pd-input-error');
+                        ageInput.focus();
+                    }
+                    return showNotification("Please enter a valid age (10 - 120 yrs)", "error");
+                }
+
+                // 2. Validate Height
+                let computedCm = '';
+                if (heightUnit === 'cm') {
+                    const parsedCm = parseFloat(heightCmVal);
+                    if (!heightCmVal || isNaN(parsedCm) || parsedCm < 50 || parsedCm > 260) {
+                        if (heightCmInput) {
+                            heightCmInput.classList.add('pd-input-error');
+                            heightCmInput.focus();
+                        }
+                        return showNotification("Please enter your height in cm (50 - 260 cm)", "error");
+                    }
+                    computedCm = parsedCm;
+                } else {
+                    const parsedFt = parseFloat(heightFtVal);
+                    const parsedIn = parseFloat(heightInVal) || 0;
+                    if (!heightFtVal || isNaN(parsedFt) || parsedFt < 1 || parsedFt > 8 || parsedIn < 0 || parsedIn >= 12) {
+                        if (heightFtInput) {
+                            heightFtInput.classList.add('pd-input-error');
+                            heightFtInput.focus();
+                        }
+                        return showNotification("Please enter a valid height in feet (1-8) and inches (0-11)", "error");
+                    }
+                    computedCm = Math.round(((parsedFt * 12) + parsedIn) * 2.54 * 10) / 10;
+                }
+
+                // 3. Validate Weight
+                const parsedWeight = parseFloat(weightVal);
+                if (!weightVal || isNaN(parsedWeight) || parsedWeight < 20 || parsedWeight > 500) {
+                    if (weightInput) {
+                        weightInput.classList.add('pd-input-error');
+                        weightInput.focus();
+                    }
+                    return showNotification("Please enter a valid weight (20 - 500)", "error");
+                }
+
+                // 4. Validate Neck
+                const parsedNeck = parseFloat(neckVal);
+                if (!neckVal || isNaN(parsedNeck) || parsedNeck < 15 || parsedNeck > 100) {
+                    if (neckInput) {
+                        neckInput.classList.add('pd-input-error');
+                        neckInput.focus();
+                    }
+                    return showNotification("Please enter your neck measurement (15 - 100 cm)", "error");
+                }
+
+                // 5. Validate Waist
+                const parsedWaist = parseFloat(waistVal);
+                if (!waistVal || isNaN(parsedWaist) || parsedWaist < 30 || parsedWaist > 250) {
+                    if (waistInput) {
+                        waistInput.classList.add('pd-input-error');
+                        waistInput.focus();
+                    }
+                    return showNotification("Please enter your waist measurement (30 - 250 cm)", "error");
+                }
+
+                // 6. Validate Hip (Females only)
+                if (gender === 'female') {
+                    const parsedHip = parseFloat(hipVal);
+                    if (!hipVal || isNaN(parsedHip) || parsedHip < 30 || parsedHip > 250) {
+                        if (hipInput) {
+                            hipInput.classList.add('pd-input-error');
+                            hipInput.focus();
+                        }
+                        return showNotification("Please enter your hip measurement (required for females)", "error");
+                    }
+                }
+
+                // All criteria fulfilled -> Proceed to save
+                const newData = {
+                    gender: gender,
+                    age: parsedAge,
+                    height: computedCm,
+                    heightUnit: heightUnit,
+                    heightFt: heightFtVal ? parseFloat(heightFtVal) : '',
+                    heightIn: heightInVal ? parseFloat(heightInVal) : '',
+                    weight: parsedWeight,
+                    activityLevel: activityLevel,
+                    neck: parsedNeck,
+                    waist: parsedWaist,
+                    hip: gender === 'female' ? parseFloat(hipVal) : ''
+                };
+
+                savePersonalData(newData, true);
+            });
+        }
+
+        populatePersonalDataUI();
+        syncPersonalDataToTools();
     };
 
 
@@ -4020,6 +4959,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const init = async () => {
         applyCustomDropdown(elements.exerciseSelect);
         if (elements.dietMealType) applyCustomDropdown(elements.dietMealType);
+        const lbSelect = document.getElementById('leaderboard-exercise-select');
+        if (lbSelect) applyCustomDropdown(lbSelect);
 
         initAIFoodScanner(); // Initialize diet analyzer listeners
         initDietHistory();   // Initialize Diet History view and charts
@@ -4141,65 +5082,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification("Failed to log out.", "error");
             }
         });
-    };
-
-    // ==========================================
-    // HELPER FUNCTIONS (Moved inside scope)
-    // ==========================================
-    const calculateBMI = (h, w) => {
-        const m = h / 100;
-        return (w / (m * m)).toFixed(1);
-    };
-
-    const getBMICategory = (bmi) => {
-        if (bmi < 18.5) return "Underweight";
-        if (bmi < 25) return "Normal weight";
-        if (bmi < 30) return "Overweight";
-        return "Obese";
-    };
-
-    const calculateBodyFat = (gender, h, w, n, hip) => {
-        let bf = 0;
-        try {
-            if (gender === 'male') {
-                if (w - n <= 0) return 0;
-                bf = 495 / (1.0324 - 0.19077 * Math.log10(w - n) + 0.15456 * Math.log10(h)) - 450;
-            } else {
-                if (w + hip - n <= 0) return 0;
-                bf = 495 / (1.29579 - 0.35004 * Math.log10(w + hip - n) + 0.22100 * Math.log10(h)) - 450;
-            }
-            return Math.max(0, bf).toFixed(1);
-        } catch (e) {
-            return 0;
-        }
-    };
-
-    const getBFCategory = (gender, bf) => {
-        bf = parseFloat(bf);
-        if (gender === 'male') {
-            if (bf < 6) return "Essential Fat";
-            if (bf < 14) return "Athletes";
-            if (bf < 18) return "Fitness";
-            if (bf < 25) return "Average";
-            return "Obese";
-        } else {
-            if (bf < 14) return "Essential Fat";
-            if (bf < 21) return "Athletes";
-            if (bf < 25) return "Fitness";
-            if (bf < 32) return "Average";
-            return "Obese";
-        }
-    };
-
-    const calculate1RM = (w, r) => {
-        const weight = parseFloat(w);
-        const reps = parseInt(r);
-
-        if (!weight || !reps || reps <= 0) return 0;
-        if (reps === 1) return Math.round(weight);
-
-        // Epley formula: 1RM = w * (1 + r/30)
-        return Math.round(weight * (1 + reps / 30));
     };
 
     // ─────────────────────────────────────────────────────────────
@@ -4370,7 +5252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // SPEEDOMETER RATE LIMIT GAUGE HELPER
+    // SLEEK AI QUOTA PILL HELPER
     // ==========================================
     let gaugeAutoRecoveryTimer = null;
     const updateSpeedometerGauge = (remaining, maxLimit = 5) => {
@@ -4378,26 +5260,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const countEl = document.getElementById('speedometer-count');
         const needleEl = document.getElementById('gauge-needle-line');
         const fillPath = document.getElementById('gauge-fill-path');
-        if (!widgetEl || !countEl || !needleEl || !fillPath) return;
+        if (!widgetEl || !countEl) return;
 
         const rem = Math.max(0, Math.min(maxLimit, Number(remaining) ?? maxLimit));
         countEl.textContent = rem;
 
-        // Needle rotation: 0 left = -90deg, 5 left = +90deg
+        // Ratio of available queries (0.0 to 1.0)
         const ratio = rem / maxLimit;
-        const angle = -90 + (ratio * 180);
-        needleEl.style.transform = `rotate(${angle}deg)`;
 
-        // Arc strokeDashoffset: Circumference = 63
-        const totalCircumference = 63;
-        const offset = totalCircumference * (1 - ratio);
-        fillPath.style.strokeDashoffset = `${offset}`;
+        // Needle rotation (if legacy needle exists)
+        if (needleEl) {
+            const angle = -90 + (ratio * 180);
+            needleEl.style.transform = `rotate(${angle}deg)`;
+        }
 
-        // Color states
-        widgetEl.classList.remove('gauge-state-green', 'gauge-state-amber', 'gauge-state-red');
-        if (rem >= 4) {
-            widgetEl.classList.add('gauge-state-green');
-        } else if (rem >= 2) {
+        // Circular progress ring strokeDashoffset: Circumference = 60
+        if (fillPath) {
+            const totalCircumference = 60;
+            const offset = totalCircumference * (1 - ratio);
+            fillPath.style.strokeDashoffset = `${offset}`;
+        }
+
+        // Color states matching brand theme
+        widgetEl.classList.remove('gauge-state-theme', 'gauge-state-green', 'gauge-state-amber', 'gauge-state-red');
+        if (rem >= 3) {
+            widgetEl.classList.add('gauge-state-theme');
+        } else if (rem >= 1) {
             widgetEl.classList.add('gauge-state-amber');
         } else {
             widgetEl.classList.add('gauge-state-red');
@@ -4821,12 +5709,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ftWrapper = document.getElementById('cq-height-ft-wrapper');
 
                 if (isCm) {
+                    const ft = parseFloat(heightInputFt?.value) || 0;
+                    const inches = parseFloat(heightInputIn?.value) || 0;
+                    if (ft > 0 || inches > 0) {
+                        const cm = Math.round(((ft * 12) + inches) * 2.54);
+                        if (heightInputCm) heightInputCm.value = cm;
+                    }
                     if (cmWrapper) cmWrapper.classList.remove('hidden');
                     if (ftWrapper) ftWrapper.classList.add('hidden');
                     heightInputCm.setAttribute('required', 'true');
                     heightInputFt.removeAttribute('required');
                     heightInputIn.removeAttribute('required');
                 } else {
+                    const cm = parseFloat(heightInputCm?.value) || 0;
+                    if (cm > 0) {
+                        const totalInches = cm / 2.54;
+                        const ft = Math.floor(totalInches / 12);
+                        const inc = Math.round(totalInches % 12);
+                        if (heightInputFt) heightInputFt.value = ft;
+                        if (heightInputIn) heightInputIn.value = inc;
+                    }
                     if (cmWrapper) cmWrapper.classList.add('hidden');
                     if (ftWrapper) ftWrapper.classList.remove('hidden');
                     heightInputCm.removeAttribute('required');
@@ -5179,6 +6081,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyAvatar(userPreferences.avatar, userPreferences.avatarType);
                 savePreferences();
             }
+
+            // Sync Firestore personalData to local preferences
+            if (currentUserProfile.personalData) {
+                userPreferences.personalData = currentUserProfile.personalData;
+                localStorage.setItem('personalData', JSON.stringify(userPreferences.personalData));
+                if (typeof populatePersonalDataUI === 'function') populatePersonalDataUI();
+                if (typeof syncPersonalDataToTools === 'function') syncPersonalDataToTools();
+            }
         } else {
             const friendCode = generateFriendCode();
             let dName = user.displayName;
@@ -5191,7 +6101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 friendCode: friendCode,
                 friends: [],
                 friendRequests: [],
-                prs: {}
+                prs: {},
+                personalData: getPersonalData()
             };
             await setDoc(userRef, currentUserProfile);
         }
@@ -5212,6 +6123,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         userPreferences.avatarType = currentUserProfile.avatarType || 'image';
                         applyAvatar(userPreferences.avatar, userPreferences.avatarType);
                         savePreferences();
+                    }
+
+                    // Sync Firestore personalData
+                    if (currentUserProfile.personalData) {
+                        userPreferences.personalData = currentUserProfile.personalData;
+                        localStorage.setItem('personalData', JSON.stringify(userPreferences.personalData));
+                        if (typeof populatePersonalDataUI === 'function') populatePersonalDataUI();
+                        if (typeof syncPersonalDataToTools === 'function') syncPersonalDataToTools();
                     }
 
                     await loadFriendsProfiles();
@@ -5253,7 +6172,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const requests = currentUserProfile.friendRequests || [];
         if (requests.length === 0) {
-            listElem.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 1rem 0;">No pending requests</div>';
+            listElem.innerHTML = `
+                <div class="social-empty-state">
+                    <i class="ri-inbox-line"></i>
+                    <span>No pending requests</span>
+                </div>`;
             return;
         }
 
@@ -5263,19 +6186,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const snap = await getDoc(doc(db, "users", reqUid));
             if (snap.exists()) {
                 const reqData = snap.data();
+                const displayName = reqData.displayName || 'Athlete';
+                const initial = displayName.charAt(0).toUpperCase();
                 const item = document.createElement('div');
-                item.style.display = 'flex';
-                item.style.justifyContent = 'space-between';
-                item.style.alignItems = 'center';
-                item.style.padding = '0.8rem';
-                item.style.background = 'var(--bg-color)';
-                item.style.borderRadius = '8px';
+                item.className = 'social-user-item';
                 
                 item.innerHTML = `
-                    <div style="font-weight: 500;">${reqData.displayName}</div>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem;" onclick="acceptFriendRequest('${reqUid}')">Accept</button>
-                        <button class="btn-outline" style="padding: 5px 15px; font-size: 0.9rem; background: transparent; color: var(--text-color); border: 1px solid var(--border-color);" onclick="declineFriendRequest('${reqUid}')">Decline</button>
+                    <div class="social-user-info">
+                        <div class="social-user-avatar">${initial}</div>
+                        <div class="social-user-name">${displayName}</div>
+                    </div>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <button class="social-btn-accept" onclick="acceptFriendRequest('${reqUid}')">Accept</button>
+                        <button class="social-btn-decline" onclick="declineFriendRequest('${reqUid}')">Decline</button>
                     </div>
                 `;
                 listElem.appendChild(item);
@@ -5283,16 +6206,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    let isManagingFriends = false;
+
     const renderCurrentFriends = async () => {
         const container = document.getElementById('current-friends-container');
         const listElem = document.getElementById('current-friends-list');
+        const btnManage = document.getElementById('btn-manage-friends');
         if (!container || !listElem || !currentUserProfile) return;
 
         const friends = currentUserProfile.friends || [];
         if (friends.length === 0) {
-            listElem.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 1rem 0;">No friends yet</div>';
+            isManagingFriends = false;
+            container.classList.remove('is-managing');
+            if (btnManage) {
+                btnManage.style.display = 'none';
+                btnManage.classList.remove('active');
+                btnManage.innerHTML = '<i class="ri-pencil-line"></i>';
+                btnManage.title = 'Manage Friends';
+            }
+            listElem.innerHTML = `
+                <div class="social-empty-state">
+                    <i class="ri-user-shared-line"></i>
+                    <span>No friends yet</span>
+                </div>`;
             return;
         }
+
+        if (btnManage) {
+            btnManage.style.display = 'inline-flex';
+            btnManage.classList.toggle('active', isManagingFriends);
+            btnManage.innerHTML = isManagingFriends ? '<i class="ri-check-line"></i>' : '<i class="ri-pencil-line"></i>';
+            btnManage.title = isManagingFriends ? 'Done Managing Friends' : 'Manage Friends';
+            btnManage.setAttribute('aria-label', btnManage.title);
+        }
+        container.classList.toggle('is-managing', isManagingFriends);
 
         listElem.innerHTML = '';
 
@@ -5300,22 +6247,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const snap = await getDoc(doc(db, "users", friendUid));
             if (snap.exists()) {
                 const friendData = snap.data();
+                const displayName = friendData.displayName || 'Athlete';
+                const initial = displayName.charAt(0).toUpperCase();
                 const item = document.createElement('div');
-                item.style.display = 'flex';
-                item.style.justifyContent = 'space-between';
-                item.style.alignItems = 'center';
-                item.style.padding = '0.8rem';
-                item.style.background = 'var(--bg-color)';
-                item.style.borderRadius = '8px';
+                item.className = 'social-user-item';
                 
                 item.innerHTML = `
-                    <div style="font-weight: 500;">${friendData.displayName}</div>
-                    <button class="btn-outline" style="padding: 4px 12px; font-size: 0.75rem; width: auto; flex: 0 0 auto; min-width: 0; border-radius: 6px; cursor: pointer; background: transparent; color: var(--error-color); border: 1px solid rgba(255, 99, 132, 0.3);" onclick="removeFriend('${friendUid}', '${friendData.displayName.replace(/'/g, "\\'")}')">Remove</button>
+                    <div class="social-user-info">
+                        <div class="social-user-avatar">${initial}</div>
+                        <div class="social-user-name">${displayName}</div>
+                    </div>
+                    <button class="social-btn-remove" onclick="removeFriend('${friendUid}', '${displayName.replace(/'/g, "\\'")}')">
+                        <i class="ri-user-unfollow-line"></i> Remove
+                    </button>
                 `;
                 listElem.appendChild(item);
             }
         }
     };
+
+    document.getElementById('btn-manage-friends')?.addEventListener('click', () => {
+        isManagingFriends = !isManagingFriends;
+        const container = document.getElementById('current-friends-container');
+        const btnManage = document.getElementById('btn-manage-friends');
+        if (container) container.classList.toggle('is-managing', isManagingFriends);
+        if (btnManage) {
+            btnManage.classList.toggle('active', isManagingFriends);
+            btnManage.innerHTML = isManagingFriends ? '<i class="ri-check-line"></i>' : '<i class="ri-pencil-line"></i>';
+            btnManage.title = isManagingFriends ? 'Done Managing Friends' : 'Manage Friends';
+            btnManage.setAttribute('aria-label', btnManage.title);
+        }
+    });
 
     window.acceptFriendRequest = async (senderUid) => {
         if (!currentUserProfile) return;
@@ -5637,18 +6599,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         const rowspanCount = group.members.length;
 
                         const exerciseTdHtml = isFirstOverall 
-                            ? `<td rowspan="${competitors.length}" style="vertical-align: middle; color: var(--text-color); border-bottom: 1px solid rgba(255,255,255,0.05);"><div style="display: flex; align-items: center; justify-content: center;">${iconHtml} <span style="font-weight: 600;">${displayExercise}</span></div></td>` 
+                            ? `<td rowspan="${competitors.length}" class="leaderboard-exercise-td" style="vertical-align: middle; color: var(--text-color); border-bottom: 1px solid rgba(255,255,255,0.05);"><div class="leaderboard-exercise-cell" style="display: flex; align-items: center; justify-content: center;">${iconHtml} <span class="leaderboard-exercise-name" style="font-weight: 600;">${displayExercise}</span></div></td>` 
                             : '';
 
-                        const rankTdHtml = isFirstInGroup ? `<td ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${rankHtml}</td>` : '';
-                        const diffTdHtml = isFirstInGroup ? `<td ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${diffHtml}</td>` : '';
+                        const rankTdHtml = isFirstInGroup ? `<td class="leaderboard-rank-td" ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${rankHtml}</td>` : '';
+                        const diffTdHtml = isFirstInGroup ? `<td class="leaderboard-diff-td" ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${diffHtml}</td>` : '';
 
                         return `
-                            <tr class="leaderboard-data-row" data-exercise="${exercise}" style="cursor: pointer; ${c.isMe ? 'background: rgba(var(--primary-color), 0.1); font-weight: bold;' : ''}">
+                            <tr class="leaderboard-data-row" data-exercise="${exercise}" style="cursor: pointer; ${c.isMe ? 'background: rgba(var(--accent-end-rgb, 247, 121, 125), 0.08); font-weight: bold;' : ''}">
                                 ${rankTdHtml}
                                 ${exerciseTdHtml}
-                                <td class="leaderboard-center-cell">${c.name}</td>
-                                <td class="leaderboard-center-cell">${c.weight} kg</td>
+                                <td class="leaderboard-center-cell leaderboard-name-cell"><span class="athlete-name">${c.name}</span></td>
+                                <td class="leaderboard-center-cell leaderboard-weight-cell">${c.weight} kg</td>
                                 ${diffTdHtml}
                             </tr>
                         `;

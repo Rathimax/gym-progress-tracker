@@ -92,24 +92,64 @@ header {
   border: none;
   box-shadow: none;
   border-radius: 9999px;
-  padding: 8px 16px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--text-light);
   cursor: pointer;
   transition: color 0.3s ease;
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.toggle-icon {
+  width: 17px;
+  height: 17px;
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.toggle-icon.exercise-icon {
+  -webkit-mask-image: url('../assets/exercise-icon.png');
+  mask-image: url('../assets/exercise-icon.png');
+}
+
+.toggle-icon.diet-icon {
+  -webkit-mask-image: url('../assets/diet-icon.png');
+  mask-image: url('../assets/diet-icon.png');
 }
 
 @media (max-width: 768px) {
   .mode-toggle .toggle-btn {
-    padding: 6px 10px;
-    font-size: 0.75rem;
+    padding: 5px 6px;
+    font-size: 0.7rem;
+    gap: 4px;
+  }
+
+  .toggle-icon {
+    width: 13px;
+    height: 13px;
   }
 }
 
 .mode-toggle .toggle-btn:hover {
   transform: none;
+}
+
+.mode-toggle .toggle-btn:hover .toggle-icon {
+  transform: scale(1.08);
 }
 
 .mode-toggle .toggle-btn.active {

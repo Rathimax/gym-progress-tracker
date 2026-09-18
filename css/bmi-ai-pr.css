@@ -50,34 +50,50 @@ button.refresh-btn:hover {
 .unit-toggle-container {
   display: flex;
   justify-content: flex-start;
-  /* Align left implicitly or per design */
-  margin-bottom: 0.5rem;
-  /* Reduced from 1.5rem */
+  margin-bottom: 0.8rem;
   align-items: center;
-  gap: 1rem;
 }
 
-.unit-toggle-group {
-  display: flex;
+.pd-unit-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--input-bg);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--card-border);
+  height: 22px;
+  box-sizing: border-box;
+}
+
+.pd-toggle-pill {
   background: transparent;
-  /* Remove background for cleaner look if desired, or keep input-bg */
-  gap: 1.5rem;
-  /* Space between radio options */
+  border: none;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0 !important;
 }
 
-/* Unit Labels */
-.unit-radio-label {
-  padding: 4px 12px;
-  /* Reduced padding top/bottom */
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--text-light);
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.pd-toggle-pill:hover:not(.active) {
+  color: var(--text);
+}
+
+.pd-toggle-pill.active {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* ... existing code ... */
@@ -293,6 +309,10 @@ button.refresh-btn:hover {
 }
 
 /* ── Personal Records List ── */
+#pr-section {
+  position: relative;
+}
+
 #pr-list {
   list-style: none;
   padding: 0;
@@ -301,6 +321,83 @@ button.refresh-btn:hover {
   flex-direction: column;
   gap: 0.6rem;
 }
+
+#pr-list.scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+#pr-list.scrollable::-webkit-scrollbar {
+  width: 5px;
+}
+
+#pr-list.scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#pr-list.scrollable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+#pr-list.scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+:root:not(.dark-mode) #pr-list.scrollable {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+:root:not(.dark-mode) #pr-list.scrollable::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.pr-scroll-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  opacity: 0.8;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  font-weight: 500;
+}
+
+.pr-scroll-hint i {
+  font-size: 0.8rem;
+}
+
+.pr-scroll-hint.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(4px);
+  pointer-events: none;
+}
+
+:root:not(.dark-mode) .pr-scroll-hint {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 
 .pr-item {
   display: flex;
@@ -311,12 +408,12 @@ button.refresh-btn:hover {
   background: var(--input-bg);
   border-radius: 16px;
   border: 1px solid var(--card-border);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .pr-item:hover {
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(247, 121, 125, 0.12);
+  transform: none;
+  box-shadow: none;
 }
 
 .pr-name {
@@ -325,14 +422,33 @@ button.refresh-btn:hover {
   gap: 0.5rem;
   font-weight: 600;
   font-size: 0.95rem;
-  color: var(--text);
+  color: var(--text-light);
+  opacity: 0.85;
   word-break: break-word;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.pr-item:hover .pr-name {
+  color: #ffffff;
+  opacity: 1;
+}
+
+:root:not(.dark-mode) .pr-item:hover .pr-name {
+  color: #0f172a;
+  opacity: 1;
 }
 
 .pr-icon {
   color: var(--accent-end);
   font-size: 1rem;
   flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.pr-item:hover .pr-icon {
+  opacity: 1;
+  filter: brightness(1.25);
 }
 
 .pr-weight {
@@ -344,6 +460,13 @@ button.refresh-btn:hover {
   border-radius: 50px;
   white-space: nowrap;
   flex-shrink: 0;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.pr-item:hover .pr-weight {
+  opacity: 1;
+  filter: brightness(1.2);
 }
 
 /* ── Weekly Summary Card ── */

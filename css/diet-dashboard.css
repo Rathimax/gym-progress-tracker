@@ -147,14 +147,18 @@
 
 .ring-bg {
   fill: none;
-  stroke: var(--card-bg-hover);
-  stroke-width: 8;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 9;
+}
+
+[data-theme="light"] .ring-bg {
+  stroke: rgba(0, 0, 0, 0.12);
 }
 
 .ring-progress {
   fill: none;
-  stroke: var(--accent-start);
-  stroke-width: 8;
+  stroke: url(#calorie-ring-gradient);
+  stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dashoffset 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -172,7 +176,7 @@
   font-weight: 800;
   color: var(--text-light);
   line-height: 1;
-  background: linear-gradient(135deg, var(--text-light), var(--accent-start));
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -258,6 +262,7 @@ body:not(.dark-mode) .macro-bar-bg {
   border-radius: 6px;
   transition: width 1s ease-out;
   position: relative;
+  overflow: hidden;
 }
 
 .macro-bar-fill::after {
@@ -269,6 +274,16 @@ body:not(.dark-mode) .macro-bar-bg {
   bottom: 0;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: shine 2s infinite linear;
+}
+
+.macro-bar-fill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  opacity: 0.55;
+  filter: blur(4px);
+  background: inherit;
 }
 
 @keyframes shine {
@@ -283,34 +298,32 @@ body:not(.dark-mode) .macro-bar-bg {
 
 .protein-fill {
   background: linear-gradient(90deg, #3b82f6, #60a5fa);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
 }
 
 .carbs-fill {
   background: linear-gradient(90deg, #8b5cf6, #a78bfa);
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
 }
 
 .fat-fill {
   background: linear-gradient(90deg, #f59e0b, #fbbf24);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
 }
 
 .water-fill {
   background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-  box-shadow: 0 0 10px rgba(14, 165, 233, 0.4);
 }
 
 /* Water */
-.dd-water-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+.dd-water-heading {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
 }
 
-.dd-water-header .dd-card-title {
-  margin-bottom: 0;
+.dd-water-heading .dd-heading-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .water-val {
@@ -320,7 +333,9 @@ body:not(.dark-mode) .macro-bar-bg {
   padding: 4px 12px;
   border-radius: 20px;
   color: #0ea5e9;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 body:not(.dark-mode) .water-val {

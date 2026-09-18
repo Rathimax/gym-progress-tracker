@@ -1,26 +1,26 @@
-@import url('./css/variables-and-reset.css?v=55');
-@import url('./css/layout.css?v=55');
-@import url('./css/forms.css?v=55');
+@import url('./css/variables-and-reset.css?v=56');
+@import url('./css/layout.css?v=68');
+@import url('./css/forms.css?v=56');
 @import url('./css/header-nav.css?v=55');
-@import url('./css/tables-and-history.css?v=55');
-@import url('./css/exercise-components.css?v=55');
-@import url('./css/sidebar-bottom-nav.css?v=55');
+@import url('./css/tables-and-history.css?v=61');
+@import url('./css/exercise-components.css?v=57');
+@import url('./css/sidebar-bottom-nav.css?v=56');
 @import url('./css/timer.css?v=55');
 @import url('./css/utilities-loaders-equipment.css?v=55');
 @import url('./css/upgrades-and-tactile.css?v=55');
-@import url('./css/routines.css?v=55');
-@import url('./css/medals-and-themes.css?v=55');
+@import url('./css/routines.css?v=75');
+@import url('./css/medals-and-themes.css?v=61');
 @import url('./css/muscle-heatmap.css?v=55');
-@import url('./css/bmi-ai-pr.css?v=55');
-@import url('./css/diet-dashboard.css?v=55');
+@import url('./css/bmi-ai-pr.css?v=60');
+@import url('./css/diet-dashboard.css?v=56');
 @import url('./css/diet-log-meal.css?v=55');
-@import url('./css/add-meal.css?v=55');
-@import url('./css/diet-ai-scan.css?v=55');
+@import url('./css/add-meal.css?v=60');
+@import url('./css/diet-ai-scan.css?v=56');
 @import url('./css/diet-history.css?v=55');
-@import url('./css/diet-coach.css?v=55');
-@import url('./css/diet-settings.css?v=55');
-@import url('./css/general-settings.css?v=55');
-@import url('./css/light-mode-overrides.css?v=55');
+@import url('./css/diet-coach.css?v=58');
+@import url('./css/diet-settings.css?v=56');
+@import url('./css/general-settings.css?v=60');
+@import url('./css/light-mode-overrides.css?v=57');
 @import url('./css/login.css?v=55');
 
 
@@ -138,20 +138,6 @@
 /* ---- Social View Specifics ---- */
 #view-social.active-view {
   align-content: start;
-}
-
-/* Mobile Optimization for Social Leaderboard Table */
-@media (max-width: 768px) {
-  #social-leaderboard-table th,
-  #social-leaderboard-table td {
-    font-size: 0.75rem !important;
-    padding: 0.5rem 0.2rem !important;
-  }
-  
-  #view-social .custom-select-trigger {
-    padding: 0.6rem 1rem !important;
-    font-size: 0.8rem !important;
-  }
 }
 
 /* Fix Diet bottom navbar selected indicators size to match Hub/Add/History */

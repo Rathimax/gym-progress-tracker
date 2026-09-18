@@ -390,3 +390,28 @@ body:not(.dark-mode) .ds-action-btn--logout:hover {
   border-color: rgba(239, 68, 68, 0.2);
 }
 
+body:not(.dark-mode) .data-management-grid #export-btn {
+  background: rgba(2, 132, 199, 0.08);
+  color: #0284c7;
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+body:not(.dark-mode) .data-management-grid #import-btn {
+  background: rgba(147, 51, 234, 0.08);
+  color: #9333ea;
+  border-color: rgba(147, 51, 234, 0.2);
+}
+
+body:not(.dark-mode) .data-management-grid #clear-btn {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+body:not(.dark-mode) .data-management-grid #logout-btn {
+  background: var(--input-bg);
+  color: var(--text);
+  border-color: var(--card-border);
+}
+
+

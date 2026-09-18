@@ -334,3 +334,51 @@
   }
 }
 
+/* Ensure Diet Coach header stays on one continuous line */
+#view-diet-ai-coach h2 {
+  white-space: nowrap;
+}
+
+#view-diet-ai-coach h2 span {
+  white-space: nowrap;
+}
+
+/* Custom AI Rate Limit Modal */
+#ai-rate-limit-overlay .rate-limit-modal {
+  background: var(--bg-sidebar, #0C121D);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+#ai-rate-limit-overlay .rate-limit-icon,
+#ai-rate-limit-overlay .rate-limit-icon i {
+  color: var(--accent-end, #f7797d);
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+#ai-rate-limit-overlay .btn-primary {
+  box-shadow: none !important;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+#ai-rate-limit-overlay .btn-primary:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 0.9;
+}
+
+#ai-rate-limit-overlay .btn-primary:active {
+  transform: scale(0.98) !important;
+  box-shadow: none !important;
+}
+
+body:not(.dark-mode) #ai-rate-limit-overlay .rate-limit-modal {
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+
+

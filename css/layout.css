@@ -3,9 +3,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card {
@@ -16,11 +16,43 @@
   border: 1px solid var(--card-border);
   transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   overflow: visible;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 
 .card-wide {
   grid-column: 1 / -1;
+  width: 100%;
+}
+
+/* Home view layout: 2-column top grid + full-width history sections */
+#view-home.view-section.active-view {
+  display: flex !important;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.home-top-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 850px) {
+  .home-top-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 }
 
 /* Typography */
@@ -64,6 +96,17 @@ label {
   letter-spacing: 0.5px;
 }
 
+.label-optional {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-left: 5px;
+  display: inline-block;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -74,15 +117,27 @@ label {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 850px) {
   .container {
-    padding: 1.5rem 1rem 2rem;
-    gap: 1.5rem;
+    padding: 1.2rem 1rem calc(80px + env(safe-area-inset-bottom, 20px));
+    display: block;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
 
   .card {
-    padding: 1.2rem 1rem;
+    padding: 1.25rem 1rem;
     border-radius: 20px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #view-home.view-section.active-view {
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 100%;
   }
 
   h2 {
