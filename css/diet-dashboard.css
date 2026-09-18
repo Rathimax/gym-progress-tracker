@@ -112,11 +112,6 @@
   gap: 1.5rem;
 }
 
-/* Calorie Card Details */
-.dd-card--calories {
-  /* Removed justify-content: center and align-items: center so children align normally (h2 stretches, content starts at top) */
-}
-
 .dd-cal-display {
   display: flex;
   flex-direction: column;
