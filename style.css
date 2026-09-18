@@ -2,13 +2,13 @@
 @import url('./css/layout.css?v=68');
 @import url('./css/forms.css?v=56');
 @import url('./css/header-nav.css?v=55');
-@import url('./css/tables-and-history.css?v=61');
+@import url('./css/tables-and-history.css?v=66');
 @import url('./css/exercise-components.css?v=57');
 @import url('./css/sidebar-bottom-nav.css?v=56');
 @import url('./css/timer.css?v=55');
 @import url('./css/utilities-loaders-equipment.css?v=55');
 @import url('./css/upgrades-and-tactile.css?v=55');
-@import url('./css/routines.css?v=75');
+@import url('./css/routines.css?v=76');
 @import url('./css/medals-and-themes.css?v=61');
 @import url('./css/muscle-heatmap.css?v=55');
 @import url('./css/bmi-ai-pr.css?v=60');
@@ -19,7 +19,7 @@
 @import url('./css/diet-history.css?v=55');
 @import url('./css/diet-coach.css?v=58');
 @import url('./css/diet-settings.css?v=56');
-@import url('./css/general-settings.css?v=60');
+@import url('./css/general-settings.css?v=64');
 @import url('./css/light-mode-overrides.css?v=57');
 @import url('./css/login.css?v=55');
 
@@ -181,7 +181,7 @@
 
 .skeleton-block {
   height: 16px;
-  background-color: var(--input-bg);
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
   animation: skeletonPulse 1.5s ease-in-out infinite;
 }
@@ -189,7 +189,7 @@
 .skeleton-avatar {
   width: 24px;
   height: 24px;
-  background-color: var(--input-bg);
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 50%;
   animation: skeletonPulse 1.5s ease-in-out infinite;
 }

@@ -79,14 +79,18 @@
   background: rgba(139, 92, 246, 0.05);
 }
 
-.custom-select-trigger i {
+.custom-select-trigger > i:last-child {
   font-size: 1.2rem;
   transition: transform 0.3s ease;
   color: var(--text-light);
 }
 
-.custom-select-wrapper.open .custom-select-trigger i {
+.custom-select-wrapper.open .custom-select-trigger > i:last-child {
   transform: rotate(180deg);
+}
+
+.custom-select-trigger .trigger-text i {
+  transform: none !important;
 }
 
 .custom-options {

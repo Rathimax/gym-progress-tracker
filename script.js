@@ -3588,6 +3588,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerAvatar = document.querySelector('.header-right .header-avatar');
         const headerProfileDiv = document.querySelector('.header-right .profile-pic');
         const preview = document.getElementById('avatar-preview-settings');
+        const oldEmoji = document.getElementById('emoji-preview');
+        if (oldEmoji) oldEmoji.remove();
 
         if (type === 'image') {
             if (headerAvatar) {
@@ -3598,13 +3600,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 headerProfileDiv.innerHTML = `<img class="header-avatar" src="${content}" style="width:100%; height:100%; object-fit:cover;">`;
             }
 
-            if (preview) preview.src = content;
+            if (preview) {
+                preview.src = content;
+                preview.style.display = 'block';
+            }
         } else {
             const emojiHTML = `<div style="font-size: 1.5rem; display:flex; justify-content:center; align-items:center; height:100%;">${content}</div>`;
             if (headerProfileDiv) {
                 headerProfileDiv.innerHTML = emojiHTML;
             }
-            if (preview) { preview.style.display = 'none'; preview.parentNode.insertAdjacentHTML('afterbegin', `<div id="emoji-preview" style="font-size: 2.5rem;">${content}</div>`); }
+            if (preview) {
+                preview.style.display = 'none';
+                preview.parentNode.insertAdjacentHTML('afterbegin', `<div id="emoji-preview" class="avatar-emoji-display">${content}</div>`);
+            }
         }
     };
 
@@ -3746,6 +3754,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (neckInput && pd.neck !== undefined) neckInput.value = pd.neck;
         if (waistInput && pd.waist !== undefined) waistInput.value = pd.waist;
         if (hipInput && pd.hip !== undefined) hipInput.value = pd.hip;
+
+        if (typeof applyCustomDropdown === 'function') {
+            if (genderSelect) applyCustomDropdown(genderSelect);
+            if (activitySelect) applyCustomDropdown(activitySelect);
+        }
 
         // Height unit toggle
         const isFt = pd.heightUnit === 'ft';
@@ -6476,8 +6489,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderLeaderboard = () => {
         const tbody = document.getElementById('leaderboard-tbody');
+        const mobileContainer = document.getElementById('mobile-leaderboard-cards');
         const select = document.getElementById('leaderboard-exercise-select');
-        if (!tbody || !select) return;
+        if (!select) return;
 
         let exercisesToRender = [];
         if (select.value) {
@@ -6493,17 +6507,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let allRowsHtml = '';
+        let mobileCardsHtml = '';
         let hasAnyData = false;
 
         exercisesToRender.forEach(exercise => {
             const competitors = [];
             if (currentUserProfile?.prs && currentUserProfile.prs[exercise]) {
-                competitors.push({ name: currentUserProfile.displayName, weight: currentUserProfile.prs[exercise], isMe: true, exercise: exercise });
+                competitors.push({ name: currentUserProfile.displayName || 'Athlete', weight: currentUserProfile.prs[exercise], isMe: true, exercise: exercise });
             }
             
             friendsProfiles.forEach(f => {
                 if (f.prs && f.prs[exercise]) {
-                    competitors.push({ name: f.displayName, weight: f.prs[exercise], isMe: false, exercise: exercise });
+                    competitors.push({ name: f.displayName || 'Athlete', weight: f.prs[exercise], isMe: false, exercise: exercise });
                 }
             });
 
@@ -6606,7 +6621,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const diffTdHtml = isFirstInGroup ? `<td class="leaderboard-diff-td" ${rowspanCount > 1 ? `rowspan="${rowspanCount}" style="vertical-align: middle;"` : ''}>${diffHtml}</td>` : '';
 
                         return `
-                            <tr class="leaderboard-data-row" data-exercise="${exercise}" style="cursor: pointer; ${c.isMe ? 'background: rgba(var(--accent-end-rgb, 247, 121, 125), 0.08); font-weight: bold;' : ''}">
+                            <tr class="leaderboard-data-row" data-exercise="${exercise}" style="cursor: pointer;">
                                 ${rankTdHtml}
                                 ${exerciseTdHtml}
                                 <td class="leaderboard-center-cell leaderboard-name-cell"><span class="athlete-name">${c.name}</span></td>
@@ -6619,13 +6634,98 @@ document.addEventListener('DOMContentLoaded', () => {
                     overallIndex += group.members.length;
                     return groupRowsHtml;
                 }).join('');
+
+                // Build Mobile Matchup Card for this exercise
+                const displayExercise = exercise.split(' (')[0];
+                let mIconColor = 'var(--primary-color)';
+                let mIconPaths = '';
+                let mIsFill = false;
+                let mIsImage = false;
+
+                if (displayExercise.includes('Bicep')) {
+                    mIconColor = '#ff9f43';
+                    mIconPaths = `<path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1" /><path d="M15 14a5 5 0 0 0-7.584 2" /><path d="M9.964 6.825C8.019 7.977 9.5 13 8 15" />`;
+                } else if (displayExercise.includes('Bench') || displayExercise.includes('Chest')) {
+                    mIsImage = true;
+                    mIconPaths = `<img src="assets/images/chest-logo.png" class="leaderboard-icon img-chest" alt="Chest Logo">`;
+                } else if (displayExercise.includes('Squat') || displayExercise.includes('Legs')) {
+                    mIsImage = true;
+                    mIconPaths = `<img src="assets/images/legs-logo.png" class="leaderboard-icon img-legs" alt="Legs Logo">`;
+                } else if (displayExercise.includes('Deadlift')) {
+                    mIconColor = '#ff6b6b';
+                    mIconPaths = `<path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z" /><path d="m2.5 21.5 1.4-1.4" /><path d="m20.1 3.9 1.4-1.4" /><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z" /><path d="m9.6 14.4 4.8-4.8" />`;
+                } else if (displayExercise.includes('Lat Pulldown') || displayExercise.includes('Back')) {
+                    mIsImage = true;
+                    mIconPaths = `<img src="assets/images/back-logo.png" class="leaderboard-icon img-back" alt="Back Logo">`;
+                } else {
+                    mIsFill = true;
+                    mIconColor = 'var(--primary-color)';
+                    mIconPaths = `<path d="M12 23a7.5 7.5 0 0 0 7.5-7.5c0-3.3-1.6-5.8-3.6-7.8-1-.9-1.8-1.8-1.8-3 0-1.6 1.4-2.8 2.5-3.8A10.8 10.8 0 0 0 12 1a10.8 10.8 0 0 0-4.6 2.9c1 .8 2.4 2 2.4 3.6 0 1.2-.8 2.1-1.8 3-2 2-3.6 4.5-3.6 7.8A7.5 7.5 0 0 0 12 23Z"/>`;
+                }
+
+                let mIconHtml;
+                if (mIsImage) {
+                    mIconHtml = mIconPaths;
+                } else {
+                    mIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="leaderboard-icon" viewBox="0 0 24 24" fill="${mIsFill ? 'currentColor' : 'none'}" stroke="${mIsFill ? 'none' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: ${mIconColor}; filter: drop-shadow(0 0 5px ${mIconColor}40);">${mIconPaths}</svg>`;
+                }
+
+                let mRowsHtml = '';
+                let mRenderedCount = 0;
+                let mOverallIdx = 0;
+                for (const group of groups) {
+                    if (mRenderedCount >= 3) break;
+                    const gRank = mOverallIdx;
+                    let mRankBadge = `#${gRank + 1}`;
+                    if (gRank === 0) mRankBadge = '🥇 1st';
+                    else if (gRank === 1) mRankBadge = '🥈 2nd';
+                    else if (gRank === 2) mRankBadge = '🥉 3rd';
+
+                    for (const c of group.members) {
+                        if (mRenderedCount >= 3) break;
+                        const initial = (c.name || 'A').charAt(0).toUpperCase();
+                        mRowsHtml += `
+                            <div class="mobile-lb-row" data-exercise="${exercise}">
+                                <div class="mobile-lb-left">
+                                    <span class="mobile-lb-rank">${mRankBadge}</span>
+                                    <div class="mobile-lb-avatar">${initial}</div>
+                                    <span class="mobile-lb-name">${c.name}</span>
+                                </div>
+                                <div class="mobile-lb-right">
+                                    <span class="mobile-lb-weight">${c.weight} kg</span>
+                                </div>
+                            </div>
+                        `;
+                        mRenderedCount++;
+                    }
+                    mOverallIdx += group.members.length;
+                }
+
+                mobileCardsHtml += `
+                    <div class="mobile-lb-card" data-exercise="${exercise}">
+                        <div class="mobile-lb-header">
+                            <div class="mobile-lb-title">
+                                ${mIconHtml}
+                                <span>${displayExercise}</span>
+                            </div>
+                            <div class="mobile-lb-arrow">
+                                <i class="ri-arrow-right-s-line"></i>
+                            </div>
+                        </div>
+                        <div class="mobile-lb-competitors">
+                            ${mRowsHtml}
+                        </div>
+                    </div>
+                `;
             }
         });
 
         if (!hasAnyData) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem 0; color:var(--text-light);">No PRs logged for these exercises yet.</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem 0; color:var(--text-light);">No PRs logged for these exercises yet.</td></tr>';
+            if (mobileContainer) mobileContainer.innerHTML = '<div class="social-empty-state"><i class="ri-trophy-line"></i><span>No PRs logged for these exercises yet.</span></div>';
         } else {
-            tbody.innerHTML = allRowsHtml;
+            if (tbody) tbody.innerHTML = allRowsHtml;
+            if (mobileContainer) mobileContainer.innerHTML = mobileCardsHtml;
         }
     };
 
@@ -6873,6 +6973,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = e.target.closest('.leaderboard-data-row');
             if (tr && tr.dataset.exercise) {
                 window.openPodium(tr.dataset.exercise);
+            }
+        });
+    }
+
+    const mobileLbCards = document.getElementById('mobile-leaderboard-cards');
+    if (mobileLbCards) {
+        mobileLbCards.addEventListener('click', (e) => {
+            const rowOrCard = e.target.closest('.mobile-lb-row, .mobile-lb-card');
+            if (rowOrCard && rowOrCard.dataset.exercise) {
+                window.openPodium(rowOrCard.dataset.exercise);
             }
         });
     }

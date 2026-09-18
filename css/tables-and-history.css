@@ -1271,6 +1271,11 @@ body.no-scroll {
   vertical-align: middle;
 }
 
+/* Mobile Leaderboard Cards Layout (Hidden on Desktop) */
+.mobile-leaderboard-list {
+  display: none;
+}
+
 /* ==========================================================================
    MOBILE RESPONSIVE STYLES FOR SOCIAL & LEADERBOARD (≤ 768px)
    ========================================================================== */
@@ -1311,107 +1316,158 @@ body.no-scroll {
     font-size: 0.9rem !important;
   }
 
-  /* Leaderboard Table Container & Geometry on Mobile */
-  .leaderboard-container {
-    width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    margin: 0;
-    padding: 0;
-  }
-
+  /* Hide desktop table on mobile */
   #social-leaderboard-table {
+    display: none !important;
+  }
+
+  /* Show mobile cards container on mobile */
+  .mobile-leaderboard-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
     width: 100% !important;
-    min-width: 100% !important;
-    table-layout: auto !important;
   }
 
-  #social-leaderboard-table th {
-    font-size: 0.65rem !important;
-    padding: 0.45rem 0.2rem !important;
-    letter-spacing: 0.2px !important;
-    text-align: center !important;
-    white-space: nowrap !important;
+  .mobile-lb-card {
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 0.75rem 0.85rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
   }
 
-  #social-leaderboard-table th:nth-child(2) {
-    text-align: left !important;
-    padding-left: 0.3rem !important;
+  .mobile-lb-card:hover {
+    border-color: rgba(var(--accent-end-rgb, 247, 121, 125), 0.35);
+    background: rgba(255, 255, 255, 0.03);
   }
 
-  #social-leaderboard-table th:nth-child(3) {
-    text-align: left !important;
-    padding-left: 0.2rem !important;
+  .mobile-lb-card.mobile-lb-skeleton {
+    cursor: default;
+    pointer-events: none;
   }
 
-  #social-leaderboard-table td {
-    font-size: 0.73rem !important;
-    padding: 0.48rem 0.2rem !important;
-    text-align: center !important;
-    white-space: nowrap !important;
+  .mobile-lb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  #social-leaderboard-table td.leaderboard-exercise-td,
-  #social-leaderboard-table td:nth-child(2) {
-    text-align: left !important;
-    padding-left: 0.3rem !important;
+  .mobile-lb-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
   }
 
-  .leaderboard-exercise-cell {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 3px !important;
-    max-width: 88px !important;
+  .mobile-lb-title .leaderboard-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 0;
   }
 
-  .leaderboard-exercise-name {
-    font-size: 0.71rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+  .mobile-lb-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 1.15rem;
+    opacity: 0.6;
+    transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
   }
 
-  .leaderboard-icon {
-    width: 13px !important;
-    height: 13px !important;
-    margin-right: 2px !important;
-    flex-shrink: 0 !important;
+  .mobile-lb-card:hover .mobile-lb-arrow {
+    opacity: 1;
+    color: var(--accent-end);
+    transform: translateX(2px);
   }
 
-  .leaderboard-icon.img-chest,
-  .leaderboard-icon.img-legs,
-  .leaderboard-icon.img-back {
-    width: 14px !important;
-    height: 14px !important;
-    flex-shrink: 0 !important;
+  .mobile-lb-competitors {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 
-  #social-leaderboard-table td.leaderboard-name-cell,
-  #social-leaderboard-table td:nth-child(3) {
-    text-align: left !important;
-    padding-left: 0.2rem !important;
-    max-width: 82px !important;
+  .mobile-lb-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.2rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
   }
 
-  .leaderboard-name-cell .athlete-name {
-    max-width: 82px !important;
-    font-size: 0.73rem !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    display: inline-block !important;
+  .mobile-lb-row:hover {
+    background: rgba(255, 255, 255, 0.02);
   }
 
-  .leaderboard-weight-cell {
-    font-weight: 700 !important;
-    font-size: 0.73rem !important;
-    white-space: nowrap !important;
+  .mobile-lb-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .mobile-lb-rank {
+    font-size: 0.78rem;
+    font-weight: 700;
+    min-width: 46px;
+    white-space: nowrap;
+    color: var(--text-light);
+    margin-right: 0.25rem;
+  }
+
+  .mobile-lb-avatar {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .mobile-lb-name {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .mobile-lb-right {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .mobile-lb-weight {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--text);
   }
 
   .diff-pill {
-    padding: 2px 5px !important;
-    font-size: 0.63rem !important;
+    padding: 2px 6px !important;
+    font-size: 0.65rem !important;
     border-radius: 6px !important;
     white-space: nowrap !important;
   }

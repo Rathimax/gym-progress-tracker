@@ -53,7 +53,7 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=120">
+  <link rel="stylesheet" href="style.css?v=129">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
 </head>
@@ -895,6 +895,7 @@
         </div>
 
         <div class="leaderboard-container">
+          <!-- Desktop Table (visible on desktop) -->
           <table class="history-table" id="social-leaderboard-table" style="width: 100%;">
             <thead>
               <tr>
@@ -962,6 +963,111 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Mobile Grouped Matchup Cards (visible on mobile only) -->
+          <div id="mobile-leaderboard-cards" class="mobile-leaderboard-list">
+            <!-- Skeleton Card 1 -->
+            <div class="mobile-lb-card mobile-lb-skeleton">
+              <div class="mobile-lb-header">
+                <div class="mobile-lb-title">
+                  <div class="skeleton-avatar" style="width: 16px; height: 16px; border-radius: 4px;"></div>
+                  <div class="skeleton-block" style="width: 75px; height: 15px;"></div>
+                </div>
+                <div class="skeleton-block" style="width: 10px; height: 14px;"></div>
+              </div>
+              <div class="mobile-lb-competitors">
+                <div class="mobile-lb-row">
+                  <div class="mobile-lb-left">
+                    <div class="skeleton-block" style="width: 32px; height: 14px;"></div>
+                    <div class="skeleton-avatar" style="width: 26px; height: 26px;"></div>
+                    <div class="skeleton-block" style="width: 95px; height: 14px;"></div>
+                  </div>
+                  <div class="mobile-lb-right">
+                    <div class="skeleton-block" style="width: 48px; height: 14px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skeleton Card 2 -->
+            <div class="mobile-lb-card mobile-lb-skeleton">
+              <div class="mobile-lb-header">
+                <div class="mobile-lb-title">
+                  <div class="skeleton-avatar" style="width: 16px; height: 16px; border-radius: 4px;"></div>
+                  <div class="skeleton-block" style="width: 95px; height: 15px;"></div>
+                </div>
+                <div class="skeleton-block" style="width: 10px; height: 14px;"></div>
+              </div>
+              <div class="mobile-lb-competitors">
+                <div class="mobile-lb-row">
+                  <div class="mobile-lb-left">
+                    <div class="skeleton-block" style="width: 32px; height: 14px;"></div>
+                    <div class="skeleton-avatar" style="width: 26px; height: 26px;"></div>
+                    <div class="skeleton-block" style="width: 105px; height: 14px;"></div>
+                  </div>
+                  <div class="mobile-lb-right">
+                    <div class="skeleton-block" style="width: 44px; height: 14px;"></div>
+                  </div>
+                </div>
+                <div class="mobile-lb-row">
+                  <div class="mobile-lb-left">
+                    <div class="skeleton-block" style="width: 32px; height: 14px;"></div>
+                    <div class="skeleton-avatar" style="width: 26px; height: 26px;"></div>
+                    <div class="skeleton-block" style="width: 85px; height: 14px;"></div>
+                  </div>
+                  <div class="mobile-lb-right">
+                    <div class="skeleton-block" style="width: 40px; height: 14px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skeleton Card 3 -->
+            <div class="mobile-lb-card mobile-lb-skeleton">
+              <div class="mobile-lb-header">
+                <div class="mobile-lb-title">
+                  <div class="skeleton-avatar" style="width: 16px; height: 16px; border-radius: 4px;"></div>
+                  <div class="skeleton-block" style="width: 80px; height: 15px;"></div>
+                </div>
+                <div class="skeleton-block" style="width: 10px; height: 14px;"></div>
+              </div>
+              <div class="mobile-lb-competitors">
+                <div class="mobile-lb-row">
+                  <div class="mobile-lb-left">
+                    <div class="skeleton-block" style="width: 32px; height: 14px;"></div>
+                    <div class="skeleton-avatar" style="width: 26px; height: 26px;"></div>
+                    <div class="skeleton-block" style="width: 90px; height: 14px;"></div>
+                  </div>
+                  <div class="mobile-lb-right">
+                    <div class="skeleton-block" style="width: 50px; height: 14px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skeleton Card 4 -->
+            <div class="mobile-lb-card mobile-lb-skeleton">
+              <div class="mobile-lb-header">
+                <div class="mobile-lb-title">
+                  <div class="skeleton-avatar" style="width: 16px; height: 16px; border-radius: 4px;"></div>
+                  <div class="skeleton-block" style="width: 90px; height: 15px;"></div>
+                </div>
+                <div class="skeleton-block" style="width: 10px; height: 14px;"></div>
+              </div>
+              <div class="mobile-lb-competitors">
+                <div class="mobile-lb-row">
+                  <div class="mobile-lb-left">
+                    <div class="skeleton-block" style="width: 32px; height: 14px;"></div>
+                    <div class="skeleton-avatar" style="width: 26px; height: 26px;"></div>
+                    <div class="skeleton-block" style="width: 100px; height: 14px;"></div>
+                  </div>
+                  <div class="mobile-lb-right">
+                    <div class="skeleton-block" style="width: 45px; height: 14px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1193,6 +1299,7 @@
               style="padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);">
               <option value="male">Male</option>
               <option value="female">Female</option>
+              <option value="other">Other / Prefer not to say</option>
             </select>
           </div>
 
@@ -1396,9 +1503,10 @@
               <div class="pd-label-row">
                 <label class="pd-label" for="pd-gender"><i class="ri-genderless-line"></i> Gender</label>
               </div>
-              <select id="pd-gender" class="pd-input">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
+              <select id="pd-gender" class="pd-input no-search">
+                <option value="male" data-icon="ri-men-line" data-icon-color="#38bdf8">Male</option>
+                <option value="female" data-icon="ri-women-line" data-icon-color="#f472b6">Female</option>
+                <option value="other" data-icon="ri-genderless-line" data-icon-color="#a78bfa">Other / Prefer not to say</option>
               </select>
             </div>
 
@@ -1455,12 +1563,12 @@
               <div class="pd-label-row">
                 <label class="pd-label" for="pd-activity"><i class="ri-run-line"></i> Activity Level</label>
               </div>
-              <select id="pd-activity" class="pd-input">
-                <option value="sedentary">Sedentary (Little or no exercise)</option>
-                <option value="light">Lightly Active (1-3 days/week)</option>
-                <option value="moderate" selected>Moderately Active (3-5 days/week)</option>
-                <option value="very">Very Active (6-7 days/week)</option>
-                <option value="extra">Extremely Active (Physical job + intense training)</option>
+              <select id="pd-activity" class="pd-input no-search">
+                <option value="sedentary" data-icon="ri-hotel-bed-line" data-icon-color="#94a3b8">Sedentary (Little or no exercise)</option>
+                <option value="light" data-icon="ri-walk-line" data-icon-color="#38bdf8">Lightly Active (1-3 days/week)</option>
+                <option value="moderate" data-icon="ri-run-line" data-icon-color="#34d399" selected>Moderately Active (3-5 days/week)</option>
+                <option value="very" data-icon="ri-fire-line" data-icon-color="#fb923c">Very Active (6-7 days/week)</option>
+                <option value="extra" data-icon="ri-flashlight-fill" data-icon-color="#f43f5e">Extremely Active (Physical job + intense training)</option>
               </select>
             </div>
           </div>
@@ -1531,15 +1639,24 @@
         </div>
         <input type="file" id="import-input" accept=".json" class="hidden" />
         
-        <div class="setting-item" style="border-top: 1px solid var(--card-border); padding-top: 1.5rem; margin-top: 1.5rem;">
-          <label class="setting-label" style="margin-bottom: 0;">Profile Photo</label>
-          <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:0.8rem; margin-top:0.3rem;">Your Profile photo is visible to your friends</p>
-          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
-            <img id="avatar-preview-settings" src="assets/app-logo.png"
-              style="width:45px; height:45px; border-radius:50%; object-fit:cover; border:2px solid var(--accent-start);">
-            <input type="file" id="avatar-upload" accept="image/*" class="hidden">
-            <button id="btn-upload-avatar" style="width:auto; padding:0.5rem 0.7rem; font-size:0.8rem;">Change Photo</button>
-            <button id="btn-emoji-avatar" style="width:auto; padding:0.5rem 0.7rem; font-size:0.8rem; background:var(--input-bg); color:var(--text); box-shadow:none;">Use Emoji</button>
+        <div class="setting-item profile-photo-setting-item">
+          <div class="profile-photo-header">
+            <label class="setting-label"><i class="ri-user-smile-fill"></i> Profile Photo</label>
+            <p class="setting-desc">Your profile photo or avatar is visible to your gym friends.</p>
+          </div>
+          <div class="profile-photo-controls">
+            <div class="profile-avatar-wrapper">
+              <img id="avatar-preview-settings" src="assets/app-logo.png" alt="Profile Avatar">
+            </div>
+            <div class="profile-photo-actions">
+              <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+              <button id="btn-upload-avatar" class="btn-profile-action btn-profile-upload">
+                <i class="ri-camera-fill"></i> Change Photo
+              </button>
+              <button id="btn-emoji-avatar" class="btn-profile-action btn-profile-emoji">
+                <i class="ri-emotion-line"></i> Use Emoji
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2673,7 +2790,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=110"></script>
+  <script type="module" src="script.js?v=117"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {
