@@ -214,6 +214,33 @@
     </div>
   </div>
 
+  <!-- Theme Selection Modal -->
+  <div id="theme-modal-overlay" class="confirm-overlay hidden">
+    <div class="confirm-modal theme-modal-card" style="text-align: left; max-width: 460px; width: 92%; max-height: 85vh; display: flex; flex-direction: column; padding: 1.5rem 1.6rem; border-radius: 24px; position: relative; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+        <h3 style="margin: 0; font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+          <i class="ri-palette-fill" style="color: var(--accent-start, #38bdf8);"></i> Theme Gallery
+        </h3>
+        <button id="btn-close-theme-modal" type="button" aria-label="Close" style="background: var(--input-bg); border: 1px solid var(--card-border); font-size: 1.2rem; color: var(--text-light); cursor: pointer; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all 0.2s;">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.2rem;">
+        Choose an accent theme to style your entire app interface.
+      </p>
+
+      <div id="modal-theme-grid" class="modal-theme-grid" style="overflow-y: auto; max-height: 48vh; padding: 4px; margin-bottom: 1.25rem;">
+        <!-- Injected by JS -->
+      </div>
+
+      <div style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: auto;">
+        <button id="btn-apply-modal-theme" class="btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 800; font-size: 0.95rem; border-radius: 14px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
+          <i class="ri-check-line"></i> APPLY THEME
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Create Recipe Modal -->
   <div id="recipe-modal-overlay" class="confirm-overlay hidden">
     <div class="confirm-modal"
@@ -797,8 +824,8 @@
               <svg class="ai-quota-ring-svg" viewBox="0 0 24 24">
                 <defs>
                   <linearGradient id="quota-grad-theme" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#8b5cf6" />
-                    <stop offset="100%" stop-color="#f43f5e" />
+                    <stop id="quota-stop-start" offset="0%" stop-color="var(--accent-start, #0f2027)" style="stop-color: var(--accent-start);" />
+                    <stop id="quota-stop-end" offset="100%" stop-color="var(--accent-end, #4ca1af)" style="stop-color: var(--accent-end);" />
                   </linearGradient>
                   <linearGradient id="quota-grad-amber" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#f59e0b" />

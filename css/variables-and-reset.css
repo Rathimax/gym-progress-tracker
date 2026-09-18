@@ -42,10 +42,10 @@ input[type="number"] {
   --glass-subtle: rgba(0, 0, 0, 0.03);
   --glass-hover: rgba(0, 0, 0, 0.06);
 
-  /* Brand Gradient */
-  --accent-start: #c6ffdd;
-  --accent-end: #f7797d;
-  --accent-gradient: linear-gradient(135deg, #c6ffdd, #fbd786, #f7797d);
+  /* Brand Gradient (Default: Moonlit Astroid) */
+  --accent-start: #0f2027;
+  --accent-end: #4ca1af;
+  --accent-gradient: linear-gradient(135deg, #0f2027, #203a43, #4ca1af);
 
   /* Inputs & Borders */
   --input-bg: #F3F4F9;

@@ -3216,56 +3216,200 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // THEME CUSTOMIZATION
     // ==========================================
+    // THEME CUSTOMIZATION
+    // ==========================================
     const THEMES = [
+        { name: 'Moonlit Astroid', start: '#0f2027', middle: '#203a43', end: '#4ca1af', text: '#ffffff' },
         { name: 'Megatron', start: '#c6ffdd', middle: '#fbd786', end: '#f7797d', text: '#1e293b' },
-        { name: 'Moonlit Astroid', start: '#0f2027', middle: '#203a43', end: '#2c5364', text: '#ffffff' },
         { name: 'Cool Sky', start: '#2980b9', end: '#6dd5fa', text: '#ffffff' },
         { name: 'Ultra Violet', start: '#654ea3', end: '#eaafc8', text: '#ffffff' },
         { name: 'Burning Orange', start: '#ff416c', end: '#ff4b2b', text: '#ffffff' },
-        { name: 'Coal', start: '#eb5757', end: '#000000', text: '#ffffff' },
+        { name: 'Mango', start: '#ffe259', end: '#ffa751', text: '#1e293b' },
         { name: 'Pidget', start: '#ee9ca7', end: '#ffdde1', text: '#1e293b' },
-        { name: 'Snowflake', start: '#b5c6e0', end: '#ebf4f5', text: '#1e293b' }
+        { name: 'Snowflake', start: '#b5c6e0', end: '#ebf4f5', text: '#1e293b' },
+        { name: 'Emerald Glow', start: '#10b981', end: '#6ee7b7', text: '#1e293b' },
+        { name: 'Flower', start: '#dcffbd', end: '#cc86d1', text: '#1e293b' },
+        { name: 'Midnight Indigo', start: '#6366f1', end: '#a855f7', text: '#ffffff' },
+        { name: 'Peach Sea', start: '#e6ae8c', end: '#a8cecf', text: '#1e293b' },
+        { name: 'Sin City Red', start: '#ed213a', end: '#93291e', text: '#ffffff' },
+        { name: 'Hersheys', start: '#1e130c', end: '#9a8478', text: '#ffffff' }
     ];
+
+    let currentActiveTheme = THEMES[0];
+    let stagedThemeIndex = 0;
 
     const initThemes = () => {
         const grid = document.getElementById('theme-grid');
+        const modalGrid = document.getElementById('modal-theme-grid');
+        const themeModalOverlay = document.getElementById('theme-modal-overlay');
+        const btnCloseModal = document.getElementById('btn-close-theme-modal');
+        const btnApplyModal = document.getElementById('btn-apply-modal-theme');
+
         if (!grid) return;
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('appTheme');
-        if (savedTheme) {
-            const theme = JSON.parse(savedTheme);
-            applyTheme(theme, false); // Don't save again, just apply
-        }
-
-        grid.innerHTML = THEMES.map((theme, index) => {
+        // 1. Render Top 5 Themes + 6th "All Themes" button in Settings card (2 rows of 3)
+        const topThemes = THEMES.slice(0, 5);
+        const topThemesHtml = topThemes.map((theme, index) => {
             const gradient = theme.middle
                 ? `linear-gradient(135deg, ${theme.start}, ${theme.middle}, ${theme.end})`
                 : `linear-gradient(135deg, ${theme.start}, ${theme.end})`;
 
             return `
-                <div class="theme-option" data-index="${index}">
+                <div class="theme-option" data-index="${index}" role="button" tabindex="0">
                     <div class="theme-preview" style="background: ${gradient};"></div>
                     <div class="theme-name">${theme.name}</div>
                 </div>
             `;
         }).join('');
 
-        // Listeners
-        grid.querySelectorAll('.theme-option').forEach(opt => {
+        const moreBtnHtml = `
+            <div class="theme-option theme-more-option" id="btn-open-theme-modal" role="button" tabindex="0" title="More themes">
+                <div class="theme-preview theme-more-preview">
+                    <img src="assets/theme-palette-icon.svg" alt="More" style="width: 24px; height: 24px; pointer-events: none;">
+                </div>
+                <div class="theme-name" id="theme-more-btn-label">More</div>
+            </div>
+        `;
+
+        grid.innerHTML = topThemesHtml + moreBtnHtml;
+
+        // 2. Render All Themes in the Modal Grid
+        if (modalGrid) {
+            modalGrid.innerHTML = THEMES.map((theme, index) => {
+                const gradient = theme.middle
+                    ? `linear-gradient(135deg, ${theme.start}, ${theme.middle}, ${theme.end})`
+                    : `linear-gradient(135deg, ${theme.start}, ${theme.end})`;
+
+                return `
+                    <div class="modal-theme-option" data-index="${index}" role="button" tabindex="0">
+                        <div class="modal-theme-check">✓</div>
+                        <div class="theme-preview" style="background: ${gradient};"></div>
+                        <div class="theme-name">${theme.name}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper: Dynamically adapt the APPLY THEME button to preview the selected theme
+        const updateModalApplyBtnPreview = (theme) => {
+            if (!btnApplyModal || !theme) return;
+            const gradient = theme.middle
+                ? `linear-gradient(135deg, ${theme.start}, ${theme.middle}, ${theme.end})`
+                : `linear-gradient(135deg, ${theme.start}, ${theme.end})`;
+
+            btnApplyModal.style.background = gradient;
+            btnApplyModal.style.color = theme.text || '#ffffff';
+            btnApplyModal.style.boxShadow = `0 8px 24px color-mix(in srgb, ${theme.start} 35%, transparent)`;
+        };
+
+        // Modal Helpers: Open / Close with background scroll lock
+        const openThemeModal = () => {
+            if (!themeModalOverlay) return;
+            themeModalOverlay.classList.remove('hidden');
+            document.body.classList.add('no-scroll');
+            document.documentElement.classList.add('no-scroll');
+
+            // Find current active theme index
+            const currentIdx = THEMES.findIndex(t => t.name === currentActiveTheme.name);
+            stagedThemeIndex = currentIdx >= 0 ? currentIdx : 0;
+            const stagedTheme = THEMES[stagedThemeIndex] || THEMES[0];
+
+            // Highlight in modal & adapt preview button
+            if (modalGrid) {
+                modalGrid.querySelectorAll('.modal-theme-option').forEach(opt => {
+                    const idx = parseInt(opt.dataset.index, 10);
+                    opt.classList.toggle('selected', idx === stagedThemeIndex);
+                });
+                const selectedOpt = modalGrid.querySelector(`.modal-theme-option[data-index="${stagedThemeIndex}"]`);
+                if (selectedOpt) {
+                    selectedOpt.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            }
+            updateModalApplyBtnPreview(stagedTheme);
+        };
+
+        const closeThemeModal = () => {
+            if (!themeModalOverlay) return;
+            themeModalOverlay.classList.add('hidden');
+            document.body.classList.remove('no-scroll');
+            document.documentElement.classList.remove('no-scroll');
+        };
+
+        // 3. Listeners for Settings Theme Options
+        grid.querySelectorAll('.theme-option:not(.theme-more-option)').forEach(opt => {
             opt.addEventListener('click', () => {
-                const idx = opt.dataset.index;
+                const idx = parseInt(opt.dataset.index, 10);
                 const theme = THEMES[idx];
                 applyTheme(theme, true);
-
-                // Update active state
-                grid.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
             });
         });
+
+        // 4. Listener for 6th "All Themes" button
+        const moreBtn = document.getElementById('btn-open-theme-modal');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', openThemeModal);
+        }
+
+        // 5. Listeners inside Theme Modal (Live Preview on Click)
+        if (modalGrid) {
+            modalGrid.querySelectorAll('.modal-theme-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    stagedThemeIndex = parseInt(opt.dataset.index, 10);
+                    modalGrid.querySelectorAll('.modal-theme-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    const stagedTheme = THEMES[stagedThemeIndex] || THEMES[0];
+                    updateModalApplyBtnPreview(stagedTheme);
+                });
+            });
+        }
+
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener('click', closeThemeModal);
+        }
+
+        if (themeModalOverlay) {
+            themeModalOverlay.addEventListener('click', (e) => {
+                if (e.target === themeModalOverlay) {
+                    closeThemeModal();
+                }
+            });
+        }
+
+        // 6. APPLY THEME button listener
+        if (btnApplyModal) {
+            btnApplyModal.addEventListener('click', () => {
+                const selectedTheme = THEMES[stagedThemeIndex] || THEMES[0];
+                applyTheme(selectedTheme, true);
+                closeThemeModal();
+            });
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && themeModalOverlay && !themeModalOverlay.classList.contains('hidden')) {
+                closeThemeModal();
+            }
+        });
+
+        // 7. Load saved theme (sync with updated THEMES palette)
+        const savedTheme = localStorage.getItem('appTheme');
+        if (savedTheme) {
+            try {
+                const parsed = JSON.parse(savedTheme);
+                const themeName = parsed.name === 'Coal' ? 'Mango' : (parsed.name === 'Neon Cyber' ? 'Peach Sea' : (parsed.name === 'Sunset Bliss' ? 'Flower' : parsed.name));
+                const theme = THEMES.find(t => t.name === themeName) || parsed;
+                applyTheme(theme, false); // Don't save again, just apply
+            } catch (e) {
+                console.error("Failed to load saved theme:", e);
+                applyTheme(THEMES[0], false);
+            }
+        } else {
+            applyTheme(THEMES[0], false);
+        }
     };
 
     const applyTheme = (theme, save = true) => {
+        currentActiveTheme = theme;
         const root = document.documentElement;
 
         // Construct gradient string
@@ -3283,6 +3427,43 @@ document.addEventListener('DOMContentLoaded', () => {
         const metaThemeColor = document.querySelector("meta[name=theme-color]");
         if (metaThemeColor) {
             metaThemeColor.setAttribute("content", theme.start);
+        }
+
+        // Update FAIT rate limit SVG gradient stops
+        const stopStart = document.getElementById('quota-stop-start');
+        const stopEnd = document.getElementById('quota-stop-end');
+        if (stopStart) {
+            stopStart.setAttribute('stop-color', theme.start);
+            stopStart.style.stopColor = theme.start;
+        }
+        if (stopEnd) {
+            stopEnd.setAttribute('stop-color', theme.end);
+            stopEnd.style.stopColor = theme.end;
+        }
+
+        // Update Active States in Settings & Modal Grids
+        const grid = document.getElementById('theme-grid');
+        const modalGrid = document.getElementById('modal-theme-grid');
+        const themeIndex = THEMES.findIndex(t => t.name === theme.name);
+
+        if (grid) {
+            grid.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+            const moreBtn = document.getElementById('btn-open-theme-modal');
+            const moreLabel = document.getElementById('theme-more-btn-label');
+
+            if (themeIndex >= 0 && themeIndex < 5) {
+                const activeOpt = grid.querySelector(`.theme-option[data-index="${themeIndex}"]`);
+                if (activeOpt) activeOpt.classList.add('active');
+            } else if (moreBtn) {
+                moreBtn.classList.add('active');
+            }
+            if (moreLabel) moreLabel.textContent = 'More';
+        }
+
+        if (modalGrid && themeIndex >= 0) {
+            modalGrid.querySelectorAll('.modal-theme-option').forEach(o => o.classList.remove('selected'));
+            const selectedOpt = modalGrid.querySelector(`.modal-theme-option[data-index="${themeIndex}"]`);
+            if (selectedOpt) selectedOpt.classList.add('selected');
         }
 
         if (save) {
