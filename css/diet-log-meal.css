@@ -161,6 +161,188 @@
   color: rgba(147, 149, 176, 0.5);
 }
 
+/* Quantity & Unit Row */
+.lm-qty-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.lm-qty-select-wrap {
+  flex: 1.1;
+  min-width: 170px;
+  position: relative;
+}
+
+.lm-qty-select {
+  width: 100%;
+  height: 100%;
+  min-height: 48px;
+  background: var(--input-bg, rgba(51, 65, 85, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text, #f8fafc);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.lm-qty-select:focus {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.lm-qty-select option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+/* Custom Select Integration within Quantity Wrap */
+.lm-qty-select-wrap .custom-select-trigger {
+  min-height: 42px;
+  border-radius: 11px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.85rem;
+  background: var(--input-bg, rgba(51, 65, 85, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom Select Options inside Quantity Select */
+.lm-qty-select-wrap .custom-options {
+  border-radius: 10px;
+  padding: 4px;
+  margin-top: 4px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 120;
+}
+
+.lm-qty-select-wrap .custom-option {
+  padding: 0.45rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.lm-qty-select-wrap .custom-option i {
+  font-size: 0.82rem;
+}
+
+.lm-qty-select-wrap .custom-option:hover {
+  padding-left: 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lm-qty-select-wrap .custom-option.selected {
+  background: rgba(245, 158, 11, 0.18);
+  color: var(--accent-start, #f59e0b);
+  font-weight: 600;
+}
+
+/* Stepper (State Holder + Up/Down Arrows) */
+.lm-qty-stepper {
+  flex: 1;
+  min-width: 170px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  background: var(--input-bg, rgba(51, 65, 85, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  padding: 3px;
+  gap: 3px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.lm-qty-stepper:focus-within {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Arrow buttons (Down / Up) */
+.lm-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text, #f8fafc);
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.lm-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.lm-arrow-btn:active {
+  transform: scale(0.92);
+}
+
+/* State Holder Input Wrap: Flex layout ensures number and unit never overlap */
+.lm-qty-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.lm-qty-input {
+  width: auto;
+  max-width: 50px;
+  min-width: 22px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+  text-align: right;
+  padding: 0;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.lm-qty-input::-webkit-outer-spin-button,
+.lm-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.lm-qty-unit-tag {
+  position: static;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-light, #9395b0);
+  pointer-events: none;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* Macro Grid */
 .lm-macros-grid {
   display: grid;
@@ -320,55 +502,191 @@
   }
 
   /* Add Meal Card Mobile Adjustments */
+  .lm-page {
+    padding-bottom: 110px;
+    gap: 0.75rem;
+  }
+
   .lm-card {
-    padding: 1.25rem;
-    border-radius: 20px;
+    padding: 1rem 0.85rem;
+    border-radius: 16px;
+  }
+
+  .lm-card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.45rem;
   }
   
   .lm-form {
-    gap: 1.2rem;
+    gap: 0.75rem;
   }
   
   .lm-section {
-    gap: 0.5rem;
+    gap: 0.32rem;
   }
   
   .lm-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.4px;
   }
   
   .lm-pill {
-    padding: 0.6rem 0.4rem;
+    padding: 0.55rem 0.35rem;
     font-size: 0.75rem;
+    border-radius: 10px;
   }
   
   .lm-input-wrap input {
-    padding: 0.7rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.88rem;
+    border-radius: 10px;
+    min-height: 42px;
+  }
+
+  /* Quantity Row on Mobile: Compact Side-by-Side */
+  .lm-qty-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .lm-qty-select-wrap {
+    min-width: 0;
+    width: 100%;
+    flex: unset;
+  }
+
+  .lm-qty-select-wrap .custom-select-trigger,
+  .lm-qty-select {
+    min-height: 38px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.74rem;
+    border-radius: 9px;
+    gap: 3px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .lm-qty-select-wrap .custom-select-trigger span {
+    font-size: 0.74rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lm-qty-select-wrap .custom-select-trigger i {
+    font-size: 0.76rem;
+    flex-shrink: 0;
+  }
+
+  /* Compact Options Dropdown Popup on Mobile */
+  .lm-qty-select-wrap .custom-options {
+    border-radius: 9px;
+    padding: 3px;
+    margin-top: 3px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .lm-qty-select-wrap .custom-option {
+    padding: 0.38rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    border-radius: 6px;
+    gap: 5px;
+  }
+
+  .lm-qty-select-wrap .custom-option i {
+    font-size: 0.76rem;
+  }
+
+  .lm-qty-select-wrap .custom-option:hover {
+    padding-left: 0.5rem;
+  }
+
+  .lm-qty-stepper {
+    min-width: 0;
+    width: 100%;
+    flex: unset;
+    min-height: 38px;
+    padding: 2px 3px;
+    border-radius: 9px;
+    gap: 2px;
+  }
+
+  .lm-arrow-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    border-radius: 7px;
+    flex-shrink: 0;
+  }
+
+  .lm-qty-input-wrap {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+    padding: 0 2px;
+  }
+
+  .lm-qty-input {
+    font-size: 0.88rem;
+    max-width: 42px;
+    min-width: 18px;
+    text-align: right;
+    padding: 0;
+  }
+
+  .lm-qty-unit-tag {
+    position: static;
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Macros Grid on Mobile */
+  .lm-macros-grid {
+    gap: 0.45rem;
   }
   
   .lm-macro {
-    padding: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 12px;
+    gap: 0.35rem;
   }
   
   .lm-macro-head {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
   }
   
   .lm-macro-input-wrap input {
-    padding: 0.5rem 2.5rem 0.5rem 0.6rem;
+    padding: 0.45rem 2.2rem 0.45rem 0.6rem;
     font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .lm-unit {
+    right: 10px;
+    font-size: 0.68rem;
   }
   
   .lm-submit {
-    padding: 0.8rem;
-    font-size: 0.9rem;
+    padding: 0.85rem;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    margin-top: 0.2rem;
   }
 }
 
 @media (max-width: 500px) {
   .lm-meal-pills {
     grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
   }
 }
 
@@ -407,3 +725,57 @@ body:not(.dark-mode) .lm-unit {
   color: var(--text-muted, #64748b);
 }
 
+body:not(.dark-mode) .lm-qty-select,
+body:not(.dark-mode) .lm-qty-select-wrap .custom-select-trigger {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .lm-qty-select option {
+  background: #ffffff;
+  color: #1e293b;
+}
+
+body:not(.dark-mode) .lm-qty-stepper {
+  background: rgba(241, 245, 249, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body:not(.dark-mode) .lm-arrow-btn {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .lm-arrow-btn:hover {
+  background: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+body:not(.dark-mode) .lm-qty-input {
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .lm-qty-unit-tag {
+  color: var(--text-muted, #64748b);
+}
+
+body:not(.dark-mode) .lm-qty-select-wrap .custom-options {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+body:not(.dark-mode) .lm-qty-select-wrap .custom-option {
+  color: var(--text-primary, #1e293b);
+}
+
+body:not(.dark-mode) .lm-qty-select-wrap .custom-option:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body:not(.dark-mode) .lm-qty-select-wrap .custom-option.selected {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}

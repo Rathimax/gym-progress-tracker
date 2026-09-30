@@ -135,6 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dietForm: document.getElementById('diet-log-form'),
         dietMealType: document.getElementById('diet-meal-type'),
         dietFoodName: document.getElementById('diet-food-name'),
+        dietQuantityType: document.getElementById('diet-quantity-type'),
+        dietQuantity: document.getElementById('diet-quantity'),
+        dietQtyUnit: document.getElementById('diet-qty-unit'),
+        btnQtyUp: document.getElementById('btn-qty-up'),
+        btnQtyDown: document.getElementById('btn-qty-down'),
         dietCalories: document.getElementById('diet-calories'),
         dietProtein: document.getElementById('diet-protein'),
         dietCarbs: document.getElementById('diet-carbs'),
@@ -2685,9 +2690,91 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // ==========================================
+        // DIET: QUANTITY TYPE & INTERACTIVE STEPPER
+        // ==========================================
+        const updateDietQtyUI = (type) => {
+            const isLiquid = type === 'liquid';
+            if (elements.dietQtyUnit) {
+                elements.dietQtyUnit.textContent = isLiquid ? 'ml' : 'srv';
+            }
+            if (elements.dietQuantity) {
+                elements.dietQuantity.min = isLiquid ? '0' : '0.25';
+                elements.dietQuantity.step = isLiquid ? '50' : '1';
+                elements.dietQuantity.placeholder = isLiquid ? '250' : '1';
+            }
+        };
+
+        // Initialize portion unit on setup
+        updateDietQtyUI(elements.dietQuantityType?.value || 'quantitative');
+
+        if (elements.dietQuantityType) {
+            elements.dietQuantityType.addEventListener('change', () => {
+                const type = elements.dietQuantityType.value;
+                const isLiquid = type === 'liquid';
+                const curVal = parseFloat(elements.dietQuantity?.value);
+
+                if (isLiquid) {
+                    // Switched to liquid: default to 250ml if empty or small quantity
+                    if (isNaN(curVal) || curVal <= 10) {
+                        if (elements.dietQuantity) elements.dietQuantity.value = '250';
+                    }
+                } else {
+                    // Switched to quantitative: default to 1 if large liquid quantity
+                    if (isNaN(curVal) || curVal >= 50) {
+                        if (elements.dietQuantity) elements.dietQuantity.value = '1';
+                    }
+                }
+                updateDietQtyUI(type);
+            });
+        }
+
+        if (elements.btnQtyUp) {
+            elements.btnQtyUp.addEventListener('click', () => {
+                const type = elements.dietQuantityType?.value || 'quantitative';
+                let cur = parseFloat(elements.dietQuantity?.value);
+                if (type === 'liquid') {
+                    if (isNaN(cur) || cur < 0) cur = 0;
+                    cur += 50;
+                } else {
+                    if (isNaN(cur) || cur < 0) cur = 0;
+                    cur = Math.floor(cur) + 1;
+                }
+                if (elements.dietQuantity) elements.dietQuantity.value = cur;
+            });
+        }
+
+        if (elements.btnQtyDown) {
+            elements.btnQtyDown.addEventListener('click', () => {
+                const type = elements.dietQuantityType?.value || 'quantitative';
+                let cur = parseFloat(elements.dietQuantity?.value);
+                if (type === 'liquid') {
+                    if (isNaN(cur)) cur = 250;
+                    cur = Math.max(0, cur - 50);
+                } else {
+                    if (isNaN(cur)) cur = 1;
+                    cur = Math.max(1, Math.round(cur - 1));
+                }
+                if (elements.dietQuantity) elements.dietQuantity.value = cur;
+            });
+        }
+
+        // ==========================================
         // DIET: LOG MEAL SUBMIT
         // ==========================================
         if (elements.dietForm) {
+            elements.dietForm.addEventListener('reset', () => {
+                setTimeout(() => {
+                    if (elements.dietQuantityType) {
+                        elements.dietQuantityType.value = 'quantitative';
+                        if (typeof applyCustomDropdown === 'function') {
+                            applyCustomDropdown(elements.dietQuantityType);
+                        }
+                    }
+                    if (elements.dietQuantity) elements.dietQuantity.value = '1';
+                    updateDietQtyUI('quantitative');
+                }, 0);
+            });
+
             elements.dietForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
@@ -2696,9 +2783,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     return showNotification("Please log in to log a meal.", "error");
                 }
 
+                const rawFoodName = elements.dietFoodName.value.trim();
+                const qtyType = elements.dietQuantityType?.value || 'quantitative';
+                const rawQty = (elements.dietQuantity?.value || '').trim();
+                const qtyNum = parseFloat(rawQty);
+
+                let qtyDisplay = '';
+                if (qtyType === 'liquid') {
+                    const finalNum = !isNaN(qtyNum) && qtyNum >= 0 ? qtyNum : 250;
+                    qtyDisplay = `${finalNum}ml`;
+                } else {
+                    const finalNum = !isNaN(qtyNum) && qtyNum > 0 ? qtyNum : 1;
+                    qtyDisplay = finalNum === 1 ? '1 serving' : `${finalNum} servings`;
+                }
+
+                let finalFoodName = rawFoodName;
+                if (qtyType === 'liquid') {
+                    if (!rawFoodName.toLowerCase().includes('ml')) {
+                        finalFoodName = `${rawFoodName} (${qtyDisplay})`;
+                    }
+                } else {
+                    const num = !isNaN(qtyNum) && qtyNum > 0 ? qtyNum : 1;
+                    if (num !== 1 && !rawFoodName.toLowerCase().includes(`(${num}x)`) && !rawFoodName.toLowerCase().includes(`(${num})`)) {
+                        finalFoodName = `${rawFoodName} (${num}x)`;
+                    }
+                }
+
                 const mealData = {
                     mealType: elements.dietMealType.value,
-                    foodName: elements.dietFoodName.value.trim(),
+                    foodName: finalFoodName,
+                    quantity: qtyDisplay,
+                    quantityType: qtyType,
                     calories: parseFloat(elements.dietCalories.value) || 0,
                     protein: parseFloat(elements.dietProtein.value) || 0,
                     carbs: parseFloat(elements.dietCarbs.value) || 0,
@@ -5485,6 +5600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const init = async () => {
         applyCustomDropdown(elements.exerciseSelect);
         if (elements.dietMealType) applyCustomDropdown(elements.dietMealType);
+        if (elements.dietQuantityType) applyCustomDropdown(elements.dietQuantityType);
         const lbSelect = document.getElementById('leaderboard-exercise-select');
         if (lbSelect) applyCustomDropdown(lbSelect);
 

@@ -53,7 +53,7 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=150">
+  <link rel="stylesheet" href="style.css?v=152">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
 </head>
@@ -1898,6 +1898,34 @@
                   </div>
                 </div>
 
+                <!-- Quantity & Unit Selector -->
+                <div class="lm-section">
+                  <label class="lm-label" for="diet-quantity"><i class="ri-scales-3-line"></i> Quantity / Portion</label>
+                  <div class="lm-qty-row">
+                    <!-- Dropdown Select -->
+                    <div class="lm-qty-select-wrap">
+                      <select id="diet-quantity-type" class="lm-qty-select no-search">
+                        <option value="quantitative" data-icon="ri-restaurant-line" selected>Servings / Pieces</option>
+                        <option value="liquid" data-icon="ri-cup-line">Drinks & Liquids (ml)</option>
+                      </select>
+                    </div>
+
+                    <!-- State Holder with Downward and Upward Arrow -->
+                    <div class="lm-qty-stepper">
+                      <button type="button" class="lm-arrow-btn lm-arrow-down" id="btn-qty-down" aria-label="Decrease quantity" title="Decrease">
+                        <i class="ri-arrow-down-s-line"></i>
+                      </button>
+                      <div class="lm-qty-input-wrap">
+                        <input type="number" id="diet-quantity" class="lm-qty-input" value="1" min="1" step="any" placeholder="1" required>
+                        <span class="lm-qty-unit-tag" id="diet-qty-unit">srv</span>
+                      </div>
+                      <button type="button" class="lm-arrow-btn lm-arrow-up" id="btn-qty-up" aria-label="Increase quantity" title="Increase">
+                        <i class="ri-arrow-up-s-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Macro Inputs -->
                 <div class="lm-section">
                   <label class="lm-label"><i class="ri-bar-chart-grouped-fill"></i> Macros</label>
@@ -2949,7 +2977,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=126"></script>
+  <script type="module" src="script.js?v=129"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

@@ -39,6 +39,7 @@ export const addMeal = async (db, uid, date, mealData) => {
             carbs: Number(mealData.carbs) || 0,
             fat: Number(mealData.fat) || 0,
             mealType: mealData.mealType || "Snack",
+            quantity: Number(mealData.quantity) || 1,
             timestamp: serverTimestamp() // Let Firebase handle exact server time
         };
 
