@@ -421,6 +421,28 @@ body:not(.dark-mode) .add-meal-toggle-btn {
   gap: 4px;
 }
 
+.btn-recipe-edit {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+  border: 1px solid var(--card-border);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-recipe-edit:hover {
+  background: color-mix(in srgb, var(--card-bg) 80%, var(--accent-start) 20%);
+  color: var(--accent-start, #38bdf8);
+  border-color: var(--accent-start, #38bdf8);
+  transform: translateY(-1px);
+}
+
 .btn-recipe-delete {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
@@ -433,12 +455,14 @@ body:not(.dark-mode) .add-meal-toggle-btn {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-recipe-delete:hover {
   background: #ef4444;
   color: white;
   border-color: #ef4444;
+  transform: translateY(-1px);
 }
 
 /* Light mode overrides */
@@ -451,9 +475,15 @@ body:not(.dark-mode) .recipes-empty {
   background: rgba(255, 255, 255, 0.5);
   border-color: rgba(0, 0, 0, 0.1);
 }
-body:not(.dark-mode) .recipe-macros {
-  border-top-color: rgba(0, 0, 0, 0.04);
-  border-bottom-color: rgba(0, 0, 0, 0.04);
+body:not(.dark-mode) .btn-recipe-edit {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-secondary, #64748b);
+}
+body:not(.dark-mode) .btn-recipe-edit:hover {
+  background: var(--accent-start, #0284c7);
+  color: #ffffff;
+  border-color: var(--accent-start, #0284c7);
 }
 
 /* =========================================

@@ -53,7 +53,7 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=129">
+  <link rel="stylesheet" href="style.css?v=149">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
 </head>
@@ -245,10 +245,10 @@
   <div id="recipe-modal-overlay" class="confirm-overlay hidden">
     <div class="confirm-modal"
       style="text-align: left; max-width: 440px; padding: 1.5rem 1.75rem; border-radius: 20px;">
-      <h3
+      <h3 id="recipe-modal-title"
         style="margin-bottom: 0.4rem; text-align: center; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
         <i class="ri-restaurant-line" style="color: var(--accent-end);"></i> Create Custom Recipe</h3>
-      <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem; text-align: center;">Save a recipe
+      <p id="recipe-modal-desc" style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem; text-align: center;">Save a recipe
         to log it with a single click.</p>
 
       <form id="recipe-create-form" style="display: flex; flex-direction: column; gap: 1rem;">
@@ -354,7 +354,7 @@
             style="background: var(--input-bg); color: var(--text); border: 1px solid var(--card-border); flex: 1; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center;">Cancel</button>
           <button type="submit" id="btn-submit-recipe" class="btn-primary"
             style="flex: 1; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; margin: 0; box-shadow: var(--shadow-btn);"><i
-              class="ri-save-line"></i> Save Recipe</button>
+              class="ri-save-line" id="btn-submit-recipe-icon"></i> <span id="btn-submit-recipe-text">Save Recipe</span></button>
         </div>
       </form>
     </div>
@@ -1959,7 +1959,7 @@
 
       <!-- SUB-VIEW: Recipes -->
       <style>
-        @import url('./css/add-meal.css?v=57');
+        @import url('./css/add-meal.css?v=61');
       </style>
       <div id="subview-recipes" class="add-meal-subview">
         <div class="card card-wide">
@@ -2020,12 +2020,89 @@
                     </div>
                     <p class="fs-drop-formats">Supports PNG, JPG, HEIC • Max 5 MB</p>
                   </div>
-                  <!-- Preview -->
-                  <img id="ai-scan-preview-img" class="scan-preview-img hidden" alt="Food Preview">
                 </div>
-                <button class="fs-analyze-btn" id="btn-analyze-food" style="display: none;">
-                  <i class="ri-sparkling-2-fill"></i> Analyze with AI
-                </button>
+              </div>
+
+              <!-- NEW STEP: Pre-scan Food Quantity & Details Card with Photo on Left & Form on Right -->
+              <div id="ai-scan-pre-details-card" class="fs-pre-details-card hidden">
+                <div class="fs-pre-main-layout">
+                  <!-- Left Column: Uploaded Photo with Change Photo (Top-Right) and Status (Bottom-Left) -->
+                  <div class="fs-pre-photo-col" id="ai-scan-preview-wrapper">
+                    <div class="fs-pre-photo-card">
+                      <div class="fs-pre-img-wrap">
+                        <button type="button" class="fs-retake-pill-btn" id="btn-scan-retake" title="Click to change photo">
+                          Change photo
+                        </button>
+                        <img id="ai-scan-preview-img" class="scan-preview-img" alt="Food Preview">
+                        <div class="fs-photo-badge">
+                          <span class="fs-photo-dot"></span> <span id="fs-photo-status-text">Photo ready to scan</span>
+                        </div>
+                        <!-- Frosted Scanning Laser Overlay (Active during analysis) -->
+                        <div class="fs-scan-overlay" id="fs-scan-overlay">
+                          <div class="fs-scan-laser"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right Column: Heading, Inputs, Chips, Bottom Actions -->
+                  <div class="fs-pre-content-col">
+                    <!-- Title & Subtitle matching reference -->
+                    <div class="fs-pre-heading-area">
+                      <h3 class="fs-pre-main-title">Meal Details & Quantity</h3>
+                      <p class="fs-pre-main-subtitle">Add a portion or a note and the AI will tighten up the macros. You can skip both.</p>
+                    </div>
+
+                    <!-- Form Fields -->
+                    <div class="fs-pre-fields-col">
+                      <!-- Section 1: Portion -->
+                      <div class="fs-pre-group">
+                        <label class="fs-pre-label" for="ai-scan-pre-qty">
+                          Portion <span class="fs-pre-optional">optional</span>
+                        </label>
+                        <div class="fs-pre-input-wrap">
+                          <input type="text" id="ai-scan-pre-qty" placeholder="e.g. 200g or 1 bowl" autocomplete="off">
+                        </div>
+                        <div class="fs-pre-chips-row">
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="100g">100g</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="200g">200g</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="300g">300g</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="1 bowl">1 bowl</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="2 pieces">2 pieces</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="1 plate">1 plate</button>
+                        </div>
+                      </div>
+
+                      <!-- Section 2: How it was made -->
+                      <div class="fs-pre-group">
+                        <label class="fs-pre-label" for="ai-scan-pre-details">
+                          How it was made <span class="fs-pre-optional">optional</span>
+                        </label>
+                        <div class="fs-pre-input-wrap">
+                          <textarea id="ai-scan-pre-details" class="fs-pre-textarea" rows="3" placeholder="e.g. cooked in olive oil, no sugar"></textarea>
+                        </div>
+                        <div class="fs-pre-chips-row">
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Home cooked">Home cooked</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Restaurant">Restaurant</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Low oil">Low oil</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Air fried">Air fried</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="High protein">High protein</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Sugar-free">Sugar-free</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Bottom Actions inside Right Column -->
+                    <div class="fs-pre-actions">
+                      <button type="button" class="fs-action-btn fs-action-btn--cancel" id="btn-pre-scan-cancel">
+                        Cancel
+                      </button>
+                      <button type="button" class="fs-analyze-btn" id="btn-analyze-food">
+                        <span class="fs-analyze-btn-text">Analyze meal</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Feature Pills -->
@@ -2060,78 +2137,133 @@
                 <p class="fs-loader-sub">Our AI is identifying ingredients and estimating macros</p>
               </div>
 
-              <!-- Results -->
+              <!-- Results: Concept 1 Split-Card Layout (Matches Step 1 Architecture) -->
               <div id="ai-scan-results" class="fs-results hidden">
-                <div class="fs-results-header">
-                  <div class="fs-results-icon"><i class="ri-checkbox-circle-fill"></i></div>
-                  <div>
-                    <h3>Confirm Nutritional Data</h3>
-                    <p class="fs-results-sub">Review and adjust the AI estimates before saving</p>
-                  </div>
-                </div>
-
-                <div class="fs-results-fields">
-                  <div class="fs-result-field fs-result-field--wide">
-                    <label for="scan-food-name"><i class="ri-restaurant-line"></i> Detected Food</label>
-                    <input type="text" id="scan-food-name" required>
-                  </div>
-
-                  <div class="fs-result-field fs-result-field--wide">
-                    <label for="scan-food-qty"><i class="ri-scales-3-line"></i> Estimated Quantity</label>
-                    <input type="text" id="scan-food-qty" required>
+                <div class="fs-results-main-layout">
+                  <!-- Left Column: Scanned Photo Preview with Badges -->
+                  <div class="fs-results-photo-col">
+                    <div class="fs-results-photo-card">
+                      <div class="fs-results-img-wrap">
+                        <button type="button" class="fs-retake-pill-btn" id="btn-results-retake" title="Click to change photo">
+                          Change photo
+                        </button>
+                        <img id="scan-results-photo" class="scan-preview-img" alt="Scanned Meal">
+                        <div class="fs-photo-badge">
+                          <span class="fs-photo-dot" style="background:#4ade80;box-shadow:0 0 10px #4ade80;"></span>
+                          <span id="results-photo-cal-badge">Verified by AI</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div class="fs-result-field fs-result-field--wide">
-                    <label for="scan-correction-text"><i class="ri-edit-2-line"></i> Tell AI what's wrong
-                      (optional)</label>
-                    <textarea id="scan-correction-text" class="fs-correction-textarea" rows="2"
-                      placeholder="e.g., It's masala dosa, not plain dosa. It's only 8 momos, no noodles."></textarea>
-                    <div class="fs-correction-actions">
-                      <button type="button" class="fs-correction-btn" id="btn-refine-scan">
-                        <i class="ri-magic-line"></i> Refine macros
+                  <!-- Right Column: Heading, Inputs, 4 Macros, Macro Ratio Bar, Refine & Actions -->
+                  <div class="fs-results-content-col">
+                    <!-- Title area: Detected Food & Quantity in a compact 2-column header -->
+                    <div class="fs-results-food-header">
+                      <div class="fs-results-field-group fs-results-field--name">
+                        <label class="fs-results-field-label" for="scan-food-name">
+                          <i class="ri-restaurant-line"></i> Detected Food
+                        </label>
+                        <div class="fs-results-input-wrap">
+                          <input type="text" id="scan-food-name" class="fs-results-title-input" required autocomplete="off" placeholder="Meal name">
+                        </div>
+                      </div>
+                      <div class="fs-results-field-group fs-results-field--qty">
+                        <label class="fs-results-field-label" for="scan-food-qty">
+                          <i class="ri-scales-3-line"></i> Portion
+                        </label>
+                        <div class="fs-results-input-wrap">
+                          <input type="text" id="scan-food-qty" class="fs-results-qty-input" required autocomplete="off" placeholder="Portion">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 4 Macro Cards (Compact 2x2 Grid) -->
+                    <div class="fs-results-macro-grid">
+                      <!-- Calories -->
+                      <div class="fs-macro-card fs-macro-card--cal">
+                        <div class="fs-macro-card-header">
+                          <span class="fs-macro-badge-icon"><i class="ri-fire-fill"></i></span>
+                          <span class="fs-macro-card-name">Calories</span>
+                        </div>
+                        <div class="fs-macro-input-wrap">
+                          <input type="number" id="scan-calories" min="0" required placeholder="0">
+                          <span class="fs-macro-unit">kcal</span>
+                        </div>
+                      </div>
+
+                      <!-- Protein -->
+                      <div class="fs-macro-card fs-macro-card--prot">
+                        <div class="fs-macro-card-header">
+                          <span class="fs-macro-badge-icon"><i class="ri-contrast-drop-2-line"></i></span>
+                          <span class="fs-macro-card-name">Protein</span>
+                        </div>
+                        <div class="fs-macro-input-wrap">
+                          <input type="number" id="scan-protein" min="0" step="0.1" required placeholder="0">
+                          <span class="fs-macro-unit">g</span>
+                        </div>
+                      </div>
+
+                      <!-- Carbs -->
+                      <div class="fs-macro-card fs-macro-card--carb">
+                        <div class="fs-macro-card-header">
+                          <span class="fs-macro-badge-icon"><i class="ri-bread-line"></i></span>
+                          <span class="fs-macro-card-name">Carbs</span>
+                        </div>
+                        <div class="fs-macro-input-wrap">
+                          <input type="number" id="scan-carbs" min="0" step="0.1" required placeholder="0">
+                          <span class="fs-macro-unit">g</span>
+                        </div>
+                      </div>
+
+                      <!-- Fat -->
+                      <div class="fs-macro-card fs-macro-card--fat">
+                        <div class="fs-macro-card-header">
+                          <span class="fs-macro-badge-icon"><i class="ri-heart-fill"></i></span>
+                          <span class="fs-macro-card-name">Fat</span>
+                        </div>
+                        <div class="fs-macro-input-wrap">
+                          <input type="number" id="scan-fat" min="0" step="0.1" required placeholder="0">
+                          <span class="fs-macro-unit">g</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Macro Ratio Bar -->
+                    <div class="fs-macro-bar-wrap" id="fs-macro-bar-wrap">
+                      <div class="fs-macro-bar-track">
+                        <div class="fs-macro-segment fs-macro-segment--prot" id="fs-bar-prot" style="width: 25%;"></div>
+                        <div class="fs-macro-segment fs-macro-segment--carb" id="fs-bar-carb" style="width: 50%;"></div>
+                        <div class="fs-macro-segment fs-macro-segment--fat" id="fs-bar-fat" style="width: 25%;"></div>
+                      </div>
+                      <div class="fs-macro-legend">
+                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--prot"></span> Protein <strong id="fs-pct-prot">--%</strong></span>
+                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--carb"></span> Carbs <strong id="fs-pct-carb">--%</strong></span>
+                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--fat"></span> Fat <strong id="fs-pct-fat">--%</strong></span>
+                      </div>
+                    </div>
+
+                    <!-- Compact Refine with AI Row -->
+                    <div class="fs-results-refine-box">
+                      <div class="fs-results-refine-input-row">
+                        <i class="ri-sparkling-2-line fs-refine-icon"></i>
+                        <input type="text" id="scan-correction-text" class="fs-results-refine-input" placeholder="Tell AI what to adjust (e.g. less oil)...">
+                        <button type="button" class="fs-correction-btn" id="btn-refine-scan" disabled>
+                          Refine
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Bottom Actions (Cancel + Save Meal) -->
+                    <div class="fs-results-actions">
+                      <button type="button" class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">
+                        Cancel
+                      </button>
+                      <button type="button" class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
+                        <i class="ri-check-line"></i> Save Meal
                       </button>
                     </div>
-                    <p class="fs-correction-hint">We'll adjust the macros using this note while keeping your photo.</p>
                   </div>
-
-                  <div class="fs-result-field fs-macro-card fs-macro-card--cal">
-                    <label for="scan-calories"><i class="ri-fire-fill"></i> Calories</label>
-                    <div class="fs-macro-input-wrap">
-                      <input type="number" id="scan-calories" min="0" required>
-                      <span class="fs-macro-unit">kcal</span>
-                    </div>
-                  </div>
-
-                  <div class="fs-result-field fs-macro-card fs-macro-card--prot">
-                    <label for="scan-protein"><i class="ri-droplet-fill"></i> Protein</label>
-                    <div class="fs-macro-input-wrap">
-                      <input type="number" id="scan-protein" min="0" step="0.1" required>
-                      <span class="fs-macro-unit">g</span>
-                    </div>
-                  </div>
-
-                  <div class="fs-result-field fs-macro-card fs-macro-card--carb">
-                    <label for="scan-carbs"><i class="ri-leaf-fill"></i> Carbs</label>
-                    <div class="fs-macro-input-wrap">
-                      <input type="number" id="scan-carbs" min="0" step="0.1" required>
-                      <span class="fs-macro-unit">g</span>
-                    </div>
-                  </div>
-
-                  <div class="fs-result-field fs-macro-card fs-macro-card--fat">
-                    <label for="scan-fat"><i class="ri-heart-fill"></i> Fat</label>
-                    <div class="fs-macro-input-wrap">
-                      <input type="number" id="scan-fat" min="0" step="0.1" required>
-                      <span class="fs-macro-unit">g</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="fs-actions">
-                  <button class="fs-action-btn fs-action-btn--cancel" id="btn-cancel-scan">Cancel</button>
-                  <button class="fs-action-btn fs-action-btn--save" id="btn-confirm-scan">
-                    <i class="ri-check-line"></i> Save Meal
-                  </button>
                 </div>
               </div>
 
@@ -2817,7 +2949,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=117"></script>
+  <script type="module" src="script.js?v=126"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

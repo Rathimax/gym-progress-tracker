@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 /**
  * Ensures date is strictly formatted as YYYY-MM-DD
@@ -250,12 +250,36 @@ export const saveRecipe = async (db, uid, recipeData) => {
             fat: Number(recipeData.fat) || 0,
             mealType: recipeData.mealType || "Snack",
             weight: Number(recipeData.weight) || 0,
+            weightUnit: recipeData.weightUnit || "g",
             createdAt: serverTimestamp()
         };
         const docRef = await addDoc(recipesRef, payload);
         return { success: true, id: docRef.id, data: payload };
     } catch (error) {
         console.error("Error saving recipe:", error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const updateRecipe = async (db, uid, recipeId, recipeData) => {
+    if (!uid || !recipeId) throw new Error("Authentication required: uid or recipeId is missing.");
+    try {
+        const recipeRef = doc(db, "users", uid, "recipes", recipeId);
+        const payload = {
+            recipeName: recipeData.recipeName || "Unnamed Recipe",
+            calories: Number(recipeData.calories) || 0,
+            protein: Number(recipeData.protein) || 0,
+            carbs: Number(recipeData.carbs) || 0,
+            fat: Number(recipeData.fat) || 0,
+            mealType: recipeData.mealType || "Snack",
+            weight: Number(recipeData.weight) || 0,
+            weightUnit: recipeData.weightUnit || "g",
+            updatedAt: serverTimestamp()
+        };
+        await updateDoc(recipeRef, payload);
+        return { success: true, id: recipeId, data: payload };
+    } catch (error) {
+        console.error("Error updating recipe:", error);
         return { success: false, error: error.message };
     }
 };

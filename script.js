@@ -160,7 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // AI Food Scan
         scanUploadZone: document.getElementById('ai-scan-upload-zone'),
         scanFileInput: document.getElementById('ai-scan-file-input'),
+        scanPreviewWrapper: document.getElementById('ai-scan-preview-wrapper'),
         scanPreviewImg: document.getElementById('ai-scan-preview-img'),
+        btnScanRetake: document.getElementById('btn-scan-retake'),
+        scanPreDetailsCard: document.getElementById('ai-scan-pre-details-card'),
+        scanPreQty: document.getElementById('ai-scan-pre-qty'),
+        scanPreDetails: document.getElementById('ai-scan-pre-details'),
+        btnPreScanCancel: document.getElementById('btn-pre-scan-cancel'),
         btnAnalyzeFood: document.getElementById('btn-analyze-food'),
         scanLoader: document.getElementById('ai-scan-loader'),
         scanResults: document.getElementById('ai-scan-results'),
@@ -176,6 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
         btnRefineScan: document.getElementById('btn-refine-scan'),
         btnCancelScan: document.getElementById('btn-cancel-scan'),
         btnConfirmScan: document.getElementById('btn-confirm-scan'),
+        scanResultsPhoto: document.getElementById('scan-results-photo'),
+        btnResultsRetake: document.getElementById('btn-results-retake'),
+        resultsPhotoCalBadge: document.getElementById('results-photo-cal-badge'),
+        fsBarProt: document.getElementById('fs-bar-prot'),
+        fsBarCarb: document.getElementById('fs-bar-carb'),
+        fsBarFat: document.getElementById('fs-bar-fat'),
+        fsPctProt: document.getElementById('fs-pct-prot'),
+        fsPctCarb: document.getElementById('fs-pct-carb'),
+        fsPctFat: document.getElementById('fs-pct-fat'),
 
         // 1RM Calculator
         calcWeight: document.getElementById('calc-weight'),
@@ -2048,6 +2063,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (target === 'recipes' && typeof window.loadRecipes === 'function') {
                     window.loadRecipes();
                 }
+                if (target === 'ai-scan' && typeof window.resetScanState === 'function') {
+                    window.resetScanState();
+                }
             });
         });
         if (headerProfile) {
@@ -2738,16 +2756,103 @@ document.addEventListener('DOMContentLoaded', () => {
             applyCustomDropdown(recipeWeightUnit);
         }
 
+        let editingRecipeId = null;
+
+        const formatServingBadge = (weight, unit) => {
+            if (!weight) return '';
+            const u = (unit || 'g').trim();
+            if (['g', 'kg', 'oz', 'ml'].includes(u)) {
+                return `(${weight}${u})`;
+            }
+            const needsPlural = Number(weight) > 1 && ['piece', 'serving', 'cup'].includes(u);
+            return `(${weight} ${u}${needsPlural ? 's' : ''})`;
+        };
+
         const showRecipeModal = () => {
             if (recipeModalOverlay) {
                 recipeModalOverlay.classList.remove('hidden');
             }
         };
 
+        const showCreateRecipeModal = () => {
+            editingRecipeId = null;
+            const modalTitle = document.getElementById('recipe-modal-title');
+            const modalDesc = document.getElementById('recipe-modal-desc');
+            const submitBtnText = document.getElementById('btn-submit-recipe-text');
+            const submitBtnIcon = document.getElementById('btn-submit-recipe-icon');
+
+            if (modalTitle) modalTitle.innerHTML = '<i class="ri-restaurant-line" style="color: var(--accent-end);"></i> Create Custom Recipe';
+            if (modalDesc) modalDesc.textContent = 'Save a recipe to log it with a single click.';
+            if (submitBtnText) submitBtnText.textContent = 'Save Recipe';
+            if (submitBtnIcon) submitBtnIcon.className = 'ri-save-line';
+
+            if (recipeCreateForm) recipeCreateForm.reset();
+            const weightInput = document.getElementById('recipe-weight-input');
+            if (weightInput) weightInput.value = '';
+            const weightUnit = document.getElementById('recipe-weight-unit');
+            if (weightUnit) {
+                weightUnit.value = 'g';
+                if (typeof applyCustomDropdown === 'function') {
+                    applyCustomDropdown(weightUnit);
+                }
+            }
+            if (recipeMealType && typeof applyCustomDropdown === 'function') {
+                recipeMealType.value = "Snack";
+                applyCustomDropdown(recipeMealType);
+            }
+
+            showRecipeModal();
+        };
+
+        const openEditRecipeModal = (recipe) => {
+            editingRecipeId = recipe.id;
+            const modalTitle = document.getElementById('recipe-modal-title');
+            const modalDesc = document.getElementById('recipe-modal-desc');
+            const submitBtnText = document.getElementById('btn-submit-recipe-text');
+            const submitBtnIcon = document.getElementById('btn-submit-recipe-icon');
+
+            if (modalTitle) modalTitle.innerHTML = '<i class="ri-edit-line" style="color: var(--accent-end);"></i> Edit Recipe';
+            if (modalDesc) modalDesc.textContent = 'Update your recipe ingredients or nutritional values.';
+            if (submitBtnText) submitBtnText.textContent = 'Update Recipe';
+            if (submitBtnIcon) submitBtnIcon.className = 'ri-check-line';
+
+            // Populate form fields
+            const nameInput = document.getElementById('recipe-name-input');
+            const weightInput = document.getElementById('recipe-weight-input');
+            const calInput = document.getElementById('recipe-calories-input');
+            const protInput = document.getElementById('recipe-protein-input');
+            const carbInput = document.getElementById('recipe-carbs-input');
+            const fatInput = document.getElementById('recipe-fat-input');
+
+            if (nameInput) nameInput.value = recipe.recipeName || '';
+            if (weightInput) weightInput.value = recipe.weight || '';
+            if (calInput) calInput.value = recipe.calories ?? '';
+            if (protInput) protInput.value = recipe.protein ?? '';
+            if (carbInput) carbInput.value = recipe.carbs ?? '';
+            if (fatInput) fatInput.value = recipe.fat ?? '';
+
+            if (recipeMealType) {
+                recipeMealType.value = recipe.mealType || 'Snack';
+                if (typeof applyCustomDropdown === 'function') {
+                    applyCustomDropdown(recipeMealType);
+                }
+            }
+            const weightUnit = document.getElementById('recipe-weight-unit');
+            if (weightUnit) {
+                weightUnit.value = recipe.weightUnit || 'g';
+                if (typeof applyCustomDropdown === 'function') {
+                    applyCustomDropdown(weightUnit);
+                }
+            }
+
+            showRecipeModal();
+        };
+
         const hideRecipeModal = () => {
+            editingRecipeId = null;
             if (recipeModalOverlay) {
                 recipeModalOverlay.classList.add('hidden');
-                recipeCreateForm.reset();
+                if (recipeCreateForm) recipeCreateForm.reset();
                 const weightInput = document.getElementById('recipe-weight-input');
                 if (weightInput) weightInput.value = '';
                 const weightUnit = document.getElementById('recipe-weight-unit');
@@ -2761,11 +2866,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     recipeMealType.value = "Snack";
                     applyCustomDropdown(recipeMealType);
                 }
+                const modalTitle = document.getElementById('recipe-modal-title');
+                const modalDesc = document.getElementById('recipe-modal-desc');
+                const submitBtnText = document.getElementById('btn-submit-recipe-text');
+                const submitBtnIcon = document.getElementById('btn-submit-recipe-icon');
+
+                if (modalTitle) modalTitle.innerHTML = '<i class="ri-restaurant-line" style="color: var(--accent-end);"></i> Create Custom Recipe';
+                if (modalDesc) modalDesc.textContent = 'Save a recipe to log it with a single click.';
+                if (submitBtnText) submitBtnText.textContent = 'Save Recipe';
+                if (submitBtnIcon) submitBtnIcon.className = 'ri-save-line';
             }
         };
 
         if (btnCreateRecipeModal) {
-            btnCreateRecipeModal.addEventListener('click', showRecipeModal);
+            btnCreateRecipeModal.addEventListener('click', showCreateRecipeModal);
         }
         if (btnCancelRecipe) {
             btnCancelRecipe.addEventListener('click', hideRecipeModal);
@@ -2779,9 +2893,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 recipes.forEach(recipe => {
                     const card = document.createElement('div');
                     card.className = 'recipe-card';
+                    const servingBadge = formatServingBadge(recipe.weight, recipe.weightUnit);
                     card.innerHTML = `
                         <div class="recipe-card-header">
-                            <h4 class="recipe-name">${recipe.recipeName}${recipe.weight ? ` <span style="font-size: 0.8rem; color: var(--text-light); font-weight: normal;">(${recipe.weight}${recipe.weightUnit || 'g'})</span>` : ''}</h4>
+                            <h4 class="recipe-name">${recipe.recipeName}${servingBadge ? ` <span style="font-size: 0.8rem; color: var(--text-light); font-weight: normal;">${servingBadge}</span>` : ''}</h4>
                             <span class="recipe-type" data-type="${recipe.mealType}">${recipe.mealType}</span>
                         </div>
                         <div class="recipe-macros">
@@ -2806,6 +2921,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn-primary btn-recipe-log" data-id="${recipe.id}">
                                 <i class="ri-add-circle-line"></i> Quick Log
                             </button>
+                            <button class="btn-recipe-edit" data-id="${recipe.id}" title="Edit Recipe">
+                                <i class="ri-edit-line"></i>
+                            </button>
                             <button class="btn-recipe-delete" data-id="${recipe.id}" title="Delete Recipe">
                                 <i class="ri-delete-bin-line"></i>
                             </button>
@@ -2824,7 +2942,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const today = new Date().toISOString().split('T')[0];
                             const mealData = {
                                 mealType: recipe.mealType,
-                                foodName: recipe.weight ? `${recipe.recipeName} (${recipe.weight}${recipe.weightUnit || 'g'})` : recipe.recipeName,
+                                foodName: servingBadge ? `${recipe.recipeName} ${servingBadge}` : recipe.recipeName,
                                 calories: recipe.calories,
                                 protein: recipe.protein,
                                 carbs: recipe.carbs,
@@ -2834,12 +2952,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (logResult.success) {
                                 if (gamificationModule) gamificationModule.logDailyDiet(today);
                                 showNotification(`Logged ${recipe.recipeName} successfully! 🍎`, 'success');
-                                // Update dashboard
+                                // Update dashboard in background
                                 if (window.updateDietDashboard) window.updateDietDashboard();
                                 if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
                                 checkDietGamificationAsync();
-                                // Redirect to dashboard
-                                document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
                             } else {
                                 showNotification('Failed to log recipe meal.', 'error');
                             }
@@ -2850,6 +2966,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             btn.innerHTML = originalContent;
                             btn.disabled = false;
                         }
+                    });
+
+                    // Edit Handler
+                    card.querySelector('.btn-recipe-edit').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openEditRecipeModal(recipe);
                     });
 
                     // Delete Handler
@@ -2963,16 +3085,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 try {
-                    const saveResult = await dietService.saveRecipe(db, user.uid, recipeData);
-                    if (saveResult.success) {
-                        showNotification(`Saved recipe "${recipeData.recipeName}"!`, 'success');
-                        hideRecipeModal();
-                        window.loadRecipes();
+                    if (editingRecipeId) {
+                        const updateResult = await dietService.updateRecipe(db, user.uid, editingRecipeId, recipeData);
+                        if (updateResult.success) {
+                            showNotification(`Updated recipe "${recipeData.recipeName}"!`, 'success');
+                            hideRecipeModal();
+                            window.loadRecipes(true);
+                        } else {
+                            showNotification('Failed to update recipe.', 'error');
+                        }
                     } else {
-                        showNotification('Failed to save recipe.', 'error');
+                        const saveResult = await dietService.saveRecipe(db, user.uid, recipeData);
+                        if (saveResult.success) {
+                            showNotification(`Saved recipe "${recipeData.recipeName}"!`, 'success');
+                            hideRecipeModal();
+                            window.loadRecipes(true);
+                        } else {
+                            showNotification('Failed to save recipe.', 'error');
+                        }
                     }
                 } catch (err) {
-                    console.error('Save recipe error:', err);
+                    console.error('Save/Update recipe error:', err);
                     showNotification('Failed to save recipe.', 'error');
                 } finally {
                     submitBtn.innerHTML = originalBtnText;
@@ -4392,6 +4525,106 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        const resetScanState = () => {
+            selectedFile = null;
+            if (scanInputCam) scanInputCam.value = '';
+            if (scanInputGal) scanInputGal.value = '';
+            if (elements.scanPreQty) elements.scanPreQty.value = '';
+            if (elements.scanPreDetails) elements.scanPreDetails.value = '';
+            document.querySelectorAll('.fs-quick-chip.active').forEach(c => c.classList.remove('active'));
+
+            const dropzoneWrapper = document.querySelector('.fs-dropzone-wrapper');
+            if (dropzoneWrapper) dropzoneWrapper.classList.remove('hidden');
+
+            elements.scanUploadZone?.classList.remove('has-preview');
+            if (elements.scanPreviewWrapper) elements.scanPreviewWrapper.classList.add('hidden');
+            if (elements.scanPreviewImg) {
+                elements.scanPreviewImg.classList.add('hidden');
+                elements.scanPreviewImg.src = '';
+            }
+            if (elements.scanPreDetailsCard) {
+                elements.scanPreDetailsCard.classList.remove('is-analyzing');
+                elements.scanPreDetailsCard.classList.add('hidden');
+            }
+            if (elements.btnAnalyzeFood) {
+                elements.btnAnalyzeFood.innerHTML = '<span class="fs-analyze-btn-text">Analyze meal</span>';
+            }
+            const photoStatusText = document.getElementById('fs-photo-status-text');
+            if (photoStatusText) photoStatusText.textContent = 'Photo ready to scan';
+
+            if (elements.scanResults) elements.scanResults.classList.add('hidden');
+            if (elements.scanResultsPhoto) elements.scanResultsPhoto.src = '';
+            if (elements.resultsPhotoCalBadge) elements.resultsPhotoCalBadge.textContent = 'Verified by AI';
+            if (elements.scanLoader) elements.scanLoader.classList.add('hidden');
+            if (elements.scanCorrectionText) elements.scanCorrectionText.value = '';
+            if (elements.btnRefineScan) elements.btnRefineScan.disabled = true;
+
+            const scanPage = document.querySelector('.fs-page');
+            if (scanPage) {
+                scanPage.querySelector('.fs-hero')?.classList.remove('hidden');
+                scanPage.querySelector('.fs-dropzone-wrapper')?.classList.remove('hidden');
+                scanPage.querySelector('.fs-features')?.classList.remove('hidden');
+            }
+            const dropInner = elements.scanUploadZone?.querySelector('.fs-dropzone-inner');
+            if (dropInner) dropInner.style.display = 'flex';
+        };
+        window.resetScanState = resetScanState;
+
+        // Dynamic Macro Ratio Bar update
+        const updateMacroRatioBar = () => {
+            const pro = Math.max(0, parseFloat(elements.scanProtein?.value) || 0);
+            const carb = Math.max(0, parseFloat(elements.scanCarbs?.value) || 0);
+            const fat = Math.max(0, parseFloat(elements.scanFat?.value) || 0);
+
+            const calProt = pro * 4;
+            const calCarb = carb * 4;
+            const calFat = fat * 9;
+            const totalMacroCals = calProt + calCarb + calFat;
+
+            if (totalMacroCals > 0) {
+                const protPct = Math.round((calProt / totalMacroCals) * 100);
+                const carbPct = Math.round((calCarb / totalMacroCals) * 100);
+                const fatPct = Math.max(0, 100 - protPct - carbPct);
+
+                if (elements.fsBarProt) elements.fsBarProt.style.width = `${protPct}%`;
+                if (elements.fsBarCarb) elements.fsBarCarb.style.width = `${carbPct}%`;
+                if (elements.fsBarFat) elements.fsBarFat.style.width = `${fatPct}%`;
+
+                if (elements.fsPctProt) elements.fsPctProt.textContent = `${protPct}%`;
+                if (elements.fsPctCarb) elements.fsPctCarb.textContent = `${carbPct}%`;
+                if (elements.fsPctFat) elements.fsPctFat.textContent = `${fatPct}%`;
+            } else {
+                if (elements.fsBarProt) elements.fsBarProt.style.width = '33.3%';
+                if (elements.fsBarCarb) elements.fsBarCarb.style.width = '33.3%';
+                if (elements.fsBarFat) elements.fsBarFat.style.width = '33.4%';
+
+                if (elements.fsPctProt) elements.fsPctProt.textContent = '--%';
+                if (elements.fsPctCarb) elements.fsPctCarb.textContent = '--%';
+                if (elements.fsPctFat) elements.fsPctFat.textContent = '--%';
+            }
+        };
+
+        // Live re-calculation when user manually adjusts protein, carbs, or fat
+        [elements.scanProtein, elements.scanCarbs, elements.scanFat].forEach(inp => {
+            if (inp) inp.addEventListener('input', updateMacroRatioBar);
+        });
+
+        if (elements.scanCalories) {
+            elements.scanCalories.addEventListener('input', () => {
+                if (elements.resultsPhotoCalBadge) {
+                    const cals = elements.scanCalories.value.trim();
+                    elements.resultsPhotoCalBadge.textContent = cals ? `${cals} kcal detected` : 'Verified by AI';
+                }
+            });
+        }
+
+        if (elements.btnResultsRetake) {
+            elements.btnResultsRetake.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetScanState();
+            });
+        }
+
         // Handle File Selection & Render Preview for both inputs
         const handleFileSelect = (e) => {
             // Clear pending flag — user returned successfully
@@ -4407,22 +4640,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
             selectedFile = file;
 
-            // Hide the upload text + icon, show the preview image
-            const contentDiv = elements.scanUploadZone.querySelector('.fs-dropzone-inner');
-            if (contentDiv) contentDiv.style.display = 'none';
+            // Hide the upload dropzone wrapper & hero so Step 2 card takes center stage
+            const dropzoneWrapper = document.querySelector('.fs-dropzone-wrapper');
+            if (dropzoneWrapper) dropzoneWrapper.classList.add('hidden');
 
-            // Use createObjectURL for preview — lightweight, no memory spike
-            elements.scanPreviewImg.src = URL.createObjectURL(file);
-            elements.scanPreviewImg.classList.remove('hidden');
+            const scanPage = document.querySelector('.fs-page');
+            if (scanPage) {
+                scanPage.querySelector('.fs-hero')?.classList.add('hidden');
+                scanPage.querySelector('.fs-features')?.classList.add('hidden');
+            }
+
+            if (elements.scanPreviewWrapper) elements.scanPreviewWrapper.classList.remove('hidden');
+            if (elements.scanPreviewImg) {
+                elements.scanPreviewImg.src = URL.createObjectURL(file);
+                elements.scanPreviewImg.classList.remove('hidden');
+            }
+
+            // Show Step 2: Meal Details & Quantity Card
+            if (elements.scanPreDetailsCard) {
+                elements.scanPreDetailsCard.classList.remove('hidden');
+            }
 
             // Reset States
-            elements.scanResults.classList.add('hidden');
-            elements.btnAnalyzeFood.style.display = 'inline-flex';
-            elements.btnAnalyzeFood.disabled = false;
+            if (elements.scanResults) elements.scanResults.classList.add('hidden');
+            if (elements.scanLoader) elements.scanLoader.classList.add('hidden');
         };
 
         if (scanInputCam) scanInputCam.addEventListener('change', handleFileSelect);
         if (scanInputGal) scanInputGal.addEventListener('change', handleFileSelect);
+
+        // Retake / Change photo button
+        if (elements.btnScanRetake) {
+            elements.btnScanRetake.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetScanState();
+            });
+        }
+
+        // Cancel button in pre-details card
+        if (elements.btnPreScanCancel) {
+            elements.btnPreScanCancel.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetScanState();
+            });
+        }
+
+        // Quick suggestion chips for portion / details
+        document.querySelectorAll('.fs-quick-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const type = chip.getAttribute('data-type');
+                const val = chip.getAttribute('data-val');
+                if (type === 'qty' && elements.scanPreQty) {
+                    if (elements.scanPreQty.value.trim() === val) {
+                        elements.scanPreQty.value = '';
+                        chip.classList.remove('active');
+                    } else {
+                        elements.scanPreQty.value = val;
+                        document.querySelectorAll('.fs-quick-chip[data-type="qty"]').forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                    }
+                    elements.scanPreQty.focus();
+                } else if (type === 'details' && elements.scanPreDetails) {
+                    const current = elements.scanPreDetails.value.trim();
+                    if (current.includes(val)) {
+                        const updated = current.replace(val, '').replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, '').trim();
+                        elements.scanPreDetails.value = updated;
+                        chip.classList.remove('active');
+                    } else {
+                        elements.scanPreDetails.value = current ? `${current}, ${val}` : val;
+                        chip.classList.add('active');
+                    }
+                    elements.scanPreDetails.focus();
+                }
+            });
+        });
 
         // Clear pending flag if user returns to browser without picking a file
         document.addEventListener('visibilitychange', () => {
@@ -4434,147 +4727,173 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Handle Form Submission -> Firebase Storage -> Express API
-        elements.btnAnalyzeFood.addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                showNotification('Please sign in to analyze food.', 'error');
-                return;
-            }
-            if (!selectedFile) return;
-
-            try {
-                // UI Toggle
-                elements.btnAnalyzeFood.disabled = true;
-                elements.btnAnalyzeFood.style.display = 'none';
-                elements.scanLoader.classList.remove('hidden');
-
-                const scanPage = document.querySelector('.fs-page');
-                if (scanPage) {
-                    scanPage.querySelector('.fs-features')?.classList.add('hidden');
+        // Handle Form Submission -> Compress -> Express API
+        if (elements.btnAnalyzeFood) {
+            elements.btnAnalyzeFood.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) {
+                    showNotification('Please sign in to analyze food.', 'error');
+                    return;
                 }
+                if (!selectedFile) return;
 
-                // 1. Compress + Encode Image Client-Side (keeps payload under Vercel's 4.5MB body limit)
-                // For files >10 MB (e.g. S24 50MP), >5 MB, and normal — tiered settings
-                const compressImage = (file) => new Promise((resolve, reject) => {
-                    const sizeInMB = file.size / (1024 * 1024);
-                    let MAX_DIM, QUALITY;
-                    if (sizeInMB > 10) {
-                        // S24 50MP/200MP: extreme compression to avoid OOM
-                        MAX_DIM = 400; QUALITY = 0.5;
-                    } else if (sizeInMB > 5) {
-                        MAX_DIM = 600; QUALITY = 0.6;
-                    } else {
-                        MAX_DIM = 800; QUALITY = 0.7;
+                const qtyHint = (elements.scanPreQty?.value || '').trim();
+                const userNotes = (elements.scanPreDetails?.value || '').trim();
+
+                try {
+                    // UI Toggle: Option 3 — Seamless in-place analyzing state
+                    if (elements.scanPreDetailsCard) {
+                        elements.scanPreDetailsCard.classList.add('is-analyzing');
+                    }
+                    if (elements.btnAnalyzeFood) {
+                        elements.btnAnalyzeFood.innerHTML = '<span class="fs-btn-inline-spinner"></span>Analyzing meal...';
+                    }
+                    const photoStatusText = document.getElementById('fs-photo-status-text');
+                    if (photoStatusText) {
+                        photoStatusText.textContent = 'Analyzing nutrition...';
                     }
 
-                    const img = new Image();
-                    const objectUrl = URL.createObjectURL(file);
-                    img.onload = () => {
-                        try {
-                            let { width, height } = img;
-                            if (width > MAX_DIM || height > MAX_DIM) {
-                                if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
-                                else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
-                            }
-                            const canvas = document.createElement('canvas');
-                            canvas.width = width;
-                            canvas.height = height;
-                            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                            URL.revokeObjectURL(objectUrl);
-                            // Export as JPEG — typical output: 50–400 KB regardless of original size
-                            const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
-                            // Free canvas memory immediately
-                            canvas.width = 0; canvas.height = 0;
-                            resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
-                        } catch (err) {
-                            URL.revokeObjectURL(objectUrl);
-                            reject(new Error('Image too large to process. Please use a lower camera resolution or pick from gallery.'));
+                    const scanPage = document.querySelector('.fs-page');
+                    if (scanPage) {
+                        scanPage.querySelector('.fs-features')?.classList.add('hidden');
+                    }
+
+                    // 1. Compress + Encode Image Client-Side (keeps payload under body limit)
+                    const compressImage = (file) => new Promise((resolve, reject) => {
+                        const sizeInMB = file.size / (1024 * 1024);
+                        let MAX_DIM, QUALITY;
+                        if (sizeInMB > 10) {
+                            MAX_DIM = 400; QUALITY = 0.5;
+                        } else if (sizeInMB > 5) {
+                            MAX_DIM = 600; QUALITY = 0.6;
+                        } else {
+                            MAX_DIM = 800; QUALITY = 0.7;
                         }
-                    };
-                    img.onerror = () => {
-                        URL.revokeObjectURL(objectUrl);
-                        reject(new Error('Could not read image file.'));
-                    };
-                    img.src = objectUrl;
-                });
 
-                const { base64: base64Data, mimeType: compressedMimeType } = await compressImage(selectedFile);
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+                        img.onload = () => {
+                            try {
+                                let { width, height } = img;
+                                if (width > MAX_DIM || height > MAX_DIM) {
+                                    if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
+                                    else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+                                }
+                                const canvas = document.createElement('canvas');
+                                canvas.width = width;
+                                canvas.height = height;
+                                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                                URL.revokeObjectURL(objectUrl);
+                                const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
+                                canvas.width = 0; canvas.height = 0;
+                                resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+                            } catch (err) {
+                                URL.revokeObjectURL(objectUrl);
+                                reject(new Error('Image too large to process. Please use a lower camera resolution or pick from gallery.'));
+                            }
+                        };
+                        img.onerror = () => {
+                            URL.revokeObjectURL(objectUrl);
+                            reject(new Error('Could not read image file.'));
+                        };
+                        img.src = objectUrl;
+                    });
 
-                // 2. Transmit compressed base64 to Vercel serverless endpoint
-                const aiResponse = await fetch('/api/analyze-food', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        imageBase64: base64Data,
-                        mimeType: compressedMimeType,
-                        uid: user.uid
-                    })
-                });
+                    const { base64: base64Data, mimeType: compressedMimeType } = await compressImage(selectedFile);
 
+                    // 2. Transmit compressed base64 & details to Vercel/Express endpoint
+                    const aiResponse = await fetch('/api/analyze-food', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            imageBase64: base64Data,
+                            mimeType: compressedMimeType,
+                            uid: user.uid,
+                            quantityHint: qtyHint,
+                            userNotes: userNotes
+                        })
+                    });
 
-                if (!aiResponse.ok) {
-                    if (aiResponse.status === 429) {
+                    if (!aiResponse.ok) {
                         const errData = await aiResponse.json().catch(() => ({}));
-                        throw new Error(errData.error || 'You have reached the rate limit try again after 10 minutes');
+                        if (aiResponse.status === 429) {
+                            throw new Error(errData.error || 'You have reached the rate limit. Please try again shortly.');
+                        }
+                        throw new Error(errData.error || 'AI Engine failed to analyze the meal. Please try again.');
                     }
-                    throw new Error('AI Engine failed to parse image. Please try another clearer image.');
+
+                    const payload = await aiResponse.json();
+                    if (!payload.success || !payload.data) throw new Error('Invalid JSON Payload Returned.');
+
+                    const aiData = payload.data; // { food, estimatedQuantity, calories, protein, carbs, fat }
+
+                    // 3. Map Data to Editable Macro Fields
+                    elements.scanFoodName.value = aiData.food || '';
+                    elements.scanFoodQty.value = aiData.estimatedQuantity || qtyHint || '';
+                    elements.scanCalories.value = aiData.calories || 0;
+                    elements.scanProtein.value = aiData.protein || 0;
+                    elements.scanCarbs.value = aiData.carbs || 0;
+                    elements.scanFat.value = aiData.fat || 0;
+
+                    // Sync meal photo preview and calorie badge to Split-Card results
+                    if (elements.scanResultsPhoto && elements.scanPreviewImg) {
+                        elements.scanResultsPhoto.src = elements.scanPreviewImg.src;
+                    }
+                    if (elements.resultsPhotoCalBadge) {
+                        elements.resultsPhotoCalBadge.textContent = `${aiData.calories || 0} kcal detected`;
+                    }
+                    updateMacroRatioBar();
+
+                    // Clean up in-place analyzing state & hide pre-details card
+                    if (elements.scanPreDetailsCard) {
+                        elements.scanPreDetailsCard.classList.remove('is-analyzing');
+                        elements.scanPreDetailsCard.classList.add('hidden');
+                    }
+                    if (elements.btnAnalyzeFood) {
+                        elements.btnAnalyzeFood.innerHTML = '<span class="fs-analyze-btn-text">Analyze meal</span>';
+                    }
+                    if (photoStatusText) {
+                        photoStatusText.textContent = 'Photo ready to scan';
+                    }
+
+                    // Toggle Views — hide upload zone & loader, show results
+                    if (elements.scanUploadZone?.closest('.fs-dropzone-wrapper')) {
+                        elements.scanUploadZone.closest('.fs-dropzone-wrapper').classList.add('hidden');
+                    }
+                    if (elements.scanLoader) elements.scanLoader.classList.add('hidden');
+                    elements.scanResults.classList.remove('hidden');
+                    if (elements.scanCorrectionText) elements.scanCorrectionText.value = '';
+                    if (elements.btnRefineScan) elements.btnRefineScan.disabled = true;
+
+                } catch (e) {
+                    console.error(e);
+                    showNotification(e.message || 'Error communicating with AI engine.', 'error');
+
+                    // Reset in-place analyzing state so user can retry or adjust notes without losing anything
+                    if (elements.scanPreDetailsCard) {
+                        elements.scanPreDetailsCard.classList.remove('is-analyzing');
+                        elements.scanPreDetailsCard.classList.remove('hidden');
+                    }
+                    if (elements.btnAnalyzeFood) {
+                        elements.btnAnalyzeFood.innerHTML = '<span class="fs-analyze-btn-text">Analyze meal</span>';
+                    }
+                    const photoStatusText = document.getElementById('fs-photo-status-text');
+                    if (photoStatusText) {
+                        photoStatusText.textContent = 'Photo ready to scan';
+                    }
+                    if (elements.scanLoader) elements.scanLoader.classList.add('hidden');
+
+                    const scanPage = document.querySelector('.fs-page');
+                    if (scanPage) {
+                        scanPage.querySelector('.fs-features')?.classList.remove('hidden');
+                    }
                 }
-
-                const payload = await aiResponse.json();
-                if (!payload.success || !payload.data) throw new Error('Invalid JSON Payload Returned.');
-
-                const aiData = payload.data; // { food, estimatedQuantity, calories, protein, carbs, fat }
-
-                // 3. Map Data to Editable Macro Fields
-                elements.scanFoodName.value = aiData.food || '';
-                elements.scanFoodQty.value = aiData.estimatedQuantity || '';
-                elements.scanCalories.value = aiData.calories || 0;
-                elements.scanProtein.value = aiData.protein || 0;
-                elements.scanCarbs.value = aiData.carbs || 0;
-                elements.scanFat.value = aiData.fat || 0;
-
-                // Toggle Views — hide upload area & features, show results
-                elements.scanLoader.classList.add('hidden');
-                elements.scanResults.classList.remove('hidden');
-
-            } catch (e) {
-                console.error(e);
-                showNotification(e.message || 'Error communicating with AI engine.', 'error');
-
-                // Reset View
-                elements.scanLoader.classList.add('hidden');
-                elements.btnAnalyzeFood.disabled = false;
-                elements.btnAnalyzeFood.style.display = 'block';
-                const scanPage = document.querySelector('.fs-page');
-                if (scanPage) {
-                    scanPage.querySelector('.fs-features')?.classList.remove('hidden');
-                }
-            }
-        });
+            });
+        }
 
         // Confirmation Actions
         elements.btnCancelScan.addEventListener('click', () => {
-            // Reset state
-            selectedFile = null;
-            if (scanInputCam) scanInputCam.value = '';
-            if (scanInputGal) scanInputGal.value = '';
-            elements.scanResults.classList.add('hidden');
-            elements.scanPreviewImg.classList.add('hidden');
-            elements.scanPreviewImg.src = '';
-
-            // Restore upload area, hero, and features
-            const scanPage = document.querySelector('.fs-page');
-            if (scanPage) {
-                scanPage.querySelector('.fs-hero')?.classList.remove('hidden');
-                scanPage.querySelector('.fs-dropzone-wrapper')?.classList.remove('hidden');
-                scanPage.querySelector('.fs-features')?.classList.remove('hidden');
-            }
-            const uploadContent = elements.scanUploadZone.querySelector('.upload-content');
-            if (uploadContent) uploadContent.style.display = 'block';
-            const dropInner = elements.scanUploadZone.querySelector('.fs-dropzone-inner');
-            if (dropInner) dropInner.style.display = 'block';
-            elements.btnAnalyzeFood.style.display = 'none';
+            resetScanState();
         });
 
         elements.btnConfirmScan.addEventListener('click', async () => {
@@ -4631,10 +4950,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Clean Up Form
                 elements.btnCancelScan.click();
-
-                // Auto-redirect user to Diet Dashboard
-                document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
-
             } catch (err) {
                 console.error('Save AI Meal error:', err);
                 showNotification('Failed to save AI meal reading.', 'error');
@@ -4642,6 +4957,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Optional: refine macros based on a user correction note
+        const updateRefineBtnState = () => {
+            const hasText = (elements.scanCorrectionText?.value || '').trim().length > 0;
+            if (elements.btnRefineScan) {
+                elements.btnRefineScan.disabled = !hasText;
+            }
+        };
+
+        if (elements.scanCorrectionText) {
+            elements.scanCorrectionText.addEventListener('input', updateRefineBtnState);
+        }
+        updateRefineBtnState();
+
         if (elements.btnRefineScan) {
             elements.btnRefineScan.addEventListener('click', async () => {
                 const user = auth.currentUser;
@@ -4696,13 +5023,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof ai.carbs === 'number') elements.scanCarbs.value = ai.carbs;
                     if (typeof ai.fat === 'number') elements.scanFat.value = ai.fat;
 
+                    if (elements.resultsPhotoCalBadge && typeof ai.calories === 'number') {
+                        elements.resultsPhotoCalBadge.textContent = `${ai.calories} kcal detected`;
+                    }
+                    updateMacroRatioBar();
+
                     showNotification('Updated macros based on your correction.');
                 } catch (err) {
                     console.error('Refine scan error:', err);
                     showNotification('Could not refine macros. Please adjust manually.', 'error');
                 } finally {
-                    elements.btnRefineScan.disabled = false;
-                    elements.btnRefineScan.innerHTML = '<i class="ri-magic-line"></i> Refine macros';
+                    elements.btnRefineScan.innerHTML = 'Refine';
+                    updateRefineBtnState();
                 }
             });
         }

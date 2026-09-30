@@ -25,8 +25,8 @@ export default async function handler(req, res) {
         }
 
         // 2. Validate request body
-        const { imageBase64, mimeType, uid } = req.body || {};
-        console.log(`[analyze-food] Request received. UID: ${uid}, mimeType: ${mimeType}, imageBase64 present: ${!!imageBase64}`);
+        const { imageBase64, mimeType, uid, userNotes, quantityHint, details } = req.body || {};
+        console.log(`[analyze-food] Request received. UID: ${uid}, mimeType: ${mimeType}, imageBase64 present: ${!!imageBase64}, quantityHint: ${quantityHint || 'none'}, userNotes: ${userNotes || details || 'none'}`);
 
         if (!imageBase64) {
             return res.status(400).json({ success: false, error: 'Missing imageBase64 in request body.' });
@@ -42,7 +42,22 @@ export default async function handler(req, res) {
         // 3. Build Gemini request
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        const promptText = `Analyze this food image and provide nutritional estimates.
+        // Build additional context from user notes if provided
+        const contextLines = [];
+        if (quantityHint && quantityHint.trim()) {
+            contextLines.push(`- User-specified portion/quantity: "${quantityHint.trim()}"`);
+        }
+        const extraNotes = (userNotes || details || '').trim();
+        if (extraNotes) {
+            contextLines.push(`- User meal/cooking details & ingredients: "${extraNotes}"`);
+        }
+
+        let contextPrompt = '';
+        if (contextLines.length > 0) {
+            contextPrompt = `\n\nUSER-PROVIDED MEAL DETAILS:\n${contextLines.join('\n')}\n\nIMPORTANT: Use the user-provided portion size, ingredients, and preparation details above to calibrate your estimation with high accuracy. If the user specified an exact quantity (e.g. "200g", "2 pieces", "1 bowl") or cooking method (e.g. "olive oil", "no sugar"), calculate the calories and macronutrients strictly tailored to that specific portion and recipe. Set "estimatedQuantity" to match or refine the user's quantity.\n`;
+        }
+
+        const promptText = `Analyze this food image and provide nutritional estimates.${contextPrompt}
 Return a STRICTLY formatted JSON object with NO markdown wrappers, NO backticks, and NO extra text outside the JSON.
 The JSON must have exactly these keys:
 {
@@ -72,34 +87,58 @@ If there are multiple foods, combine their totals. If it's not food, set numeric
             }
         };
 
-        // 4. Call Gemini Vision API
-        console.log('[analyze-food] Calling Gemini Vision API...');
-        const aiRes = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(geminiBody)
-        });
+        // 3. Candidate models with automatic fallback on 503 high-demand or transient errors
+        const candidateModels = ['gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-3.7-flash'];
 
-        if (!aiRes.ok) {
-            const errorText = await aiRes.text();
-            console.error(`[analyze-food] Gemini API returned non-OK status ${aiRes.status}:`, errorText);
-            return res.status(502).json({
-                success: false,
-                error: `Gemini API error (${aiRes.status})`,
-                details: errorText
-            });
+        let rawText = '';
+        let lastStatus = 0;
+        let lastErrorText = '';
+
+        for (const model of candidateModels) {
+            console.log(`[analyze-food] Calling Gemini Vision API with model: ${model}...`);
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+            try {
+                const aiRes = await fetch(geminiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(geminiBody)
+                });
+
+                if (aiRes.ok) {
+                    const aiData = await aiRes.json();
+                    rawText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    if (rawText) {
+                        console.log(`[analyze-food] Successfully received response from ${model}`);
+                        break;
+                    }
+                } else {
+                    lastStatus = aiRes.status;
+                    lastErrorText = await aiRes.text();
+                    console.warn(`[analyze-food] Model ${model} returned non-OK status ${lastStatus}:`, lastErrorText);
+
+                    // If transient/demand error, try the next model
+                    if (lastStatus === 503 || lastStatus === 429 || lastStatus === 500 || lastStatus === 502) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+            } catch (networkErr) {
+                console.warn(`[analyze-food] Network error with ${model}:`, networkErr.message);
+            }
         }
 
-        const aiData = await aiRes.json();
-
-        // 5. Extract raw text from Gemini response
-        let rawText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log('[analyze-food] RAW AI RESPONSE:', rawText);
-
         if (!rawText) {
-            return res.status(500).json({
+            const isDemandSpike = lastStatus === 503 || lastErrorText.includes('high demand') || lastErrorText.includes('UNAVAILABLE');
+            const message = isDemandSpike
+                ? 'Gemini AI is currently experiencing high demand. Please try again in a few moments.'
+                : 'AI Engine failed to parse image. Please try again.';
+
+            return res.status(502).json({
                 success: false,
-                error: 'Gemini returned an empty response. The image may be unclear or unsupported.'
+                error: message,
+                details: lastErrorText
             });
         }
 
