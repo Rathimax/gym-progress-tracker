@@ -709,36 +709,61 @@
 }
 
 @media (max-width: 860px) {
+  /* Pre-Scan Layout */
   .fs-pre-main-layout {
-    flex-direction: column;
-    gap: 1.25rem;
+    flex-direction: column !important;
+    gap: 1.15rem !important;
   }
   .fs-pre-photo-col {
-    width: 100%;
-    flex: 0 0 auto;
-    max-width: none;
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
   }
   .fs-pre-photo-card {
-    width: 100%;
-    height: 220px;
+    width: 100% !important;
+    height: 180px !important;
   }
   .fs-pre-img-wrap {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    height: 220px;
-    min-height: 220px;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 180px !important;
+    min-height: 180px !important;
+    border-radius: 16px !important;
   }
   .fs-retake-pill-btn {
-    top: 12px !important;
-    right: 12px !important;
+    top: 10px !important;
+    right: 10px !important;
     padding: 6px 14px !important;
     font-size: 0.78rem !important;
   }
   .fs-photo-badge {
-    bottom: 12px !important;
-    left: 12px !important;
-    font-size: 0.8rem !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Results Split-Card Layout */
+  .fs-results-main-layout {
+    flex-direction: column !important;
+    gap: 1.15rem !important;
+  }
+  .fs-results-photo-col {
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
+  }
+  .fs-results-photo-card {
+    width: 100% !important;
+    height: 180px !important;
+  }
+  .fs-results-img-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 180px !important;
+    min-height: 180px !important;
+    border-radius: 16px !important;
   }
 }
 
@@ -1447,14 +1472,306 @@
     background-clip: text;
   }
 
-  .fs-results {
-    padding: 1.25rem;
-    border-radius: 20px;
+  .fs-page {
+    gap: 0.85rem !important;
+    margin-top: 0.35rem !important;
+    padding-bottom: 2.5rem !important;
   }
 
-  .fs-result-field input {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9rem;
+  /* ── Pre-Details Screen (Mobile Refinement) ── */
+  .fs-pre-details-card {
+    padding: 1rem 0.85rem !important;
+    border-radius: 16px !important;
+    margin-top: 0.2rem !important;
+  }
+
+  .fs-pre-main-layout {
+    gap: 0.85rem !important;
+  }
+
+  .fs-pre-photo-card,
+  .fs-pre-img-wrap {
+    height: 155px !important;
+    min-height: 155px !important;
+    border-radius: 14px !important;
+  }
+
+  .fs-retake-pill-btn {
+    top: 9px !important;
+    right: 9px !important;
+    padding: 5px 13px !important;
+    font-size: 0.74rem !important;
+  }
+
+  .fs-photo-badge {
+    bottom: 9px !important;
+    left: 9px !important;
+    font-size: 0.74rem !important;
+  }
+
+  .fs-pre-heading-area {
+    margin-bottom: 0.15rem !important;
+  }
+
+  .fs-pre-main-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    margin: 0 0 0.2rem 0 !important;
+    line-height: 1.25 !important;
+  }
+
+  .fs-pre-main-subtitle {
+    font-size: 0.78rem !important;
+    margin: 0 0 0.7rem 0 !important;
+    line-height: 1.35 !important;
+    color: #94a3b8 !important;
+  }
+
+  .fs-pre-fields-col {
+    gap: 0.75rem !important;
+  }
+
+  .fs-pre-group {
+    gap: 0 !important;
+  }
+
+  .fs-pre-label {
+    font-size: 0.86rem !important;
+    margin: 0 0 0.35rem 0 !important;
+    gap: 5px !important;
+  }
+
+  .fs-pre-optional {
+    font-size: 0.74rem !important;
+  }
+
+  .fs-pre-input-wrap input {
+    padding: 0.55rem 0.8rem !important;
+    font-size: 0.88rem !important;
+    border-radius: 10px !important;
+  }
+
+  .fs-pre-textarea {
+    padding: 0.55rem 0.8rem !important;
+    font-size: 0.88rem !important;
+    border-radius: 10px !important;
+    min-height: 52px !important;
+    height: 54px !important;
+    line-height: 1.35 !important;
+  }
+
+  .fs-pre-input-wrap input::placeholder,
+  .fs-pre-textarea::placeholder {
+    font-size: 0.82rem !important;
+  }
+
+  .fs-pre-chips-row {
+    gap: 5px 6px !important;
+    margin-top: 0.4rem !important;
+  }
+
+  .fs-quick-chip {
+    padding: 4px 9px !important;
+    font-size: 0.74rem !important;
+    border-radius: 999px !important;
+  }
+
+  .fs-pre-actions {
+    margin-top: 0.8rem !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .fs-pre-actions .fs-action-btn--cancel {
+    flex: 0 0 85px !important;
+    width: 85px !important;
+    height: 44px !important;
+    font-size: 0.88rem !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+  }
+
+  .fs-pre-actions .fs-analyze-btn {
+    flex: 1 1 auto !important;
+    height: 44px !important;
+    font-size: 0.94rem !important;
+    border-radius: 12px !important;
+    padding: 0 1rem !important;
+  }
+
+  /* ── Results Screen (Mobile Refinement) ── */
+  .fs-results {
+    padding: 1rem 0.85rem !important;
+    border-radius: 16px !important;
+  }
+
+  .fs-results-main-layout {
+    gap: 0.85rem !important;
+  }
+
+  .fs-results-photo-card,
+  .fs-results-img-wrap {
+    height: 155px !important;
+    min-height: 155px !important;
+    border-radius: 14px !important;
+  }
+
+  .fs-results .fs-retake-pill-btn {
+    top: 9px !important;
+    right: 9px !important;
+    padding: 5px 13px !important;
+    font-size: 0.74rem !important;
+  }
+
+  .fs-results .fs-photo-badge {
+    bottom: 9px !important;
+    left: 9px !important;
+    font-size: 0.74rem !important;
+  }
+
+  .fs-results-content-col {
+    width: 100% !important;
+    gap: 0.7rem !important;
+  }
+
+  .fs-results-food-header {
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .fs-results-field--name {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .fs-results-field--qty {
+    flex: 0 0 100px !important;
+    width: 100px !important;
+    min-width: 0 !important;
+  }
+
+  .fs-results-field-label {
+    font-size: 0.7rem !important;
+    margin-bottom: 2px !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .fs-results-input-wrap input {
+    padding: 0.52rem 0.75rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 10px !important;
+  }
+
+  .fs-results-macro-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .fs-macro-card {
+    padding: 0.55rem 0.7rem !important;
+    border-radius: 12px !important;
+    gap: 2px !important;
+  }
+
+  .fs-macro-card-header {
+    gap: 5px !important;
+  }
+
+  .fs-macro-badge-icon {
+    font-size: 0.85rem !important;
+  }
+
+  .fs-macro-card-name {
+    font-size: 0.7rem !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .fs-macro-card .fs-macro-input-wrap {
+    padding: 0.32rem 0.6rem !important;
+    border-radius: 8px !important;
+    margin-top: 2px !important;
+    gap: 4px !important;
+  }
+
+  .fs-macro-card input[type="number"] {
+    font-size: 1.15rem !important;
+  }
+
+  .fs-macro-card .fs-macro-unit {
+    font-size: 0.72rem !important;
+  }
+
+  .fs-macro-bar-wrap {
+    padding: 0.55rem 0.75rem !important;
+    border-radius: 10px !important;
+    gap: 4px !important;
+  }
+
+  .fs-macro-bar-track {
+    height: 5px !important;
+  }
+
+  .fs-macro-legend {
+    font-size: 0.68rem !important;
+  }
+
+  .fs-macro-legend-item {
+    gap: 4px !important;
+  }
+
+  .fs-results-refine-box .fs-results-refine-input-row {
+    min-height: 38px !important;
+    padding: 3px 5px 3px 10px !important;
+    border-radius: 10px !important;
+    gap: 8px !important;
+  }
+
+  .fs-refine-icon {
+    font-size: 0.88rem !important;
+  }
+
+  .fs-results-refine-input {
+    font-size: 0.8rem !important;
+    padding: 0.35rem 0 !important;
+  }
+
+  .fs-results-refine-input::placeholder {
+    font-size: 0.76rem !important;
+  }
+
+  .fs-results-refine-box .fs-correction-btn {
+    height: 28px !important;
+    padding: 0.25rem 0.7rem !important;
+    font-size: 0.74rem !important;
+    border-radius: 6px !important;
+  }
+
+  .fs-results-actions {
+    margin-top: 4px !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .fs-results-actions .fs-action-btn--cancel {
+    flex: 0 0 85px !important;
+    width: 85px !important;
+    height: 44px !important;
+    font-size: 0.88rem !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+  }
+
+  .fs-results-actions .fs-action-btn--save {
+    flex: 1 1 auto !important;
+    height: 44px !important;
+    font-size: 0.94rem !important;
+    border-radius: 12px !important;
+    padding: 0 1rem !important;
   }
 }
 
