@@ -11,6 +11,7 @@ import analyzeFoodHandler    from './api/analyze-food.js';
 import refineFoodHandler     from './api/refine-food.js';
 import generateDietPlanHandler from './api/generate-diet-plan.js';
 import listModelsHandler     from './api/list-models.js';
+import searchFoodHandler     from './api/search-food.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,9 +22,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
 
 // ==========================================
-// AI ROUTES — delegated to api/ handlers
-// Rate limiting, validation, and error handling
-// are all handled inside each handler file.
+// AI & FOOD API ROUTES
 // ==========================================
 app.post('/api/chat',               chatHandler);
 app.post('/api/diet-coach',         dietCoachHandler);
@@ -31,6 +30,8 @@ app.post('/api/analyze-food',       analyzeFoodHandler);
 app.post('/api/refine-food',        refineFoodHandler);
 app.post('/api/generate-diet-plan', generateDietPlanHandler);
 app.get( '/api/list-models',        listModelsHandler);
+app.get( '/api/search-food',        searchFoodHandler);
+app.post('/api/search-food',        searchFoodHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

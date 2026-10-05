@@ -9,6 +9,7 @@ import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
 import * as dietService from "./dietService.js"; // New Diet Service
 import { getLiftTier } from './js/services/strengthLeague.js';
+import { initFoodDatabase } from './js/diet/foodDatabaseUI.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyD0hdb9-NZ3Et3owriYW5d6iEl6JIdqvV4",
@@ -43,6 +44,14 @@ window.storage = storage;
 window.ref = ref;
 window.uploadBytes = uploadBytes;
 window.getDownloadURL = getDownloadURL;
+
+const getLocalDateString = (d = new Date()) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+window.getLocalDateString = getLocalDateString;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Handle back button / back swipe to prevent instant exit using hash routing
@@ -1508,10 +1517,191 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.historyList.innerHTML = `<div class="empty-state" style="padding:2rem; text-align:center;"><img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width:80px; display:block; margin:0 auto 1rem; opacity:0.6;"><p style="opacity:0.7;">No workouts found for this selection. 💪</p></div>`;
             return;
         }
-
         const grouped = filtered.reduce((acc, d) => { const date = d.date.split('T')[0]; (acc[date] = acc[date] || []).push(d); return acc; }, {});
         const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
-        elements.historyList.innerHTML = sortedDates.map(date => ` <div class="history-date"> <h3>${new Date(date).toLocaleDateString()}</h3> <table> <thead><tr><th>Exercise</th><th>Reps</th><th>Sets</th><th>Weight (${getUnitLabel()})</th><th>Time</th><th></th></tr></thead> <tbody> ${grouped[date].map(e => `<tr><td>${e.exercise}</td><td>${e.reps}</td><td>${e.sets}</td><td>${formatWeight(e.weight)}</td><td>${e.durationMinutes}m</td><td><button class="delete-item-btn" data-id="${e.id}"><i class="ri-delete-bin-line"></i></button></td></tr>`).join('')} </tbody> </table> </div>`).join('');
+
+        const formatFriendlyDate = (dateStr) => {
+            try {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(d);
+                    target.setHours(0, 0, 0, 0);
+                    const diffDays = Math.round((today - target) / (1000 * 60 * 60 * 24));
+                    const formatted = d.toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    if (diffDays === 0) return `Today • ${formatted}`;
+                    if (diffDays === 1) return `Yesterday • ${formatted}`;
+                    return formatted;
+                }
+                return new Date(dateStr).toLocaleDateString();
+            } catch (err) {
+                return dateStr;
+            }
+        };
+
+        const renderWorkoutCard = (e) => {
+            const rawEx = e.exercise || 'Exercise';
+            let cleanName = rawEx;
+            let equip = '';
+
+            const match = rawEx.match(/^(.*?)\s*\((.*?)\)$/);
+            if (match) {
+                cleanName = match[1].trim();
+                equip = match[2].trim();
+            } else {
+                if (/\bbarbell\b/i.test(rawEx)) equip = 'Barbell';
+                else if (/\bdumbbell\b/i.test(rawEx)) equip = 'Dumbbell';
+                else if (/\bcable\b/i.test(rawEx)) equip = 'Cable';
+                else if (/\bmachine\b/i.test(rawEx)) equip = 'Machine';
+                else if (/\bsmith\b/i.test(rawEx)) equip = 'Smith Machine';
+                else if (/\bbodyweight\b/i.test(rawEx) || /push up|pull up|chin up|dip|crunch|plank/i.test(rawEx)) equip = 'Bodyweight';
+            }
+
+            let muscle = '';
+            if (typeof EXERCISE_MUSCLE_MAP !== 'undefined' && EXERCISE_MUSCLE_MAP[rawEx]) {
+                muscle = EXERCISE_MUSCLE_MAP[rawEx][0];
+            } else if (typeof EXERCISE_MUSCLE_MAP !== 'undefined') {
+                const key = Object.keys(EXERCISE_MUSCLE_MAP).find(k => k.toLowerCase().startsWith(cleanName.toLowerCase()));
+                if (key) muscle = EXERCISE_MUSCLE_MAP[key][0];
+            }
+
+            // Category-specific logo / icon matching user requirements
+            const exLower = (rawEx + ' ' + cleanName).toLowerCase();
+            const muscleLower = (muscle || '').toLowerCase();
+
+            let iconHtml = '<i class="ri-user-heart-line"></i>';
+            let avatarClass = 'other';
+
+            if (
+                muscleLower.includes('leg') ||
+                muscleLower.includes('quad') ||
+                muscleLower.includes('hamstring') ||
+                muscleLower.includes('calv') ||
+                muscleLower.includes('glute') ||
+                exLower.includes('squat') ||
+                exLower.includes('leg') ||
+                exLower.includes('calf') ||
+                exLower.includes('lunge') ||
+                exLower.includes('deadlift')
+            ) {
+                iconHtml = '<img src="assets/images/legs-logo.png" class="whc-avatar-img img-legs" alt="Legs">';
+                avatarClass = 'legs';
+            } else if (
+                muscleLower.includes('chest') ||
+                exLower.includes('bench') ||
+                exLower.includes('chest') ||
+                exLower.includes('pec') ||
+                exLower.includes('push up') ||
+                exLower.includes('pushup') ||
+                exLower.includes('fly')
+            ) {
+                iconHtml = '<img src="assets/images/chest-logo.png" class="whc-avatar-img img-chest" alt="Chest">';
+                avatarClass = 'chest';
+            } else if (
+                muscleLower.includes('bicep') ||
+                exLower.includes('bicep') ||
+                exLower.includes('curl')
+            ) {
+                iconHtml = '<img src="assets/images/bicep-logo.png" class="whc-avatar-img img-bicep" alt="Bicep">';
+                avatarClass = 'bicep';
+            } else if (
+                muscleLower.includes('yoga') ||
+                muscleLower.includes('stretch') ||
+                exLower.includes('yoga') ||
+                exLower.includes('asana') ||
+                exLower.includes('stretch') ||
+                exLower.includes('pose') ||
+                exLower.includes('pranayama') ||
+                exLower.includes('meditation')
+            ) {
+                iconHtml = '<img src="assets/images/yoga-logo.png" class="whc-avatar-img img-yoga" alt="Yoga">';
+                avatarClass = 'yoga';
+            } else if (
+                muscleLower.includes('back') ||
+                muscleLower.includes('lat') ||
+                exLower.includes('lat pulldown') ||
+                exLower.includes('pull up') ||
+                exLower.includes('pullup') ||
+                exLower.includes('row')
+            ) {
+                iconHtml = '<img src="assets/images/back-logo.png" class="whc-avatar-img img-back" alt="Back">';
+                avatarClass = 'back';
+            } else {
+                // Other exercises not categorisable like this: person with heart
+                iconHtml = '<i class="ri-user-heart-line"></i>';
+                avatarClass = 'other';
+            }
+
+            const unit = getUnitLabel();
+            const displayWeight = formatWeight(e.weight);
+            const totalVol = Math.round((e.weight || 0) * (e.sets || 0) * (e.reps || 0));
+
+            return `
+                <div class="workout-history-card">
+                    <div class="whc-top">
+                        <div class="whc-avatar whc-avatar-${avatarClass}">
+                            ${iconHtml}
+                        </div>
+                        <div class="whc-info">
+                            <div class="whc-title-row">
+                                <h4 class="whc-title" title="${rawEx}">${cleanName}</h4>
+                            </div>
+                            <div class="whc-tags">
+                                ${equip ? `<span class="whc-badge whc-badge-equip">${equip}</span>` : ''}
+                                ${muscle ? `<span class="whc-badge whc-badge-muscle">${muscle}</span>` : ''}
+                            </div>
+                        </div>
+                        <button class="delete-item-btn whc-btn-delete" data-id="${e.id}" title="Delete workout" aria-label="Delete workout">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                    <div class="whc-stats-grid">
+                        <div class="whc-stat-cell">
+                            <span class="whc-stat-label">WEIGHT</span>
+                            <span class="whc-stat-val"><strong>${displayWeight}</strong> <span class="whc-unit">${unit}</span></span>
+                        </div>
+                        <div class="whc-stat-cell">
+                            <span class="whc-stat-label">SETS × REPS</span>
+                            <span class="whc-stat-val"><strong>${e.sets}</strong> × <strong>${e.reps}</strong></span>
+                        </div>
+                        <div class="whc-stat-cell">
+                            <span class="whc-stat-label">TIME</span>
+                            <span class="whc-stat-val"><strong>${e.durationMinutes || 0}</strong> <span class="whc-unit">min</span></span>
+                        </div>
+                        <div class="whc-stat-cell">
+                            <span class="whc-stat-label">VOLUME</span>
+                            <span class="whc-stat-val">${e.weight > 0 ? `<strong>${formatWeight(totalVol)}</strong> <span class="whc-unit">${unit}</span>` : '<span class="whc-stat-bw">BW</span>'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        elements.historyList.innerHTML = sortedDates.map(date => {
+            const count = grouped[date].length;
+            const countLabel = count === 1 ? '1 exercise' : `${count} exercises`;
+            return `
+                <div class="history-date whc-date-group">
+                    <div class="whc-date-header">
+                        <div class="whc-date-title">
+                            <i class="ri-calendar-event-line"></i>
+                            <span>${formatFriendlyDate(date)}</span>
+                        </div>
+                        <span class="whc-date-badge">${countLabel}</span>
+                    </div>
+                    <div class="whc-cards-list">
+                        ${grouped[date].map(e => renderWorkoutCard(e)).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
     };
 
     const updateFilteredHistory = () => {
@@ -2049,6 +2239,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (item.dataset.target === 'view-tools' || item.dataset.target === 'view-ai') {
                 if (typeof syncPersonalDataToTools === 'function') syncPersonalDataToTools();
+            }
+            if (item.dataset.target === 'view-diet-history') {
+                if (typeof window.updateDietHistory === 'function') window.updateDietHistory();
             }
             if (item.dataset.target === 'view-achievements') updateAchievementsUI();
         }));
@@ -2825,8 +3018,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.btnSubmitMeal.disabled = true;
 
                 try {
-                    // Force strictly YYYY-MM-DD
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getLocalDateString();
                     const result = await dietService.addMeal(db, user.uid, today, mealData);
 
                     if (result.success) {
@@ -2835,8 +3027,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         elements.dietForm.reset();
                         elements.dietMealType.value = "Breakfast"; // Reset selected opt
                         if (typeof applyCustomDropdown === 'function') applyCustomDropdown(elements.dietMealType);
-                        // Re-arm realtime listeners so Dashboard reflects the new meal instantly
+                        // Re-arm realtime listeners so Dashboard & History reflect the new meal instantly
                         if (window.updateDietDashboard) window.updateDietDashboard();
+                        if (window.updateDietHistory) window.updateDietHistory(today);
                         if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
                         checkDietGamificationAsync();
                     } else {
@@ -3054,7 +3247,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         try {
                             const user = auth.currentUser;
-                            const today = new Date().toISOString().split('T')[0];
+                            const today = getLocalDateString();
                             const mealData = {
                                 mealType: recipe.mealType,
                                 foodName: servingBadge ? `${recipe.recipeName} ${servingBadge}` : recipe.recipeName,
@@ -3067,8 +3260,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (logResult.success) {
                                 if (gamificationModule) gamificationModule.logDailyDiet(today);
                                 showNotification(`Logged ${recipe.recipeName} successfully! 🍎`, 'success');
-                                // Update dashboard in background
+                                // Update dashboard & history in background
                                 if (window.updateDietDashboard) window.updateDietDashboard();
+                                if (window.updateDietHistory) window.updateDietHistory(today);
                                 if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
                                 checkDietGamificationAsync();
                             } else {
@@ -3243,7 +3437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (unsubscribeMeals) unsubscribeMeals();
             if (unsubscribeWater) unsubscribeWater();
 
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
 
             unsubscribeMeals = dietService.observeMealsByDate(db, user.uid, today, (result) => {
                 if (result.success) {
@@ -3308,7 +3502,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.btnAddWater.disabled = true;
                 elements.btnAddWater.innerHTML = '<i class="ri-drop-fill animate-droplet-fall"></i>';
 
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
                 const result = await dietService.addWater(db, user.uid, today, 250);
 
                 if (result.success) {
@@ -3321,6 +3515,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         showNotification("Added 250ml water! 💧");
                     }
+                    if (window.updateDietHistory) window.updateDietHistory(today);
                     checkDietGamificationAsync();
                 } else {
                     showNotification("Failed to add water.", "error");
@@ -3344,11 +3539,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.btnSubWater.disabled = true;
                 elements.btnSubWater.innerHTML = '<i class="ri-drop-fill animate-droplet-rise"></i>';
 
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
                 const result = await dietService.addWater(db, user.uid, today, -250);
 
                 if (result.success) {
                     showNotification("Removed 250ml water.");
+                    if (window.updateDietHistory) window.updateDietHistory(today);
                 } else {
                     showNotification("Failed to remove water.", "error");
                 }
@@ -5028,9 +5224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Formatting Date
-                const dateObj = new Date();
-                const today = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                const today = getLocalDateString();
 
                 const safeFoodName = elements.scanFoodQty.value.trim()
                     ? `${fName} (${elements.scanFoodQty.value.trim()})`
@@ -5060,6 +5254,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     gamificationModule.logAIScan();
                     gamificationModule.logDailyDiet(today);
                 }
+                if (window.updateDietDashboard) window.updateDietDashboard();
+                if (window.updateDietHistory) window.updateDietHistory(today);
                 if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
                 checkDietGamificationAsync();
 
@@ -5160,29 +5356,155 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     let historyWeeklyCalsChart = null;
     let historyWeeklyProteinChart = null;
-    let currentDietHistoryDate = new Date().toISOString().split('T')[0];
+    let currentDietHistoryDate = getLocalDateString();
     let currentDietHistoryMealFilter = '';
+    let unsubscribeDietHistoryMeals = null;
+    let unsubscribeDietHistoryWater = null;
+    let latestDietHistoryMeals = [];
+    let latestDietHistoryWater = 0;
+
+    const updateDailyDietHistoryUI = (meals, tWater) => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const calGoal = userPreferences.calorieTarget || 2000;
+        let filteredMeals = meals || [];
+        if (currentDietHistoryMealFilter) {
+            filteredMeals = filteredMeals.filter(m => m.mealType === currentDietHistoryMealFilter);
+        }
+
+        let tCals = 0, tPro = 0, tCarb = 0, tFat = 0;
+        const mealList = document.getElementById('history-meal-list');
+        if (!mealList) return;
+        mealList.innerHTML = '';
+
+        if (filteredMeals.length === 0) {
+            mealList.innerHTML = `
+                <div class="dh-meal-empty">
+                    <div class="dh-empty-icon"><i class="ri-restaurant-2-line"></i></div>
+                    <div class="dh-empty-title">No meals logged yet</div>
+                    <div class="dh-empty-sub">Meals logged for this day will appear here automatically.</div>
+                </div>
+            `;
+        } else {
+            const proSvg = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+            const carbSvg = `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:inline-block;vertical-align:-1px"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/></svg>`;
+            const fatSvg = `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="display:inline-block;vertical-align:-1px"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+
+            filteredMeals.forEach(m => {
+                tCals += (m.calories || 0); tPro += (m.protein || 0); tCarb += (m.carbs || 0); tFat += (m.fat || 0);
+                
+                const mealType = m.mealType || 'Snack';
+                const mealTypeLower = mealType.toLowerCase();
+
+                let mealIcon = 'ri-apple-line';
+                if (mealTypeLower === 'breakfast') mealIcon = 'ri-sun-foggy-line';
+                else if (mealTypeLower === 'lunch') mealIcon = 'ri-restaurant-line';
+                else if (mealTypeLower === 'dinner') mealIcon = 'ri-moon-clear-line';
+                else if (mealTypeLower === 'snack') mealIcon = 'ri-flashlight-line';
+
+                // Separate title and portion cleanly
+                const rawName = m.foodName || 'Meal Item';
+                const portionMatch = rawName.match(/^(.*?)\s*(\([^)]+\))$/);
+                let title = rawName;
+                let portion = '';
+                if (portionMatch) {
+                    title = portionMatch[1].trim();
+                    portion = portionMatch[2].replace(/^\(|\)$/g, '').trim();
+                } else if (m.quantity) {
+                    portion = `${m.quantity} ${m.quantityType || ''}`.trim();
+                }
+
+                const card = document.createElement('div');
+                card.className = `dh-meal-card dh-meal-type-${mealTypeLower}`;
+                card.innerHTML = `
+                    <div class="dh-meal-avatar">
+                        <i class="${mealIcon}"></i>
+                    </div>
+                    <div class="dh-meal-main">
+                        <div class="dh-meal-header">
+                            <span class="dh-meal-title" title="${title}">${title}</span>
+                            <span class="dh-meal-tag ${mealTypeLower}">${mealType}</span>
+                        </div>
+                        ${portion ? `<div class="dh-meal-portion"><i class="ri-scales-3-line"></i> ${portion}</div>` : ''}
+                        <div class="dh-meal-macro-chips">
+                            <span class="dh-macro-pill pro" title="Protein">
+                                ${proSvg}
+                                <span class="macro-val">${m.protein || 0}g</span>
+                            </span>
+                            <span class="dh-macro-pill carb" title="Carbs">
+                                ${carbSvg}
+                                <span class="macro-val">${m.carbs || 0}g</span>
+                            </span>
+                            <span class="dh-macro-pill fat" title="Fat">
+                                ${fatSvg}
+                                <span class="macro-val">${m.fat || 0}g</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="dh-meal-right">
+                        <div class="dh-meal-cals-badge">
+                            <span class="dh-cals-num">${m.calories || 0}</span>
+                            <span class="dh-cals-unit">kcal</span>
+                        </div>
+                        <button class="dh-btn-delete" data-id="${m.id}" title="Delete Meal" aria-label="Delete Meal">
+                            <i class="ri-delete-bin-7-line"></i>
+                        </button>
+                    </div>
+                `;
+                mealList.appendChild(card);
+            });
+        }
+
+        const calsEl = document.getElementById('history-daily-cals');
+        const protEl = document.getElementById('history-daily-protein');
+        const carbsEl = document.getElementById('history-daily-carbs');
+        const fatEl = document.getElementById('history-daily-fat');
+        const waterEl = document.getElementById('history-daily-water');
+
+        if (calsEl) calsEl.textContent = Math.round(tCals);
+        if (protEl) protEl.textContent = Math.round(tPro) + 'g';
+        if (carbsEl) carbsEl.textContent = Math.round(tCarb) + 'g';
+        if (fatEl) fatEl.textContent = Math.round(tFat) + 'g';
+
+        const wGoal = 2500;
+        if (waterEl) waterEl.textContent = `${tWater || 0}/${wGoal}ml`;
+
+        // Calorie progress bar
+        const pct = Math.min(100, Math.round((tCals / calGoal) * 100));
+        const barFill = document.getElementById('dh-calorie-bar-fill');
+        const barText = document.getElementById('dh-calorie-bar-text');
+        if (barFill) barFill.style.width = pct + '%';
+        if (barText) barText.textContent = `${Math.round(tCals)} / ${calGoal} kcal`;
+
+        // Bind Delete events
+        mealList.querySelectorAll('.dh-btn-delete').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.dataset.id;
+                if (confirm("Delete this meal?")) {
+                    await dietService.deleteMeal(db, user.uid, currentDietHistoryDate, id);
+                    if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
+                    showNotification("Meal deleted.", "info");
+                }
+            });
+        });
+    };
 
     const renderDietDailyHistory = async () => {
         const user = auth.currentUser;
         if (!user) return;
 
         const date = currentDietHistoryDate;
-        const result = await dietService.getMealsByDate(db, user.uid, date);
-        const waterResult = await dietService.getWaterByDate(db, user.uid, date);
-
-        const calGoal = userPreferences.calorieTarget || 2000;
         const controlsContainer = document.getElementById('diet-history-controls');
 
         // 1. Generate Dates for Scroller (Last 14 days)
         const dateItems = [];
         const today = new Date();
-        today.setHours(0,0,0,0);
         
         for (let i = 0; i < 14; i++) {
             const d = new Date(today);
             d.setDate(today.getDate() - i);
-            const iso = d.toISOString().split('T')[0];
+            const iso = getLocalDateString(d);
             const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
             const dayNum = d.getDate();
             dateItems.push({ iso, dayName, dayNum });
@@ -5190,153 +5512,124 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Build Controls HTML
         const mealsList = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
-        controlsContainer.innerHTML = `
-            <div class="filter-group">
-                <label for="history-filter-meal">Filter by Meal</label>
-                <select id="history-filter-meal">
-                    <option value="">All Meals</option>
-                    ${mealsList.map(m => `<option value="${m}" ${m === currentDietHistoryMealFilter ? 'selected' : ''}>${m}</option>`).join('')}
-                </select>
-            </div>
-
-            <div class="date-scroller-container">
-                <div class="date-scroller" id="diet-history-date-scroller">
-                    ${dateItems.map(item => `
-                        <div class="date-item ${item.iso === currentDietHistoryDate ? 'active' : ''}" data-date="${item.iso}">
-                            <span class="day-name">${item.dayName}</span>
-                            <span class="day-number">${item.dayNum}</span>
-                        </div>
-                    `).join('')}
+        if (controlsContainer) {
+            controlsContainer.innerHTML = `
+                <div class="filter-group">
+                    <label for="history-filter-meal">Filter by Meal</label>
+                    <select id="history-filter-meal">
+                        <option value="">All Meals</option>
+                        ${mealsList.map(m => `<option value="${m}" ${m === currentDietHistoryMealFilter ? 'selected' : ''}>${m}</option>`).join('')}
+                    </select>
                 </div>
-                <div class="calendar-picker-wrapper">
-                    <button class="btn-open-calendar" id="btn-diet-history-calendar" title="Pick specific date">
-                        <i class="ri-calendar-line"></i>
-                    </button>
-                    <input type="date" id="diet-history-filter-date-input" value="${currentDietHistoryDate}" style="position:absolute; opacity:0; pointer-events:none; right:0; bottom:0;">
-                </div>
-            </div>
-            
-            <div class="history-status-bar" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                <span class="history-status-text">
-                    ${currentDietHistoryMealFilter ? `Showing <strong>${currentDietHistoryMealFilter}</strong> on ` : `Showing meals on `}
-                    <strong>${new Date(currentDietHistoryDate).toLocaleDateString()}</strong>
-                </span>
-                ${currentDietHistoryMealFilter ? `<button class="btn-clear-filters" id="btn-clear-diet-history-filters"><i class="ri-close-line"></i> Clear</button>` : ''}
-            </div>
-        `;
 
-        // 3. APPLY CUSTOM DROPDOWN STYLE
-        const mealSelect = document.getElementById('history-filter-meal');
-        applyCustomDropdown(mealSelect);
-
-        // 4. Attach Control Listeners
-        mealSelect.addEventListener('change', (e) => {
-            currentDietHistoryMealFilter = e.target.value;
-            renderDietDailyHistory();
-        });
-        
-        document.querySelectorAll('#diet-history-date-scroller .date-item').forEach(item => {
-            item.addEventListener('click', () => {
-                currentDietHistoryDate = item.getAttribute('data-date');
-                renderDietDailyHistory();
-            });
-        });
-
-        const calBtn = document.getElementById('btn-diet-history-calendar');
-        const dateInput = document.getElementById('diet-history-filter-date-input');
-        if (calBtn) calBtn.addEventListener('click', () => dateInput.showPicker());
-        dateInput.addEventListener('change', (e) => {
-            currentDietHistoryDate = e.target.value;
-            renderDietDailyHistory();
-        });
-        
-        const clearBtn = document.getElementById('btn-clear-diet-history-filters');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
-                currentDietHistoryMealFilter = '';
-                renderDietDailyHistory();
-            });
-        }
-
-        // 5. Render Data
-        if (result.success) {
-            let filteredMeals = result.meals;
-            if (currentDietHistoryMealFilter) {
-                filteredMeals = filteredMeals.filter(m => m.mealType === currentDietHistoryMealFilter);
-            }
-
-            let tCals = 0, tPro = 0, tCarb = 0, tFat = 0;
-            const mealList = document.getElementById('history-meal-list');
-            mealList.innerHTML = '';
-
-            if (filteredMeals.length === 0) {
-                mealList.innerHTML = '<div class="dh-meal-empty">No meals logged for this selection.</div>';
-            } else {
-                filteredMeals.forEach(m => {
-                    tCals += (m.calories || 0); tPro += (m.protein || 0); tCarb += (m.carbs || 0); tFat += (m.fat || 0);
-                    const card = document.createElement('div');
-                    card.className = 'dh-meal-card';
-                    card.innerHTML = `
-                        <div class="dh-meal-left">
-                            <div class="dh-meal-name">${m.foodName}</div>
-                            <div class="dh-meal-type-badge">${m.mealType}</div>
-                            <div class="dh-meal-micro-macros">
-                                <span><i class="ri-boxing-fill" style="color:#3b82f6"></i> ${m.protein || 0}g</span>
-                                <span><i class="ri-bread-fill" style="color:#a855f7"></i> ${m.carbs || 0}g</span>
-                                <span><i class="ri-drop-fill" style="color:#ec4899"></i> ${m.fat || 0}g</span>
+                <div class="date-scroller-container">
+                    <div class="date-scroller" id="diet-history-date-scroller">
+                        ${dateItems.map(item => `
+                            <div class="date-item ${item.iso === currentDietHistoryDate ? 'active' : ''}" data-date="${item.iso}">
+                                <span class="day-name">${item.dayName}</span>
+                                <span class="day-number">${item.dayNum}</span>
                             </div>
-                        </div>
-                        <div class="dh-meal-right">
-                            <div><span class="dh-meal-kcal">${m.calories || 0}</span> <span class="dh-meal-kcal-unit">kcal</span></div>
-                            <button class="dh-btn-delete" data-id="${m.id}" title="Delete Meal"><i class="ri-delete-bin-line"></i></button>
-                        </div>
-                    `;
-                    mealList.appendChild(card);
-                });
-            }
+                        `).join('')}
+                    </div>
+                    <div class="calendar-picker-wrapper">
+                        <button class="btn-open-calendar" id="btn-diet-history-calendar" title="Pick specific date">
+                            <i class="ri-calendar-line"></i>
+                        </button>
+                        <input type="date" id="diet-history-filter-date-input" value="${currentDietHistoryDate}" style="position:absolute; opacity:0; pointer-events:none; right:0; bottom:0;">
+                    </div>
+                </div>
+                
+                <div class="history-status-bar" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span class="history-status-text">
+                        ${currentDietHistoryMealFilter ? `Showing <strong>${currentDietHistoryMealFilter}</strong> on ` : `Showing meals on `}
+                        <strong>${new Date(currentDietHistoryDate + 'T00:00:00').toLocaleDateString()}</strong>
+                    </span>
+                    ${currentDietHistoryMealFilter ? `<button class="btn-clear-filters" id="btn-clear-diet-history-filters"><i class="ri-close-line"></i> Clear</button>` : ''}
+                </div>
+            `;
 
-            document.getElementById('history-daily-cals').textContent = Math.round(tCals);
-            document.getElementById('history-daily-protein').textContent = Math.round(tPro) + 'g';
-            document.getElementById('history-daily-carbs').textContent = Math.round(tCarb) + 'g';
-            document.getElementById('history-daily-fat').textContent = Math.round(tFat) + 'g';
-
-            const wGoal = 2500;
-            const tWater = waterResult.success ? waterResult.totalMl : 0;
-            document.getElementById('history-daily-water').textContent = `${tWater}/${wGoal}ml`;
-
-            // Calorie progress bar
-            const pct = Math.min(100, Math.round((tCals / calGoal) * 100));
-            const barFill = document.getElementById('dh-calorie-bar-fill');
-            const barText = document.getElementById('dh-calorie-bar-text');
-            if (barFill) barFill.style.width = pct + '%';
-            if (barText) barText.textContent = `${Math.round(tCals)} / ${calGoal} kcal`;
-
-            // Bind Delete events
-            mealList.querySelectorAll('.dh-btn-delete').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const id = e.currentTarget.dataset.id;
-                    if (confirm("Delete this meal?")) {
-                        await dietService.deleteMeal(db, user.uid, date, id);
-                        if (window.clearWeeklyDietCache) window.clearWeeklyDietCache();
-                        renderDietDailyHistory();
-                        showNotification("Meal deleted.", "info");
+            // 3. APPLY CUSTOM DROPDOWN STYLE
+            const mealSelect = document.getElementById('history-filter-meal');
+            if (mealSelect) {
+                applyCustomDropdown(mealSelect);
+                mealSelect.addEventListener('change', (e) => {
+                    currentDietHistoryMealFilter = e.target.value;
+                    updateDailyDietHistoryUI(latestDietHistoryMeals, latestDietHistoryWater);
+                    const statusText = document.querySelector('.history-status-text');
+                    if (statusText) {
+                        statusText.innerHTML = `${currentDietHistoryMealFilter ? `Showing <strong>${currentDietHistoryMealFilter}</strong> on ` : `Showing meals on `}<strong>${new Date(currentDietHistoryDate).toLocaleDateString()}</strong>`;
                     }
                 });
+            }
+            
+            document.querySelectorAll('#diet-history-date-scroller .date-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    currentDietHistoryDate = item.getAttribute('data-date');
+                    renderDietDailyHistory();
+                });
             });
 
-        } else {
-            console.error("Error loading daily history", result.error);
-            document.getElementById('history-meal-list').innerHTML = '<div class="dh-meal-empty">No meals logged for this selection.</div>';
-            document.getElementById('history-daily-cals').textContent = 0;
-            document.getElementById('history-daily-protein').textContent = '0g';
-            document.getElementById('history-daily-carbs').textContent = '0g';
-            document.getElementById('history-daily-fat').textContent = '0g';
-            document.getElementById('history-daily-water').textContent = '0ml';
-            const barFill = document.getElementById('dh-calorie-bar-fill');
-            const barText = document.getElementById('dh-calorie-bar-text');
-            if (barFill) barFill.style.width = '0%';
-            if (barText) barText.textContent = `0 / ${calGoal} kcal`;
+            const calBtn = document.getElementById('btn-diet-history-calendar');
+            const dateInput = document.getElementById('diet-history-filter-date-input');
+            if (calBtn && dateInput) calBtn.addEventListener('click', () => dateInput.showPicker());
+            if (dateInput) {
+                dateInput.addEventListener('change', (e) => {
+                    currentDietHistoryDate = e.target.value;
+                    renderDietDailyHistory();
+                });
+            }
+            
+            const clearBtn = document.getElementById('btn-clear-diet-history-filters');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    currentDietHistoryMealFilter = '';
+                    renderDietDailyHistory();
+                });
+            }
         }
+
+        // 4. Set up Real-Time Listeners for the Selected Date
+        if (unsubscribeDietHistoryMeals) {
+            unsubscribeDietHistoryMeals();
+            unsubscribeDietHistoryMeals = null;
+        }
+        if (unsubscribeDietHistoryWater) {
+            unsubscribeDietHistoryWater();
+            unsubscribeDietHistoryWater = null;
+        }
+
+        // Immediate snapshot fetch
+        const [mealsRes, waterRes] = await Promise.allSettled([
+            dietService.getMealsByDate(db, user.uid, date),
+            dietService.getWaterByDate(db, user.uid, date)
+        ]);
+
+        if (mealsRes.status === 'fulfilled' && mealsRes.value && mealsRes.value.success) {
+            latestDietHistoryMeals = mealsRes.value.meals;
+        } else {
+            latestDietHistoryMeals = [];
+        }
+        if (waterRes.status === 'fulfilled' && waterRes.value && waterRes.value.success) {
+            latestDietHistoryWater = waterRes.value.totalMl;
+        } else {
+            latestDietHistoryWater = 0;
+        }
+        updateDailyDietHistoryUI(latestDietHistoryMeals, latestDietHistoryWater);
+
+        // Attach Realtime Live Observation for Instant Self-Refreshing!
+        unsubscribeDietHistoryMeals = dietService.observeMealsByDate(db, user.uid, date, (result) => {
+            if (result && result.success) {
+                latestDietHistoryMeals = result.meals;
+                updateDailyDietHistoryUI(latestDietHistoryMeals, latestDietHistoryWater);
+            }
+        });
+
+        unsubscribeDietHistoryWater = dietService.observeWaterByDate(db, user.uid, date, (waterResult) => {
+            if (waterResult && waterResult.success) {
+                latestDietHistoryWater = waterResult.totalMl;
+                updateDailyDietHistoryUI(latestDietHistoryMeals, latestDietHistoryWater);
+            }
+        });
     };
     let weeklyDietCache = null;
     let weeklyDietCacheTime = 0;
@@ -5549,19 +5842,33 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Date Picker Handler
-        if (dateInput) {
-            dateInput.addEventListener('change', renderDietDailyHistory);
-        }
-
-        // History Route Trigger
-        document.querySelector('.nav-item[data-target="view-diet-history"]')?.addEventListener('click', () => {
-            if (btnDaily.classList.contains('active')) {
-                renderDietDailyHistory();
-            } else {
-                renderDietWeeklyHistory();
+        // Expose global update trigger for other modules and tabs
+        window.updateDietHistory = (targetDate) => {
+            if (targetDate) {
+                currentDietHistoryDate = targetDate;
             }
+            if (btnDaily && btnDaily.classList.contains('active')) {
+                renderDietDailyHistory();
+            } else if (btnWeekly && btnWeekly.classList.contains('active')) {
+                renderDietWeeklyHistory();
+            } else {
+                renderDietDailyHistory();
+            }
+        };
+
+        // History Route Trigger on ALL nav items (both sidebar and mobile bottom nav)
+        document.querySelectorAll('.nav-item[data-target="view-diet-history"]').forEach(nav => {
+            nav.addEventListener('click', () => {
+                if (typeof window.updateDietHistory === 'function') {
+                    window.updateDietHistory();
+                }
+            });
         });
+
+        // Initial render if user is already authenticated
+        if (auth.currentUser) {
+            renderDietDailyHistory();
+        }
     };
 
 
@@ -5616,6 +5923,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Init Modules
         routinesModule = initRoutines(app, db, auth, elements);
         gamificationModule = initGamification(db, auth);
+        initFoodDatabase({
+            db,
+            auth,
+            dietService,
+            gamificationModule,
+            showNotification,
+            checkDietGamificationAsync
+        });
 
         // Hide loader initially, but UI might be locked until auth
         hideLoader();
@@ -5701,10 +6016,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 updateAllUI();
                 
-                // Trigger an initial render of Diet History if the function is exposed or we simulate a click on the active tab
-                const activeDietBtn = document.querySelector('.dh-toggle-btn.active');
-                if (activeDietBtn) {
-                    activeDietBtn.click(); // This will force the render functions inside the closure to execute
+                // Trigger an initial render of Diet History and arm realtime listeners
+                if (typeof window.updateDietHistory === 'function') {
+                    window.updateDietHistory();
                 }
             } else {
                 // User is signed out, show login screen
@@ -5786,6 +6100,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!hasActiveDiet) document.querySelector('.nav-item[data-target="view-diet-dashboard"]').click();
 
                     if (window.updateDietDashboard) window.updateDietDashboard();
+                    if (window.updateDietHistory) window.updateDietHistory();
                 }
             });
         });

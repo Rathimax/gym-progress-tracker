@@ -1,20 +1,23 @@
 import { getFirestore, collection, addDoc, getDocs, doc, query, orderBy, serverTimestamp, setDoc, getDoc, increment, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 /**
- * Ensures date is strictly formatted as YYYY-MM-DD
+ * Ensures date is strictly formatted as YYYY-MM-DD in local time
  * @param {string|Date} rawDate 
  * @returns {string} Formatted date string
  */
 const formatDate = (rawDate) => {
-    if (rawDate instanceof Date) {
-        return rawDate.toISOString().split('T')[0];
+    if (!rawDate) return '';
+    if (typeof rawDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+        return rawDate;
     }
-    // Attempt standard cast
+    if (rawDate instanceof Date) {
+        return `${rawDate.getFullYear()}-${String(rawDate.getMonth() + 1).padStart(2, '0')}-${String(rawDate.getDate()).padStart(2, '0')}`;
+    }
     const d = new Date(rawDate);
-    if (!isNaN(d)) return d.toISOString().split('T')[0];
-
-    // Fallback if already formatted
-    return rawDate;
+    if (!isNaN(d)) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    return String(rawDate);
 };
 
 // ==========================================
@@ -40,6 +43,7 @@ export const addMeal = async (db, uid, date, mealData) => {
             fat: Number(mealData.fat) || 0,
             mealType: mealData.mealType || "Snack",
             quantity: Number(mealData.quantity) || 1,
+            clientTimestamp: Date.now(),
             timestamp: serverTimestamp() // Let Firebase handle exact server time
         };
 
@@ -58,14 +62,17 @@ export const getMealsByDate = async (db, uid, date) => {
     try {
         const formattedDate = formatDate(date);
         const itemsRef = collection(db, "users", uid, "meals", formattedDate, "items");
-
-        // Query ordered by timestamp
-        const q = query(itemsRef, orderBy("timestamp", "asc"));
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(itemsRef);
 
         const meals = [];
         snapshot.forEach((doc) => {
             meals.push({ id: doc.id, ...doc.data() });
+        });
+
+        meals.sort((a, b) => {
+            const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : (a.timestamp || a.clientTimestamp || 0);
+            const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : (b.timestamp || b.clientTimestamp || 0);
+            return timeA - timeB;
         });
 
         return { success: true, meals };
@@ -134,12 +141,16 @@ export const observeMealsByDate = (db, uid, date, callback) => {
 
     const formattedDate = formatDate(date);
     const itemsRef = collection(db, "users", uid, "meals", formattedDate, "items");
-    const q = query(itemsRef, orderBy("timestamp", "asc"));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(itemsRef, (snapshot) => {
         const meals = [];
         snapshot.forEach((doc) => {
             meals.push({ id: doc.id, ...doc.data() });
+        });
+        meals.sort((a, b) => {
+            const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : (a.timestamp || a.clientTimestamp || 0);
+            const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : (b.timestamp || b.clientTimestamp || 0);
+            return timeA - timeB;
         });
         callback({ success: true, meals });
     }, (error) => {

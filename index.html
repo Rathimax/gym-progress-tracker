@@ -53,7 +53,8 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=152">
+  <link rel="stylesheet" href="style.css?v=166">
+  <link rel="stylesheet" href="css/food-database.css?v=22">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
 </head>
@@ -202,26 +203,35 @@
 
   <!-- AI Rate Limit Modal -->
   <div id="ai-rate-limit-overlay" class="confirm-overlay hidden">
-    <div class="confirm-modal rate-limit-modal" style="text-align: center; max-width: 350px; padding: 1.75rem 1.5rem; border-radius: 24px;">
-      <div class="confirm-icon rate-limit-icon" style="color: var(--accent-end, #f7797d); font-size: 2.6rem; margin-bottom: 0.5rem; text-shadow: none; filter: none;">
+    <div class="confirm-modal rate-limit-modal"
+      style="text-align: center; max-width: 350px; padding: 1.75rem 1.5rem; border-radius: 24px;">
+      <div class="confirm-icon rate-limit-icon"
+        style="color: var(--accent-end, #f7797d); font-size: 2.6rem; margin-bottom: 0.5rem; text-shadow: none; filter: none;">
         <i class="ri-sparkling-fill" style="text-shadow: none; filter: none;"></i>
       </div>
-      <h3 style="margin-bottom: 0.5rem; font-weight: 800; font-size: 1.15rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">AI Request Limit</h3>
-      <p style="font-size: 0.9rem; color: var(--text, #f8fafc); margin-bottom: 1.4rem; line-height: 1.5;">You are allowed <strong>5 AI requests per minute</strong>.</p>
+      <h3
+        style="margin-bottom: 0.5rem; font-weight: 800; font-size: 1.15rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+        AI Request Limit</h3>
+      <p style="font-size: 0.9rem; color: var(--text, #f8fafc); margin-bottom: 1.4rem; line-height: 1.5;">You are
+        allowed <strong>5 AI requests per minute</strong>.</p>
       <div class="confirm-actions" style="display: flex; justify-content: center;">
-        <button id="btn-rate-limit-ok" class="btn-primary" style="min-width: 140px; padding: 0.75rem 1.75rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: var(--accent-gradient); color: white; border: none; cursor: pointer; box-shadow: none;">Got it</button>
+        <button id="btn-rate-limit-ok" class="btn-primary"
+          style="min-width: 140px; padding: 0.75rem 1.75rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: var(--accent-gradient); color: white; border: none; cursor: pointer; box-shadow: none;">Got
+          it</button>
       </div>
     </div>
   </div>
 
   <!-- Theme Selection Modal -->
   <div id="theme-modal-overlay" class="confirm-overlay hidden">
-    <div class="confirm-modal theme-modal-card" style="text-align: left; max-width: 460px; width: 92%; max-height: 85vh; display: flex; flex-direction: column; padding: 1.5rem 1.6rem; border-radius: 24px; position: relative; box-sizing: border-box;">
+    <div class="confirm-modal theme-modal-card"
+      style="text-align: left; max-width: 460px; width: 92%; max-height: 85vh; display: flex; flex-direction: column; padding: 1.5rem 1.6rem; border-radius: 24px; position: relative; box-sizing: border-box;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
         <h3 style="margin: 0; font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
           <i class="ri-palette-fill" style="color: var(--accent-start, #38bdf8);"></i> Theme Gallery
         </h3>
-        <button id="btn-close-theme-modal" type="button" aria-label="Close" style="background: var(--input-bg); border: 1px solid var(--card-border); font-size: 1.2rem; color: var(--text-light); cursor: pointer; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all 0.2s;">
+        <button id="btn-close-theme-modal" type="button" aria-label="Close"
+          style="background: var(--input-bg); border: 1px solid var(--card-border); font-size: 1.2rem; color: var(--text-light); cursor: pointer; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: all 0.2s;">
           <i class="ri-close-line"></i>
         </button>
       </div>
@@ -229,12 +239,14 @@
         Choose an accent theme to style your entire app interface.
       </p>
 
-      <div id="modal-theme-grid" class="modal-theme-grid" style="overflow-y: auto; max-height: 48vh; padding: 4px; margin-bottom: 1.25rem;">
+      <div id="modal-theme-grid" class="modal-theme-grid"
+        style="overflow-y: auto; max-height: 48vh; padding: 4px; margin-bottom: 1.25rem;">
         <!-- Injected by JS -->
       </div>
 
       <div style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: auto;">
-        <button id="btn-apply-modal-theme" class="btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 800; font-size: 0.95rem; border-radius: 14px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
+        <button id="btn-apply-modal-theme" class="btn-primary"
+          style="width: 100%; padding: 0.85rem; font-weight: 800; font-size: 0.95rem; border-radius: 14px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
           <i class="ri-check-line"></i> APPLY THEME
         </button>
       </div>
@@ -247,8 +259,10 @@
       style="text-align: left; max-width: 440px; padding: 1.5rem 1.75rem; border-radius: 20px;">
       <h3 id="recipe-modal-title"
         style="margin-bottom: 0.4rem; text-align: center; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <i class="ri-restaurant-line" style="color: var(--accent-end);"></i> Create Custom Recipe</h3>
-      <p id="recipe-modal-desc" style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem; text-align: center;">Save a recipe
+        <i class="ri-restaurant-line" style="color: var(--accent-end);"></i> Create Custom Recipe
+      </h3>
+      <p id="recipe-modal-desc"
+        style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem; text-align: center;">Save a recipe
         to log it with a single click.</p>
 
       <form id="recipe-create-form" style="display: flex; flex-direction: column; gap: 1rem;">
@@ -278,7 +292,8 @@
             <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem;"
               for="recipe-weight-input">Serving Size</label>
             <div class="recipe-serving-row">
-              <input type="number" id="recipe-weight-input" placeholder="Weight" min="0" step="any" class="recipe-serving-input">
+              <input type="number" id="recipe-weight-input" placeholder="Weight" min="0" step="any"
+                class="recipe-serving-input">
               <div class="recipe-unit-wrapper">
                 <select id="recipe-weight-unit" class="recipe-unit-select no-search">
                   <option value="g" selected>g</option>
@@ -304,7 +319,10 @@
           <div class="lm-macros-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
             <div class="lm-macro lm-macro--cal" style="margin: 0; padding: 10px; border-radius: 10px;">
               <div class="lm-macro-head">
-                <i class="ri-fire-fill"></i>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="#f59e0b"
+                  style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
                 <span>Calories</span>
               </div>
               <div class="lm-macro-input-wrap">
@@ -315,7 +333,12 @@
             </div>
             <div class="lm-macro lm-macro--prot" style="margin: 0; padding: 10px; border-radius: 10px;">
               <div class="lm-macro-head">
-                <i class="ri-droplet-fill"></i>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
                 <span>Protein</span>
               </div>
               <div class="lm-macro-input-wrap">
@@ -326,7 +349,17 @@
             </div>
             <div class="lm-macro lm-macro--carb" style="margin: 0; padding: 10px; border-radius: 10px;">
               <div class="lm-macro-head">
-                <i class="ri-leaf-fill"></i>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="#a855f7" stroke="#a855f7" stroke-width="0.5"
+                  style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                  <path d="M2 22 16 8" />
+                  <path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                  <path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                  <path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                  <path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" />
+                  <path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                  <path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                  <path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                </svg>
                 <span>Carbs</span>
               </div>
               <div class="lm-macro-input-wrap">
@@ -337,7 +370,10 @@
             </div>
             <div class="lm-macro lm-macro--fat" style="margin: 0; padding: 10px; border-radius: 10px;">
               <div class="lm-macro-head">
-                <i class="ri-heart-fill"></i>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="#ec4899"
+                  style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                </svg>
                 <span>Fat</span>
               </div>
               <div class="lm-macro-input-wrap">
@@ -354,7 +390,8 @@
             style="background: var(--input-bg); color: var(--text); border: 1px solid var(--card-border); flex: 1; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center;">Cancel</button>
           <button type="submit" id="btn-submit-recipe" class="btn-primary"
             style="flex: 1; padding: 0.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; margin: 0; box-shadow: var(--shadow-btn);"><i
-              class="ri-save-line" id="btn-submit-recipe-icon"></i> <span id="btn-submit-recipe-text">Save Recipe</span></button>
+              class="ri-save-line" id="btn-submit-recipe-icon"></i> <span id="btn-submit-recipe-text">Save
+              Recipe</span></button>
         </div>
       </form>
     </div>
@@ -523,260 +560,261 @@
       <div class="home-top-grid">
         <!-- Log Workout -->
         <div class="card card-log-workout">
-        <div
-          style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; border-bottom:2px solid var(--card-border); padding-bottom:0.75rem;">
-          <h2 style="border:none; margin:0; padding:0; min-width:0;"><span class="icon"><i class="ri-edit-circle-fill"></i></span>
-            Log Workout</h2>
-          <button id="btn-open-routines"
-            style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-end); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
-            <span class="routine-btn-icon"></span> Load Routine
-          </button>
-        </div>
-        <form id="workout-form">
-          <label for="exercise-select">Exercise:</label>
-          <div class="exercise-input-wrapper">
-            <select id="exercise-select" required>
-              <option value="">Select an exercise</option>
-
-              <!-- CHEST -->
-              <optgroup label="Chest">
-                <option>Bench Press (Barbell)</option>
-                <option>Bench Press (Dumbbell)</option>
-                <option>Bench Press (Smith Machine)</option>
-                <option>Incline Bench Press (Barbell)</option>
-                <option>Incline Bench Press (Dumbbell)</option>
-                <option>Incline Bench Press (Smith Machine)</option>
-                <option>Decline Bench Press</option>
-                <option>Chest Press (Machine)</option>
-                <option>Push Up</option>
-                <option>Weighted Push Up</option>
-                <option>Chest Fly (Dumbbell)</option>
-                <option>Chest Fly (Cable)</option>
-                <option>Pec Deck / Machine Fly</option>
-                <option>Dips (Chest Focus)</option>
-                <option>Pullover (Dumbbell)</option>
-                <option>Svend Press</option>
-                <option>Landmine Press</option>
-                <option>Floor Press</option>
-              </optgroup>
-
-              <!-- BACK -->
-              <optgroup label="Back">
-                <option>Deadlift (Conventional)</option>
-                <option>Deadlift (Sumo)</option>
-                <option>Deadlift (Romania)</option>
-                <option>Rack Pull</option>
-                <option>Pull Up</option>
-                <option>Weighted Pull Up</option>
-                <option>Chin Up</option>
-                <option>Weighted Chin Up</option>
-                <option>Lat Pulldown (Wide Grip)</option>
-                <option>Lat Pulldown (Close Grip)</option>
-                <option>Lat Pulldown (Reverse Grip)</option>
-                <option>Barbell Row</option>
-                <option>Pendlay Row</option>
-                <option>Dumbbell Row (Single Arm)</option>
-                <option>Seated Cable Row</option>
-                <option>T-Bar Row</option>
-                <option>Chest Supported Row</option>
-                <option>Face Pull</option>
-                <option>Shrugs (Barbell)</option>
-                <option>Shrugs (Dumbbell)</option>
-                <option>Back Extension / Hyperextension</option>
-                <option>Good Morning</option>
-              </optgroup>
-
-              <!-- SHOULDERS -->
-              <optgroup label="Shoulder">
-                <option>Overhead Press (Barbell)</option>
-                <option>Overhead Press (Dumbbell)</option>
-                <option>Seated Shoulder Press (Dumbbell)</option>
-                <option>Seated Shoulder Press (Machine)</option>
-                <option>Arnold Press</option>
-                <option>Push Press</option>
-                <option>Lateral Raise (Dumbbell)</option>
-                <option>Lateral Raise (Cable)</option>
-                <option>Lateral Raise (Machine)</option>
-                <option>Front Raise (Dumbbell)</option>
-                <option>Front Raise (Cable)</option>
-                <option>Front Raise (Plate)</option>
-                <option>Rear Delt Fly (Dumbbell)</option>
-                <option>Rear Delt Fly (Machine)</option>
-                <option>Rear Delt Fly (Cable)</option>
-                <option>Upright Row</option>
-                <option>Egyptian Lateral Raise</option>
-              </optgroup>
-
-              <!-- LEGS (QUADS) -->
-              <optgroup label="Legs - Quads">
-                <option>Squat (Barbell Back)</option>
-                <option>Squat (Barbell Front)</option>
-                <option>Squat (Goblet)</option>
-                <option>Leg Press</option>
-                <option>Hack Squat</option>
-                <option>Leg Extension</option>
-                <option>Lunge (Walking)</option>
-                <option>Lunge (Reverse)</option>
-                <option>Split Squat (Bulgarian)</option>
-                <option>Split Squat (Static)</option>
-                <option>Step Up</option>
-                <option>Sissy Squat</option>
-                <option>Pistol Squat</option>
-              </optgroup>
-
-              <!-- LEGS (HAMSTRINGS & GLUTES) -->
-              <optgroup label="Legs - Hams & Glutes">
-                <option>Romanian Deadlift (Barbell)</option>
-                <option>Romanian Deadlift (Dumbbell)</option>
-                <option>Leg Curl (Seated)</option>
-                <option>Leg Curl (Lying)</option>
-                <option>Nordic Hamstring Curl</option>
-                <option>Hip Thrust (Barbell)</option>
-                <option>Hip Thrust (Machine)</option>
-                <option>Glute Bridge</option>
-                <option>Cable Kickback</option>
-                <option>Glute Ham Raise</option>
-                <option>Hip Abduction (Machine)</option>
-                <option>Hip Adduction (Machine)</option>
-              </optgroup>
-
-              <!-- CALVES -->
-              <optgroup label="Calves">
-                <option>Calf Raise (Standing)</option>
-                <option>Calf Raise (Seated)</option>
-                <option>Calf Raise (Leg Press)</option>
-                <option>Donkey Calf Raise</option>
-              </optgroup>
-
-              <!-- BICEPS -->
-              <optgroup label="Bicep">
-                <option>Bicep Curl (Barbell)</option>
-                <option>Bicep Curl (Dumbbell)</option>
-                <option>Hammer Curl</option>
-                <option>Preacher Curl (Barbell)</option>
-                <option>Preacher Curl (Machine)</option>
-                <option>Concentration Curl</option>
-                <option>Cable Curl</option>
-                <option>Bayesian Curl</option>
-                <option>Spider Curl</option>
-                <option>Reverse Curl</option>
-                <option>Zottman Curl</option>
-                <option>Incline Dumbbell Curl</option>
-                <option>Strict Curl</option>
-              </optgroup>
-
-              <!-- TRICEPS -->
-              <optgroup label="Tricep">
-                <option>Tricep Pushdown (Rope)</option>
-                <option>Tricep Pushdown (Bar)</option>
-                <option>Skull Crushers (Barbell)</option>
-                <option>Skull Crushers (Dumbbell)</option>
-                <option>Overhead Tricep Extension (Dumbbell)</option>
-                <option>Overhead Tricep Extension (Cable)</option>
-                <option>Close Grip Bench Press</option>
-                <option>Dips (Tricep Focus)</option>
-                <option>Kickback (Dumbbell)</option>
-                <option>Kickback (Cable)</option>
-                <option>JM Press</option>
-              </optgroup>
-
-              <!-- ABS / CORE -->
-              <optgroup label="Abs & Core">
-                <option>Plank</option>
-                <option>Side Plank</option>
-                <option>Crunch</option>
-                <option>Sit Up</option>
-                <option>Leg Raise (Hanging)</option>
-                <option>Leg Raise (Lying)</option>
-                <option>Captain's Chair Leg Raise</option>
-                <option>Russian Twist</option>
-                <option>Cable Crunch</option>
-                <option>Ab Wheel Rollout</option>
-                <option>Woodchopper</option>
-                <option>Vacuum</option>
-                <option>L-Sit</option>
-              </optgroup>
-
-              <!-- CARDIO & PLYO -->
-              <optgroup label="Cardio & Plyo">
-                <option>Running (Treadmill)</option>
-                <option>Running (Outdoor)</option>
-                <option>Cycling</option>
-                <option>Rowing Machine</option>
-                <option>Jump Rope</option>
-                <option>Box Jump</option>
-                <option>Burpees</option>
-                <option>Mountain Climbers</option>
-                <option>Jumping Jacks</option>
-                <option>Battle Ropes</option>
-              </optgroup>
-
-              <!-- OLYMPIC & FULL BODY -->
-              <optgroup label="Olympic & Full Body">
-                <option>Clean and Jerk</option>
-                <option>Snatch</option>
-                <option>Power Clean</option>
-                <option>Hang Clean</option>
-                <option>Thruster</option>
-                <option>Kettlebell Swing</option>
-                <option>Turkish Get Up</option>
-                <option>Farmers Walk</option>
-              </optgroup>
-
-              <!-- OTHER -->
-              <optgroup label="Other">
-                <option>Neck Curl</option>
-                <option>Neck Extension</option>
-                <option>Wrist Curl</option>
-                <option>Wrist Extension</option>
-              </optgroup>
-            </select>
-            <input type="text" id="exercise-text" class="hidden" placeholder="Type custom exercise..." />
-            <button type="button" id="toggle-input-btn" title="Type custom exercise"><i
-                class="ri-add-line"></i></button>
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; border-bottom:2px solid var(--card-border); padding-bottom:0.75rem;">
+            <h2 style="border:none; margin:0; padding:0; min-width:0;"><span class="icon"><i
+                  class="ri-edit-circle-fill"></i></span>
+              Log Workout</h2>
+            <button id="btn-open-routines"
+              style="width:auto; padding:0.5rem 1rem; font-size:0.85rem; background:var(--input-bg); color:var(--accent-end); border-radius:20px; box-shadow:none; border:1px solid var(--card-border); display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
+              <span class="routine-btn-icon"></span> Load Routine
+            </button>
           </div>
+          <form id="workout-form">
+            <label for="exercise-select">Exercise:</label>
+            <div class="exercise-input-wrapper">
+              <select id="exercise-select" required>
+                <option value="">Select an exercise</option>
 
-          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
-            <div>
-              <label for="reps" style="margin-top: 1.25rem;">Reps:</label>
-              <input type="number" id="reps" step="1" required placeholder="e.g., 10" />
+                <!-- CHEST -->
+                <optgroup label="Chest">
+                  <option>Bench Press (Barbell)</option>
+                  <option>Bench Press (Dumbbell)</option>
+                  <option>Bench Press (Smith Machine)</option>
+                  <option>Incline Bench Press (Barbell)</option>
+                  <option>Incline Bench Press (Dumbbell)</option>
+                  <option>Incline Bench Press (Smith Machine)</option>
+                  <option>Decline Bench Press</option>
+                  <option>Chest Press (Machine)</option>
+                  <option>Push Up</option>
+                  <option>Weighted Push Up</option>
+                  <option>Chest Fly (Dumbbell)</option>
+                  <option>Chest Fly (Cable)</option>
+                  <option>Pec Deck / Machine Fly</option>
+                  <option>Dips (Chest Focus)</option>
+                  <option>Pullover (Dumbbell)</option>
+                  <option>Svend Press</option>
+                  <option>Landmine Press</option>
+                  <option>Floor Press</option>
+                </optgroup>
+
+                <!-- BACK -->
+                <optgroup label="Back">
+                  <option>Deadlift (Conventional)</option>
+                  <option>Deadlift (Sumo)</option>
+                  <option>Deadlift (Romania)</option>
+                  <option>Rack Pull</option>
+                  <option>Pull Up</option>
+                  <option>Weighted Pull Up</option>
+                  <option>Chin Up</option>
+                  <option>Weighted Chin Up</option>
+                  <option>Lat Pulldown (Wide Grip)</option>
+                  <option>Lat Pulldown (Close Grip)</option>
+                  <option>Lat Pulldown (Reverse Grip)</option>
+                  <option>Barbell Row</option>
+                  <option>Pendlay Row</option>
+                  <option>Dumbbell Row (Single Arm)</option>
+                  <option>Seated Cable Row</option>
+                  <option>T-Bar Row</option>
+                  <option>Chest Supported Row</option>
+                  <option>Face Pull</option>
+                  <option>Shrugs (Barbell)</option>
+                  <option>Shrugs (Dumbbell)</option>
+                  <option>Back Extension / Hyperextension</option>
+                  <option>Good Morning</option>
+                </optgroup>
+
+                <!-- SHOULDERS -->
+                <optgroup label="Shoulder">
+                  <option>Overhead Press (Barbell)</option>
+                  <option>Overhead Press (Dumbbell)</option>
+                  <option>Seated Shoulder Press (Dumbbell)</option>
+                  <option>Seated Shoulder Press (Machine)</option>
+                  <option>Arnold Press</option>
+                  <option>Push Press</option>
+                  <option>Lateral Raise (Dumbbell)</option>
+                  <option>Lateral Raise (Cable)</option>
+                  <option>Lateral Raise (Machine)</option>
+                  <option>Front Raise (Dumbbell)</option>
+                  <option>Front Raise (Cable)</option>
+                  <option>Front Raise (Plate)</option>
+                  <option>Rear Delt Fly (Dumbbell)</option>
+                  <option>Rear Delt Fly (Machine)</option>
+                  <option>Rear Delt Fly (Cable)</option>
+                  <option>Upright Row</option>
+                  <option>Egyptian Lateral Raise</option>
+                </optgroup>
+
+                <!-- LEGS (QUADS) -->
+                <optgroup label="Legs - Quads">
+                  <option>Squat (Barbell Back)</option>
+                  <option>Squat (Barbell Front)</option>
+                  <option>Squat (Goblet)</option>
+                  <option>Leg Press</option>
+                  <option>Hack Squat</option>
+                  <option>Leg Extension</option>
+                  <option>Lunge (Walking)</option>
+                  <option>Lunge (Reverse)</option>
+                  <option>Split Squat (Bulgarian)</option>
+                  <option>Split Squat (Static)</option>
+                  <option>Step Up</option>
+                  <option>Sissy Squat</option>
+                  <option>Pistol Squat</option>
+                </optgroup>
+
+                <!-- LEGS (HAMSTRINGS & GLUTES) -->
+                <optgroup label="Legs - Hams & Glutes">
+                  <option>Romanian Deadlift (Barbell)</option>
+                  <option>Romanian Deadlift (Dumbbell)</option>
+                  <option>Leg Curl (Seated)</option>
+                  <option>Leg Curl (Lying)</option>
+                  <option>Nordic Hamstring Curl</option>
+                  <option>Hip Thrust (Barbell)</option>
+                  <option>Hip Thrust (Machine)</option>
+                  <option>Glute Bridge</option>
+                  <option>Cable Kickback</option>
+                  <option>Glute Ham Raise</option>
+                  <option>Hip Abduction (Machine)</option>
+                  <option>Hip Adduction (Machine)</option>
+                </optgroup>
+
+                <!-- CALVES -->
+                <optgroup label="Calves">
+                  <option>Calf Raise (Standing)</option>
+                  <option>Calf Raise (Seated)</option>
+                  <option>Calf Raise (Leg Press)</option>
+                  <option>Donkey Calf Raise</option>
+                </optgroup>
+
+                <!-- BICEPS -->
+                <optgroup label="Bicep">
+                  <option>Bicep Curl (Barbell)</option>
+                  <option>Bicep Curl (Dumbbell)</option>
+                  <option>Hammer Curl</option>
+                  <option>Preacher Curl (Barbell)</option>
+                  <option>Preacher Curl (Machine)</option>
+                  <option>Concentration Curl</option>
+                  <option>Cable Curl</option>
+                  <option>Bayesian Curl</option>
+                  <option>Spider Curl</option>
+                  <option>Reverse Curl</option>
+                  <option>Zottman Curl</option>
+                  <option>Incline Dumbbell Curl</option>
+                  <option>Strict Curl</option>
+                </optgroup>
+
+                <!-- TRICEPS -->
+                <optgroup label="Tricep">
+                  <option>Tricep Pushdown (Rope)</option>
+                  <option>Tricep Pushdown (Bar)</option>
+                  <option>Skull Crushers (Barbell)</option>
+                  <option>Skull Crushers (Dumbbell)</option>
+                  <option>Overhead Tricep Extension (Dumbbell)</option>
+                  <option>Overhead Tricep Extension (Cable)</option>
+                  <option>Close Grip Bench Press</option>
+                  <option>Dips (Tricep Focus)</option>
+                  <option>Kickback (Dumbbell)</option>
+                  <option>Kickback (Cable)</option>
+                  <option>JM Press</option>
+                </optgroup>
+
+                <!-- ABS / CORE -->
+                <optgroup label="Abs & Core">
+                  <option>Plank</option>
+                  <option>Side Plank</option>
+                  <option>Crunch</option>
+                  <option>Sit Up</option>
+                  <option>Leg Raise (Hanging)</option>
+                  <option>Leg Raise (Lying)</option>
+                  <option>Captain's Chair Leg Raise</option>
+                  <option>Russian Twist</option>
+                  <option>Cable Crunch</option>
+                  <option>Ab Wheel Rollout</option>
+                  <option>Woodchopper</option>
+                  <option>Vacuum</option>
+                  <option>L-Sit</option>
+                </optgroup>
+
+                <!-- CARDIO & PLYO -->
+                <optgroup label="Cardio & Plyo">
+                  <option>Running (Treadmill)</option>
+                  <option>Running (Outdoor)</option>
+                  <option>Cycling</option>
+                  <option>Rowing Machine</option>
+                  <option>Jump Rope</option>
+                  <option>Box Jump</option>
+                  <option>Burpees</option>
+                  <option>Mountain Climbers</option>
+                  <option>Jumping Jacks</option>
+                  <option>Battle Ropes</option>
+                </optgroup>
+
+                <!-- OLYMPIC & FULL BODY -->
+                <optgroup label="Olympic & Full Body">
+                  <option>Clean and Jerk</option>
+                  <option>Snatch</option>
+                  <option>Power Clean</option>
+                  <option>Hang Clean</option>
+                  <option>Thruster</option>
+                  <option>Kettlebell Swing</option>
+                  <option>Turkish Get Up</option>
+                  <option>Farmers Walk</option>
+                </optgroup>
+
+                <!-- OTHER -->
+                <optgroup label="Other">
+                  <option>Neck Curl</option>
+                  <option>Neck Extension</option>
+                  <option>Wrist Curl</option>
+                  <option>Wrist Extension</option>
+                </optgroup>
+              </select>
+              <input type="text" id="exercise-text" class="hidden" placeholder="Type custom exercise..." />
+              <button type="button" id="toggle-input-btn" title="Type custom exercise"><i
+                  class="ri-add-line"></i></button>
             </div>
-            <div>
-              <label for="sets" style="margin-top: 1.25rem;">Sets:</label>
-              <input type="number" id="sets" step="1" required placeholder="e.g., 3" />
+
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
+              <div>
+                <label for="reps" style="margin-top: 1.25rem;">Reps:</label>
+                <input type="number" id="reps" step="1" required placeholder="e.g., 10" />
+              </div>
+              <div>
+                <label for="sets" style="margin-top: 1.25rem;">Sets:</label>
+                <input type="number" id="sets" step="1" required placeholder="e.g., 3" />
+              </div>
             </div>
+            <label for="weight">Weight (kg):</label><input type="number" id="weight" step="0.1" required
+              placeholder="e.g., 20.5" />
+
+            <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
+
+            <label for="duration-minutes">Estimated Duration: <span class="label-optional">(optional)</span></label>
+            <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
+                placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59"
+                placeholder="Secs" /></div>
+
+            <button type="submit">Add Workout</button>
+          </form>
+        </div>
+
+        <!-- Body Weight -->
+        <div class="card card-compact" id="card-bodyweight">
+          <h2><span class="icon"><i class="ri-scales-3-fill"></i></span> Body Weight Tracker</h2>
+          <form id="bw-form" class="inline-form">
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
+              <input type="number" id="bw-input" step="0.1" placeholder="Weight (kg)" required />
+              <input type="date" id="bw-date" required />
+            </div>
+            <button type="submit">Log Weight</button>
+          </form>
+          <div class="bw-stats">
+            <span>Latest: <strong id="bw-current">--</strong></span>
+            <span>Start: <strong id="bw-start">--</strong></span>
+            <span>Change: <strong id="bw-change">--</strong></span>
           </div>
-          <label for="weight">Weight (kg):</label><input type="number" id="weight" step="0.1" required
-            placeholder="e.g., 20.5" />
-
-          <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
-
-          <label for="duration-minutes">Estimated Duration: <span class="label-optional">(optional)</span></label>
-          <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
-              placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59"
-              placeholder="Secs" /></div>
-
-          <button type="submit">Add Workout</button>
-        </form>
-      </div>
-
-      <!-- Body Weight -->
-      <div class="card card-compact" id="card-bodyweight">
-        <h2><span class="icon"><i class="ri-scales-3-fill"></i></span> Body Weight Tracker</h2>
-        <form id="bw-form" class="inline-form">
-          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
-            <input type="number" id="bw-input" step="0.1" placeholder="Weight (kg)" required />
-            <input type="date" id="bw-date" required />
-          </div>
-          <button type="submit">Log Weight</button>
-        </form>
-        <div class="bw-stats">
-          <span>Latest: <strong id="bw-current">--</strong></span>
-          <span>Start: <strong id="bw-start">--</strong></span>
-          <span>Change: <strong id="bw-change">--</strong></span>
         </div>
       </div>
-    </div>
 
       <!-- Weekly Summary Card -->
       <div id="weekly-summary-card" class="card card-wide">
@@ -812,20 +850,25 @@
     <!-- VIEW 2: AI ASSISTANT -->
     <div id="view-ai" class="view-section">
       <div class="card card-wide ai-chat-container">
-        <div class="ai-chat-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+        <div class="ai-chat-header"
+          style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
           <h2 style="margin:0; display:flex; align-items:center; gap:0.5rem;">
             <span class="icon"><i class="ri-sparkling-fill"></i></span>
             <span>F<em>AI</em>T</span>
           </h2>
 
           <!-- SLEEK AI QUOTA PILL BADGE -->
-          <div id="ai-speedometer-widget" class="ai-quota-badge gauge-state-theme" title="Exercise AI Rate Limit: 5 requests per minute (Click for details)" onclick="window.showRateLimitModal && window.showRateLimitModal()">
+          <div id="ai-speedometer-widget" class="ai-quota-badge gauge-state-theme"
+            title="Exercise AI Rate Limit: 5 requests per minute (Click for details)"
+            onclick="window.showRateLimitModal && window.showRateLimitModal()">
             <div class="ai-quota-ring-wrap">
               <svg class="ai-quota-ring-svg" viewBox="0 0 24 24">
                 <defs>
                   <linearGradient id="quota-grad-theme" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop id="quota-stop-start" offset="0%" stop-color="var(--accent-start, #0f2027)" style="stop-color: var(--accent-start);" />
-                    <stop id="quota-stop-end" offset="100%" stop-color="var(--accent-end, #4ca1af)" style="stop-color: var(--accent-end);" />
+                    <stop id="quota-stop-start" offset="0%" stop-color="var(--accent-start, #0f2027)"
+                      style="stop-color: var(--accent-start);" />
+                    <stop id="quota-stop-end" offset="100%" stop-color="var(--accent-end, #4ca1af)"
+                      style="stop-color: var(--accent-end);" />
                   </linearGradient>
                   <linearGradient id="quota-grad-amber" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#f59e0b" />
@@ -888,8 +931,11 @@
       <!-- Strength League Dashboard -->
       <div class="card card-wide" style="margin-top: 1.5rem;">
         <div class="league-header">
-          <h2 style="display:flex; align-items:center;"><span class="icon"><i class="ri-sword-fill"></i></span> Strength League 
-            <button id="btn-league-info" style="background:none; border:none; color:var(--text-light); font-size:1.2rem; cursor:pointer; margin-left:0.5rem; padding:0; display:flex; align-items:center;"><i class="ri-question-line"></i></button>
+          <h2 style="display:flex; align-items:center;"><span class="icon"><i class="ri-sword-fill"></i></span> Strength
+            League
+            <button id="btn-league-info"
+              style="background:none; border:none; color:var(--text-light); font-size:1.2rem; cursor:pointer; margin-left:0.5rem; padding:0; display:flex; align-items:center;"><i
+                class="ri-question-line"></i></button>
           </h2>
           <div class="expandable-search" id="league-search-container">
             <input type="text" id="league-search-input" placeholder="Search exercise..." aria-label="Search exercise">
@@ -915,7 +961,8 @@
       <div class="card fade-in card-wide" style="grid-column: 1 / -1;">
         <div class="card-header-flex">
           <h2><span class="icon"><i class="ri-trophy-fill"></i></span> Leaderboard</h2>
-          <select id="leaderboard-exercise-select" class="dropdown" style="width: auto; min-width: 170px; max-width: 220px;">
+          <select id="leaderboard-exercise-select" class="dropdown"
+            style="width: auto; min-width: 170px; max-width: 220px;">
             <option value="">Select Exercise</option>
             <!-- Options populated via JS -->
           </select>
@@ -936,7 +983,9 @@
             <tbody id="leaderboard-tbody">
               <!-- Skeleton Loader (shows immediately until JS populates) -->
               <tr class="skeleton-row">
-                <td style="text-align: center;"><div class="skeleton-avatar" style="margin: 0 auto;"></div></td>
+                <td style="text-align: center;">
+                  <div class="skeleton-avatar" style="margin: 0 auto;"></div>
+                </td>
                 <td>
                   <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                     <div class="skeleton-block" style="width: 16px; height: 16px;"></div>
@@ -949,12 +998,20 @@
                     <div class="skeleton-block" style="width: 50px;"></div>
                   </div>
                 </td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 40px; margin: 0 auto;"></div></td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 50px; margin: 0 auto; border-radius: 12px;"></div></td>
+                <td style="text-align: center;">
+                  <div class="skeleton-block" style="width: 40px; margin: 0 auto;"></div>
+                </td>
+                <td style="text-align: center;">
+                  <div class="skeleton-block" style="width: 50px; margin: 0 auto; border-radius: 12px;"></div>
+                </td>
               </tr>
-              <tr class="exercise-spacer"><td colspan="5"></td></tr>
+              <tr class="exercise-spacer">
+                <td colspan="5"></td>
+              </tr>
               <tr class="skeleton-row">
-                <td style="text-align: center;"><div class="skeleton-avatar" style="margin: 0 auto;"></div></td>
+                <td style="text-align: center;">
+                  <div class="skeleton-avatar" style="margin: 0 auto;"></div>
+                </td>
                 <td>
                   <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                     <div class="skeleton-block" style="width: 16px; height: 16px;"></div>
@@ -967,12 +1024,20 @@
                     <div class="skeleton-block" style="width: 60px;"></div>
                   </div>
                 </td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 35px; margin: 0 auto;"></div></td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 45px; margin: 0 auto; border-radius: 12px;"></div></td>
+                <td style="text-align: center;">
+                  <div class="skeleton-block" style="width: 35px; margin: 0 auto;"></div>
+                </td>
+                <td style="text-align: center;">
+                  <div class="skeleton-block" style="width: 45px; margin: 0 auto; border-radius: 12px;"></div>
+                </td>
               </tr>
-              <tr class="exercise-spacer"><td colspan="5"></td></tr>
+              <tr class="exercise-spacer">
+                <td colspan="5"></td>
+              </tr>
               <tr class="skeleton-row">
-                <td style="text-align: center;"><div class="skeleton-avatar" style="margin: 0 auto;"></div></td>
+                <td style="text-align: center;">
+                  <div class="skeleton-avatar" style="margin: 0 auto;"></div>
+                </td>
                 <td>
                   <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                     <div class="skeleton-block" style="width: 16px; height: 16px;"></div>
@@ -985,8 +1050,12 @@
                     <div class="skeleton-block" style="width: 50px;"></div>
                   </div>
                 </td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 40px; margin: 0 auto;"></div></td>
-                <td style="text-align: center;"><div class="skeleton-block" style="width: 40px; margin: 0 auto; border-radius: 12px;"></div></td>
+                <td style="text-align: center;">
+                  <div class="skeleton-block" style="width: 40px; margin: 0 auto;"></div>
+                </td>
+                <td style="text-align: center;">
+                  <div class="skeleton-block" style="width: 40px; margin: 0 auto; border-radius: 12px;"></div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -1113,7 +1182,8 @@
       <div id="current-friends-container" class="card fade-in">
         <div class="card-header-flex" style="margin-bottom: 0.75rem; padding-bottom: 0.75rem;">
           <h2><span class="icon"><i class="ri-team-fill"></i></span> Current Friends</h2>
-          <button id="btn-manage-friends" class="manage-friends-btn" title="Manage Friends" aria-label="Manage Friends" style="display: none;">
+          <button id="btn-manage-friends" class="manage-friends-btn" title="Manage Friends" aria-label="Manage Friends"
+            style="display: none;">
             <i class="ri-pencil-line"></i>
           </button>
         </div>
@@ -1128,7 +1198,9 @@
       <!-- Profile & Invite Card -->
       <div class="card fade-in" id="friend-code-card">
         <h2><span class="icon"><i class="ri-qr-code-fill"></i></span> Your Friend Code</h2>
-        <p class="setting-desc" style="text-align: center; margin-top: -0.2rem; margin-bottom: 1.2rem; font-size: 0.85rem;">Share your code or add friends to compare PRs</p>
+        <p class="setting-desc"
+          style="text-align: center; margin-top: -0.2rem; margin-bottom: 1.2rem; font-size: 0.85rem;">Share your code or
+          add friends to compare PRs</p>
 
         <div class="friend-code-display-wrap">
           <div id="my-friend-code" class="friend-code-box">------</div>
@@ -1507,8 +1579,10 @@
           <p class="setting-desc">Dataset for League rankings.</p>
         </div>
 
-        <div class="setting-item" style="border-top: 1px solid var(--card-border); padding-top: 1.5rem; margin-top: 1rem;">
-          <label class="setting-label" style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <div class="setting-item"
+          style="border-top: 1px solid var(--card-border); padding-top: 1.5rem; margin-top: 1rem;">
+          <label class="setting-label"
+            style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
             <i class="ri-palette-fill" style="color: var(--text);"></i> Theme Customization
           </label>
           <p class="setting-desc">Select an accent theme for your app:</p>
@@ -1521,8 +1595,9 @@
       <!-- Section 2: Personal Data -->
       <div class="card settings-card" id="personal-data-card">
         <h2><span class="icon"><i class="ri-user-heart-fill"></i></span> Personal Data</h2>
-        <p class="setting-desc">Saved to your profile and auto-filled across BMI, Body Fat %, Calorie, and AI Diet tools.</p>
-        
+        <p class="setting-desc">Saved to your profile and auto-filled across BMI, Body Fat %, Calorie, and AI Diet
+          tools.</p>
+
         <form id="personal-data-form" onsubmit="event.preventDefault();">
           <div class="pd-grid">
             <!-- Gender -->
@@ -1533,7 +1608,8 @@
               <select id="pd-gender" class="pd-input no-search">
                 <option value="male" data-icon="ri-men-line" data-icon-color="#38bdf8">Male</option>
                 <option value="female" data-icon="ri-women-line" data-icon-color="#f472b6">Female</option>
-                <option value="other" data-icon="ri-genderless-line" data-icon-color="#a78bfa">Other / Prefer not to say</option>
+                <option value="other" data-icon="ri-genderless-line" data-icon-color="#a78bfa">Other / Prefer not to say
+                </option>
               </select>
             </div>
 
@@ -1559,7 +1635,8 @@
                 </div>
               </div>
               <div id="pd-height-cm-wrap" class="pd-input-wrap">
-                <input type="number" id="pd-height-cm" class="pd-input" placeholder="Height in cm" min="50" max="260" step="0.1" />
+                <input type="number" id="pd-height-cm" class="pd-input" placeholder="Height in cm" min="50" max="260"
+                  step="0.1" />
                 <span class="pd-unit">cm</span>
               </div>
               <div id="pd-height-ft-wrap" class="pd-ft-in-grid hidden">
@@ -1568,7 +1645,8 @@
                   <span class="pd-unit">ft</span>
                 </div>
                 <div class="pd-input-wrap">
-                  <input type="number" id="pd-height-in" class="pd-input" placeholder="Inches" min="0" max="11" step="0.1" />
+                  <input type="number" id="pd-height-in" class="pd-input" placeholder="Inches" min="0" max="11"
+                    step="0.1" />
                   <span class="pd-unit">in</span>
                 </div>
               </div>
@@ -1580,7 +1658,8 @@
                 <label class="pd-label" for="pd-weight"><i class="ri-scales-line"></i> Weight</label>
               </div>
               <div class="pd-input-wrap">
-                <input type="number" id="pd-weight" class="pd-input" placeholder="Weight" min="20" max="400" step="0.1" />
+                <input type="number" id="pd-weight" class="pd-input" placeholder="Weight" min="20" max="400"
+                  step="0.1" />
                 <span class="pd-unit" id="pd-weight-unit">kg</span>
               </div>
             </div>
@@ -1591,11 +1670,16 @@
                 <label class="pd-label" for="pd-activity"><i class="ri-run-line"></i> Activity Level</label>
               </div>
               <select id="pd-activity" class="pd-input no-search">
-                <option value="sedentary" data-icon="ri-hotel-bed-line" data-icon-color="#94a3b8">Sedentary (Little or no exercise)</option>
-                <option value="light" data-icon="ri-walk-line" data-icon-color="#38bdf8">Lightly Active (1-3 days/week)</option>
-                <option value="moderate" data-icon="ri-run-line" data-icon-color="#34d399" selected>Moderately Active (3-5 days/week)</option>
-                <option value="very" data-icon="ri-fire-line" data-icon-color="#fb923c">Very Active (6-7 days/week)</option>
-                <option value="extra" data-icon="ri-flashlight-fill" data-icon-color="#f43f5e">Extremely Active (Physical job + intense training)</option>
+                <option value="sedentary" data-icon="ri-hotel-bed-line" data-icon-color="#94a3b8">Sedentary (Little or
+                  no exercise)</option>
+                <option value="light" data-icon="ri-walk-line" data-icon-color="#38bdf8">Lightly Active (1-3 days/week)
+                </option>
+                <option value="moderate" data-icon="ri-run-line" data-icon-color="#34d399" selected>Moderately Active
+                  (3-5 days/week)</option>
+                <option value="very" data-icon="ri-fire-line" data-icon-color="#fb923c">Very Active (6-7 days/week)
+                </option>
+                <option value="extra" data-icon="ri-flashlight-fill" data-icon-color="#f43f5e">Extremely Active
+                  (Physical job + intense training)</option>
               </select>
             </div>
           </div>
@@ -1620,13 +1704,15 @@
                   <label class="pd-label" for="pd-waist">Waist</label>
                 </div>
                 <div class="pd-input-wrap">
-                  <input type="number" id="pd-waist" class="pd-input" placeholder="Waist" min="30" max="200" step="0.1" />
+                  <input type="number" id="pd-waist" class="pd-input" placeholder="Waist" min="30" max="200"
+                    step="0.1" />
                   <span class="pd-unit">cm</span>
                 </div>
               </div>
               <div class="pd-field hidden" id="pd-hip-field">
                 <div class="pd-label-row">
-                  <label class="pd-label" for="pd-hip">Hip <span style="font-size:0.75rem; color:var(--text-light); text-transform:none;">(Female)</span></label>
+                  <label class="pd-label" for="pd-hip">Hip <span
+                      style="font-size:0.75rem; color:var(--text-light); text-transform:none;">(Female)</span></label>
                 </div>
                 <div class="pd-input-wrap">
                   <input type="number" id="pd-hip" class="pd-input" placeholder="Hip" min="30" max="200" step="0.1" />
@@ -1637,7 +1723,8 @@
           </div>
 
           <div style="margin-top: 1.5rem; display: flex; gap: 0.8rem; justify-content: flex-end;">
-            <button type="button" id="btn-save-personal-data" class="btn-primary" disabled style="padding: 0.75rem 1.5rem; font-size: 0.95rem; border-radius: 12px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <button type="button" id="btn-save-personal-data" class="btn-primary" disabled
+              style="padding: 0.75rem 1.5rem; font-size: 0.95rem; border-radius: 12px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
               <i class="ri-save-3-line"></i> Save Personal Data
             </button>
           </div>
@@ -1665,7 +1752,7 @@
           <button id="logout-btn"><span class="icon-btn"><i class="ri-logout-box-r-line"></i></span> Logout</button>
         </div>
         <input type="file" id="import-input" accept=".json" class="hidden" />
-        
+
         <div class="setting-item profile-photo-setting-item">
           <div class="profile-photo-header">
             <label class="setting-label"><i class="ri-user-smile-fill"></i> Profile Photo</label>
@@ -1773,6 +1860,15 @@
                 </div>
               </div>
             </div>
+            <div style="margin-top: 1.15rem; width: 100%;">
+              <button type="button" class="btn-select-food"
+                style="width: 100%; padding: 0.65rem 1rem; font-size: 0.85rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"
+                onclick="if(window.openFoodDatabase) window.openFoodDatabase();">
+                <span class="add-meal-icon food-db-icon"
+                  style="background-color: var(--accent-end, #38bdf8); width: 18px; height: 18px;"></span>
+                <span>Browse Food Database & Log</span>
+              </button>
+            </div>
           </div>
 
           <!-- Right Column (Macros & Water) -->
@@ -1782,21 +1878,49 @@
               <h2><span class="icon"><i class="ri-bar-chart-horizontal-fill"></i></span> Macros</h2>
               <div class="dd-macro-list">
                 <div class="macro-row">
-                  <div class="macro-label"><span>Protein</span> <span id="diet-protein-val"
-                      style="font-weight: 700;">0 / 120g</span></div>
+                  <div class="macro-label">
+                    <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2563eb"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                        style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>Protein</span>
+                    <span id="diet-protein-val" style="font-weight: 700;">0 / 120g</span>
+                  </div>
                   <div class="macro-bar-bg">
                     <div class="macro-bar-fill protein-fill" id="diet-protein-bar" style="width: 0%;"></div>
                   </div>
                 </div>
                 <div class="macro-row">
-                  <div class="macro-label"><span>Carbs</span> <span id="diet-carbs-val"
-                      style="font-weight: 700;">0 / 200g</span></div>
+                  <div class="macro-label">
+                    <span><svg viewBox="0 0 24 24" width="14" height="14" fill="#a855f7" stroke="#a855f7"
+                        stroke-width="0.5" style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                        <path d="M2 22 16 8" />
+                        <path
+                          d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                        <path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                        <path
+                          d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                        <path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" />
+                        <path
+                          d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                        <path
+                          d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                        <path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                      </svg>Carbs</span>
+                    <span id="diet-carbs-val" style="font-weight: 700;">0 / 200g</span>
+                  </div>
                   <div class="macro-bar-bg">
                     <div class="macro-bar-fill carbs-fill" id="diet-carbs-bar" style="width: 0%;"></div>
                   </div>
                 </div>
                 <div class="macro-row">
-                  <div class="macro-label"><span>Fat</span> <span id="diet-fat-val" style="font-weight: 700;">0 / 67g</span>
+                  <div class="macro-label">
+                    <span><svg viewBox="0 0 24 24" width="14" height="14" fill="#ec4899"
+                        style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                      </svg>Fat</span>
+                    <span id="diet-fat-val" style="font-weight: 700;">0 / 67g</span>
                   </div>
                   <div class="macro-bar-bg">
                     <div class="macro-bar-fill fat-fill" id="diet-fat-bar" style="width: 0%;"></div>
@@ -1836,7 +1960,12 @@
 
       <!-- Sub-mode Toggle -->
       <div class="add-meal-toggle">
-        <button class="add-meal-toggle-btn active" data-subview="manual">
+        <button class="add-meal-toggle-btn active" data-subview="food-db">
+          <span class="add-meal-icon food-db-icon"></span>
+          <span class="toggle-label-full">Food Database</span>
+          <span class="toggle-label-short">Database</span>
+        </button>
+        <button class="add-meal-toggle-btn" data-subview="manual">
           <span class="add-meal-icon manual-icon"></span>
           <span class="toggle-label-full">Manual Entry</span>
           <span class="toggle-label-short">Manual</span>
@@ -1853,12 +1982,83 @@
         </button>
       </div>
 
+      <!-- SUB-VIEW: Food Database & Calorie Book -->
+      <div id="subview-food-db" class="add-meal-subview active">
+        <div class="card card-wide">
+          <div class="food-db-container">
+            <div class="food-db-header">
+              <div>
+                <h2><span class="add-meal-heading-icon food-db-icon"></span> Food Database & Calorie Book</h2>
+                <p class="food-db-subtitle">Verified nutrition for Indian & worldwide foods with instant portion scaling
+                </p>
+              </div>
+              <div class="food-db-count-badge" id="food-db-count">
+                <i class="ri-sparkling-fill"></i> Loading foods...
+              </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="food-db-search-wrapper">
+              <input type="text" id="food-db-search" class="food-db-search-input" placeholder="Search..."
+                autocomplete="off">
+              <i class="ri-search-2-line food-db-search-icon"></i>
+              <button type="button" id="food-db-search-clear" class="food-db-search-clear" style="display: none;"
+                title="Clear search" aria-label="Clear search">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.3"
+                  stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div id="food-db-live-indicator" class="food-db-live-indicator" style="display: none;">
+              <i class="ri-loader-4-line ri-spin"></i>
+              <span>Searching millions of global foods...</span>
+            </div>
+
+            <!-- Filter Controls: Categories -->
+            <div class="food-db-filters-row">
+              <div class="food-db-categories-scroll" id="food-db-categories">
+                <!-- Dynamically populated from FOOD_CATEGORIES -->
+              </div>
+            </div>
+
+            <!-- Food Grid -->
+            <div class="food-db-grid" id="food-db-grid">
+              <!-- Populated via foodDatabaseUI.js -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="food-db-empty-state" id="food-db-empty" style="display: none;">
+              <i class="ri-search-eye-line"></i>
+              <h3>No matching food found</h3>
+              <p>Try searching with another keyword or enter custom calories in Manual Entry.</p>
+              <button type="button" class="btn-primary"
+                style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.85rem;"
+                onclick="document.querySelector('.add-meal-toggle-btn[data-subview=\'manual\']')?.click()">
+                Switch to Manual Entry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- SUB-VIEW: Manual Log -->
-      <div id="subview-manual" class="add-meal-subview active">
+      <div id="subview-manual" class="add-meal-subview">
 
         <!-- (original Log Meal content starts here) -->
         <div id="view-diet-log-meal" class="view-section-inner">
           <div class="lm-page">
+
+            <!-- Food Database Quick Banner -->
+            <div class="food-db-shortcut-banner" onclick="if(window.openFoodDatabase) window.openFoodDatabase();">
+              <div class="food-db-shortcut-left">
+                <div class="food-db-shortcut-icon"><span class="add-meal-icon food-db-icon"
+                    style="width: 17px; height: 17px;"></span></div>
+                <span class="food-db-shortcut-text">Explore Built-In Food Database</span>
+              </div>
+              <i class="ri-arrow-right-s-line food-db-shortcut-arrow"></i>
+            </div>
 
             <!-- Form Card -->
             <div class="lm-card">
@@ -1900,7 +2100,8 @@
 
                 <!-- Quantity & Unit Selector -->
                 <div class="lm-section">
-                  <label class="lm-label" for="diet-quantity"><i class="ri-scales-3-line"></i> Quantity / Portion</label>
+                  <label class="lm-label" for="diet-quantity"><i class="ri-scales-3-line"></i> Quantity /
+                    Portion</label>
                   <div class="lm-qty-row">
                     <!-- Dropdown Select -->
                     <div class="lm-qty-select-wrap">
@@ -1912,14 +2113,17 @@
 
                     <!-- State Holder with Downward and Upward Arrow -->
                     <div class="lm-qty-stepper">
-                      <button type="button" class="lm-arrow-btn lm-arrow-down" id="btn-qty-down" aria-label="Decrease quantity" title="Decrease">
+                      <button type="button" class="lm-arrow-btn lm-arrow-down" id="btn-qty-down"
+                        aria-label="Decrease quantity" title="Decrease">
                         <i class="ri-arrow-down-s-line"></i>
                       </button>
                       <div class="lm-qty-input-wrap">
-                        <input type="number" id="diet-quantity" class="lm-qty-input" value="1" min="1" step="any" placeholder="1" required>
+                        <input type="number" id="diet-quantity" class="lm-qty-input" value="1" min="1" step="any"
+                          placeholder="1" required>
                         <span class="lm-qty-unit-tag" id="diet-qty-unit">srv</span>
                       </div>
-                      <button type="button" class="lm-arrow-btn lm-arrow-up" id="btn-qty-up" aria-label="Increase quantity" title="Increase">
+                      <button type="button" class="lm-arrow-btn lm-arrow-up" id="btn-qty-up"
+                        aria-label="Increase quantity" title="Increase">
                         <i class="ri-arrow-up-s-line"></i>
                       </button>
                     </div>
@@ -1932,7 +2136,10 @@
                   <div class="lm-macros-grid">
                     <div class="lm-macro lm-macro--cal">
                       <div class="lm-macro-head">
-                        <i class="ri-fire-fill"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#f59e0b"
+                          style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
                         <span>Calories</span>
                       </div>
                       <div class="lm-macro-input-wrap">
@@ -1942,7 +2149,12 @@
                     </div>
                     <div class="lm-macro lm-macro--prot">
                       <div class="lm-macro-head">
-                        <i class="ri-droplet-fill"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2.5"
+                          stroke-linecap="round" stroke-linejoin="round"
+                          style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
                         <span>Protein</span>
                       </div>
                       <div class="lm-macro-input-wrap">
@@ -1952,7 +2164,22 @@
                     </div>
                     <div class="lm-macro lm-macro--carb">
                       <div class="lm-macro-head">
-                        <i class="ri-leaf-fill"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#a855f7" stroke="#a855f7"
+                          stroke-width="0.5" style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                          <path d="M2 22 16 8" />
+                          <path
+                            d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                          <path
+                            d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                          <path
+                            d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                          <path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" />
+                          <path
+                            d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                          <path
+                            d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                          <path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                        </svg>
                         <span>Carbs</span>
                       </div>
                       <div class="lm-macro-input-wrap">
@@ -1962,7 +2189,10 @@
                     </div>
                     <div class="lm-macro lm-macro--fat">
                       <div class="lm-macro-head">
-                        <i class="ri-heart-fill"></i>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#ec4899"
+                          style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                        </svg>
                         <span>Fat</span>
                       </div>
                       <div class="lm-macro-input-wrap">
@@ -1987,7 +2217,7 @@
 
       <!-- SUB-VIEW: Recipes -->
       <style>
-        @import url('./css/add-meal.css?v=61');
+        @import url('./css/add-meal.css?v=64');
       </style>
       <div id="subview-recipes" class="add-meal-subview">
         <div class="card card-wide">
@@ -2007,7 +2237,7 @@
             </div>
           </div>
         </div>
-      </div>      <!-- SUB-VIEW: AI Scan -->
+      </div> <!-- SUB-VIEW: AI Scan -->
       <div id="subview-ai-scan" class="add-meal-subview">
         <div class="card card-wide">
           <h2><span class="add-meal-heading-icon ai-scan-icon"></span> AI Food Scan</h2>
@@ -2058,7 +2288,8 @@
                   <div class="fs-pre-photo-col" id="ai-scan-preview-wrapper">
                     <div class="fs-pre-photo-card">
                       <div class="fs-pre-img-wrap">
-                        <button type="button" class="fs-retake-pill-btn" id="btn-scan-retake" title="Click to change photo">
+                        <button type="button" class="fs-retake-pill-btn" id="btn-scan-retake"
+                          title="Click to change photo">
                           Change photo
                         </button>
                         <img id="ai-scan-preview-img" class="scan-preview-img" alt="Food Preview">
@@ -2078,7 +2309,8 @@
                     <!-- Title & Subtitle matching reference -->
                     <div class="fs-pre-heading-area">
                       <h3 class="fs-pre-main-title">Meal Details & Quantity</h3>
-                      <p class="fs-pre-main-subtitle">Add a portion or a note and the AI will tighten up the macros. You can skip both.</p>
+                      <p class="fs-pre-main-subtitle">Add a portion or a note and the AI will tighten up the macros. You
+                        can skip both.</p>
                     </div>
 
                     <!-- Form Fields -->
@@ -2096,8 +2328,10 @@
                           <button type="button" class="fs-quick-chip" data-type="qty" data-val="200g">200g</button>
                           <button type="button" class="fs-quick-chip" data-type="qty" data-val="300g">300g</button>
                           <button type="button" class="fs-quick-chip" data-type="qty" data-val="1 bowl">1 bowl</button>
-                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="2 pieces">2 pieces</button>
-                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="1 plate">1 plate</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="2 pieces">2
+                            pieces</button>
+                          <button type="button" class="fs-quick-chip" data-type="qty" data-val="1 plate">1
+                            plate</button>
                         </div>
                       </div>
 
@@ -2107,15 +2341,22 @@
                           How it was made <span class="fs-pre-optional">optional</span>
                         </label>
                         <div class="fs-pre-input-wrap">
-                          <textarea id="ai-scan-pre-details" class="fs-pre-textarea" rows="3" placeholder="e.g. cooked in olive oil, no sugar"></textarea>
+                          <textarea id="ai-scan-pre-details" class="fs-pre-textarea" rows="3"
+                            placeholder="e.g. cooked in olive oil, no sugar"></textarea>
                         </div>
                         <div class="fs-pre-chips-row">
-                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Home cooked">Home cooked</button>
-                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Restaurant">Restaurant</button>
-                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Low oil">Low oil</button>
-                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Air fried">Air fried</button>
-                          <button type="button" class="fs-quick-chip" data-type="details" data-val="High protein">High protein</button>
-                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Sugar-free">Sugar-free</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Home cooked">Home
+                            cooked</button>
+                          <button type="button" class="fs-quick-chip" data-type="details"
+                            data-val="Restaurant">Restaurant</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Low oil">Low
+                            oil</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="Air fried">Air
+                            fried</button>
+                          <button type="button" class="fs-quick-chip" data-type="details" data-val="High protein">High
+                            protein</button>
+                          <button type="button" class="fs-quick-chip" data-type="details"
+                            data-val="Sugar-free">Sugar-free</button>
                         </div>
                       </div>
                     </div>
@@ -2172,7 +2413,8 @@
                   <div class="fs-results-photo-col">
                     <div class="fs-results-photo-card">
                       <div class="fs-results-img-wrap">
-                        <button type="button" class="fs-retake-pill-btn" id="btn-results-retake" title="Click to change photo">
+                        <button type="button" class="fs-retake-pill-btn" id="btn-results-retake"
+                          title="Click to change photo">
                           Change photo
                         </button>
                         <img id="scan-results-photo" class="scan-preview-img" alt="Scanned Meal">
@@ -2193,7 +2435,8 @@
                           <i class="ri-restaurant-line"></i> Detected Food
                         </label>
                         <div class="fs-results-input-wrap">
-                          <input type="text" id="scan-food-name" class="fs-results-title-input" required autocomplete="off" placeholder="Meal name">
+                          <input type="text" id="scan-food-name" class="fs-results-title-input" required
+                            autocomplete="off" placeholder="Meal name">
                         </div>
                       </div>
                       <div class="fs-results-field-group fs-results-field--qty">
@@ -2201,7 +2444,8 @@
                           <i class="ri-scales-3-line"></i> Portion
                         </label>
                         <div class="fs-results-input-wrap">
-                          <input type="text" id="scan-food-qty" class="fs-results-qty-input" required autocomplete="off" placeholder="Portion">
+                          <input type="text" id="scan-food-qty" class="fs-results-qty-input" required autocomplete="off"
+                            placeholder="Portion">
                         </div>
                       </div>
                     </div>
@@ -2211,7 +2455,10 @@
                       <!-- Calories -->
                       <div class="fs-macro-card fs-macro-card--cal">
                         <div class="fs-macro-card-header">
-                          <span class="fs-macro-badge-icon"><i class="ri-fire-fill"></i></span>
+                          <span class="fs-macro-badge-icon"><svg viewBox="0 0 24 24" width="16" height="16"
+                              fill="#f59e0b">
+                              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                            </svg></span>
                           <span class="fs-macro-card-name">Calories</span>
                         </div>
                         <div class="fs-macro-input-wrap">
@@ -2223,7 +2470,11 @@
                       <!-- Protein -->
                       <div class="fs-macro-card fs-macro-card--prot">
                         <div class="fs-macro-card-header">
-                          <span class="fs-macro-badge-icon"><i class="ri-contrast-drop-2-line"></i></span>
+                          <span class="fs-macro-badge-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                              stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg></span>
                           <span class="fs-macro-card-name">Protein</span>
                         </div>
                         <div class="fs-macro-input-wrap">
@@ -2235,7 +2486,23 @@
                       <!-- Carbs -->
                       <div class="fs-macro-card fs-macro-card--carb">
                         <div class="fs-macro-card-header">
-                          <span class="fs-macro-badge-icon"><i class="ri-bread-line"></i></span>
+                          <span class="fs-macro-badge-icon"><svg viewBox="0 0 24 24" width="16" height="16"
+                              fill="#a855f7" stroke="#a855f7" stroke-width="0.5">
+                              <path d="M2 22 16 8" />
+                              <path
+                                d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                              <path
+                                d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                              <path
+                                d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                              <path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" />
+                              <path
+                                d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                              <path
+                                d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                              <path
+                                d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                            </svg></span>
                           <span class="fs-macro-card-name">Carbs</span>
                         </div>
                         <div class="fs-macro-input-wrap">
@@ -2247,7 +2514,10 @@
                       <!-- Fat -->
                       <div class="fs-macro-card fs-macro-card--fat">
                         <div class="fs-macro-card-header">
-                          <span class="fs-macro-badge-icon"><i class="ri-heart-fill"></i></span>
+                          <span class="fs-macro-badge-icon"><svg viewBox="0 0 24 24" width="16" height="16"
+                              fill="#ec4899">
+                              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                            </svg></span>
                           <span class="fs-macro-card-name">Fat</span>
                         </div>
                         <div class="fs-macro-input-wrap">
@@ -2265,9 +2535,12 @@
                         <div class="fs-macro-segment fs-macro-segment--fat" id="fs-bar-fat" style="width: 25%;"></div>
                       </div>
                       <div class="fs-macro-legend">
-                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--prot"></span> Protein <strong id="fs-pct-prot">--%</strong></span>
-                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--carb"></span> Carbs <strong id="fs-pct-carb">--%</strong></span>
-                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--fat"></span> Fat <strong id="fs-pct-fat">--%</strong></span>
+                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--prot"></span>
+                          Protein <strong id="fs-pct-prot">--%</strong></span>
+                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--carb"></span> Carbs
+                          <strong id="fs-pct-carb">--%</strong></span>
+                        <span class="fs-macro-legend-item"><span class="fs-legend-dot fs-legend-dot--fat"></span> Fat
+                          <strong id="fs-pct-fat">--%</strong></span>
                       </div>
                     </div>
 
@@ -2275,7 +2548,8 @@
                     <div class="fs-results-refine-box">
                       <div class="fs-results-refine-input-row">
                         <i class="ri-sparkling-2-line fs-refine-icon"></i>
-                        <input type="text" id="scan-correction-text" class="fs-results-refine-input" placeholder="Tell AI what to adjust (e.g. less oil)...">
+                        <input type="text" id="scan-correction-text" class="fs-results-refine-input"
+                          placeholder="Tell AI what to adjust (e.g. less oil)...">
                         <button type="button" class="fs-correction-btn" id="btn-refine-scan" disabled>
                           Refine
                         </button>
@@ -2325,7 +2599,11 @@
           <!-- Daily Summary Stats -->
           <div style="margin-bottom: 2rem;">
             <div class="dh-summary-hero">
-              <div class="dh-hero-icon"><i class="ri-fire-fill"></i></div>
+              <div class="dh-hero-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="#f59e0b">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              </div>
               <div class="dh-hero-value" id="history-daily-cals">0</div>
               <div class="dh-hero-label">Calories Consumed</div>
             </div>
@@ -2340,17 +2618,32 @@
 
             <div class="dh-summary-macros">
               <div class="dh-macro" data-color="blue">
-                <i class="ri-boxing-fill"></i>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
                 <span class="dh-macro-val" id="history-daily-protein">0g</span>
                 <span class="dh-macro-label">Protein</span>
               </div>
               <div class="dh-macro" data-color="purple">
-                <i class="ri-bread-fill"></i>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="#a855f7" stroke="#a855f7" stroke-width="0.5">
+                  <path d="M2 22 16 8" />
+                  <path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                  <path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                  <path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+                  <path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" />
+                  <path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                  <path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                  <path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+                </svg>
                 <span class="dh-macro-val" id="history-daily-carbs">0g</span>
                 <span class="dh-macro-label">Carbs</span>
               </div>
               <div class="dh-macro" data-color="pink">
-                <i class="ri-drop-fill"></i>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="#ec4899">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                </svg>
                 <span class="dh-macro-val" id="history-daily-fat">0g</span>
                 <span class="dh-macro-label">Fat</span>
               </div>
@@ -2383,12 +2676,18 @@
         <!-- Weekly Averages Grid -->
         <div class="dh-weekly-grid">
           <div class="dh-weekly-stat" data-color="orange">
-            <i class="ri-fire-fill"></i>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#f59e0b" style="margin-bottom: 2px;">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
             <div class="dh-weekly-val" id="history-weekly-avg-cals">0</div>
             <div class="dh-weekly-label">Avg Calories</div>
           </div>
           <div class="dh-weekly-stat" data-color="blue">
-            <i class="ri-boxing-fill"></i>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2px;">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
             <div class="dh-weekly-val" id="history-weekly-avg-protein">0g</div>
             <div class="dh-weekly-label">Avg Protein</div>
           </div>
@@ -2406,7 +2705,9 @@
 
         <!-- Section Subheading -->
         <div style="margin-top: 1.5rem; margin-bottom: 0.75rem; text-align: center;">
-          <h2 style="font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Graphical Representation</h2>
+          <h2
+            style="font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">
+            Graphical Representation</h2>
         </div>
 
         <!-- Charts Area -->
@@ -2428,23 +2729,26 @@
         <h2>
           <span class="icon"><i class="ri-sparkling-fill"></i></span>
           <span style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0;">
-             <span style="display:inline-flex; align-items:center; gap:4px; white-space: nowrap;">Diet Coach
-               <button type="button" class="ai-rate-limit-btn"
-                 onclick="window.showRateLimitModal()"
-                 style="background:none; border:none; color:var(--text-light); cursor:pointer; font-size:0.85rem; padding:0 2px; opacity:0.75; transition:opacity 0.2s, color 0.2s; display:inline-flex; align-items:center;"
-                 onmouseover="this.style.opacity='1'; this.style.color='var(--accent-end)'" onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-light)'">
-                 <i class="ri-information-line"></i>
-               </button>
-             </span>
-             <span id="dc-status" style="font-size: 0.8rem; font-weight: 500; color: var(--accent-end); margin-top: 2px; white-space: nowrap;">Loading context...</span>
+            <span style="display:inline-flex; align-items:center; gap:4px; white-space: nowrap;">Diet Coach
+              <button type="button" class="ai-rate-limit-btn" onclick="window.showRateLimitModal()"
+                style="background:none; border:none; color:var(--text-light); cursor:pointer; font-size:0.85rem; padding:0 2px; opacity:0.75; transition:opacity 0.2s, color 0.2s; display:inline-flex; align-items:center;"
+                onmouseover="this.style.opacity='1'; this.style.color='var(--accent-end)'"
+                onmouseout="this.style.opacity='0.75'; this.style.color='var(--text-light)'">
+                <i class="ri-information-line"></i>
+              </button>
+            </span>
+            <span id="dc-status"
+              style="font-size: 0.8rem; font-weight: 500; color: var(--accent-end); margin-top: 2px; white-space: nowrap;">Loading
+              context...</span>
           </span>
         </h2>
         <div id="dc-messages"
           style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 12px; background: rgba(0,0,0,0.02)">
           <div class="dc-welcome ai-message bot"
             style="align-self: flex-start; background: var(--input-bg); padding: 1rem; border-radius: 12px; max-width: 80%; line-height: 1.5;">
-            Hi! I'm your Diet Coach 🥗<br/><br/>
-            Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your real data.
+            Hi! I'm your Diet Coach 🥗<br /><br />
+            Ask me about your nutrition, meal planning, macro targets, or get personalized advice based on your real
+            data.
           </div>
         </div>
         <div class="ai-input-area"
@@ -2452,7 +2756,8 @@
           <input type="text" id="dc-input" placeholder="Ask about your nutrition..." autocomplete="off"
             style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text);" />
           <button id="dc-send-btn"
-            style="display: inline-flex; align-items: center; justify-content: center; width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i class="ri-send-plane-fill"></i></button>
+            style="display: inline-flex; align-items: center; justify-content: center; width: auto; padding: 0.8rem 1.2rem; background: var(--accent-gradient); color: white; border-radius: 8px; border: none; cursor: pointer;"><i
+              class="ri-send-plane-fill"></i></button>
         </div>
       </div>
     </div>
@@ -2509,9 +2814,11 @@
                 Type</label>
               <select id="setting-goal-type">
                 <option value="Cut" data-icon="ri-fire-fill" data-icon-color="#ef4444">Cut (Fat Loss)</option>
-                <option value="Maintain" selected data-icon="ri-scales-3-fill" data-icon-color="#6366f1">Maintain</option>
+                <option value="Maintain" selected data-icon="ri-scales-3-fill" data-icon-color="#6366f1">Maintain
+                </option>
                 <option value="Bulk" data-custom-svg="sumo">Bulk (Muscle Gain)</option>
-                <option value="Recomp" data-icon="ri-loop-right-fill" data-icon-color="#10b981">Recomp (Muscle Gain + Fat Loss)</option>
+                <option value="Recomp" data-icon="ri-loop-right-fill" data-icon-color="#10b981">Recomp (Muscle Gain +
+                  Fat Loss)</option>
               </select>
             </div>
             <div class="ds-field ds-field--full">
@@ -2907,18 +3214,39 @@
   <div id="modal-league-info" class="modal hidden" style="z-index:11000;">
     <div class="modal-content" style="max-width: 450px; text-align: left;">
       <span class="close-modal" id="close-league-info">&times;</span>
-      <h2 style="color: var(--accent-end); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i class="ri-sword-fill"></i> Strength League</h2>
+      <h2 style="color: var(--accent-end); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i
+          class="ri-sword-fill"></i> Strength League</h2>
       <p style="color: var(--text); line-height: 1.6; margin-bottom: 1.5rem;">
-        The <strong>Strength League</strong> ranks your personal best lifts against global strength standards for each exercise. Keep logging workouts to see how you stack up and push yourself to reach the next tier!
+        The <strong>Strength League</strong> ranks your personal best lifts against global strength standards for each
+        exercise. Keep logging workouts to see how you stack up and push yourself to reach the next tier!
       </p>
-      <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; max-height: 250px; overflow-y: auto; padding-right: 0.5rem;">
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge wood" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Wood</span><span style="color: var(--text-light); font-size: 0.9rem;">Beginner lifter, just starting out.</span></div>
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge iron" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Iron</span><span style="color: var(--text-light); font-size: 0.9rem;">Novice, building foundational strength.</span></div>
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge gold" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Gold</span><span style="color: var(--text-light); font-size: 0.9rem;">Intermediate, consistently lifting heavy.</span></div>
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge diamond" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Diamond</span><span style="color: var(--text-light); font-size: 0.9rem;">Advanced, highly trained lifter.</span></div>
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge netherite" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Netherite</span><span style="color: var(--text-light); font-size: 0.9rem;">Elite, exceptional strength relative to bodyweight.</span></div>
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge olympian" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Olympian</span><span style="color: var(--text-light); font-size: 0.9rem;">World-class strength levels.</span></div>
-        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge inhuman" style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Inhuman</span><span style="color: var(--text-light); font-size: 0.9rem;">Beyond human limits. Very rarely achieved.</span></div>
+      <div
+        style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; max-height: 250px; overflow-y: auto; padding-right: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge wood"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Wood</span><span
+            style="color: var(--text-light); font-size: 0.9rem;">Beginner lifter, just starting out.</span></div>
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge iron"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Iron</span><span
+            style="color: var(--text-light); font-size: 0.9rem;">Novice, building foundational strength.</span></div>
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge gold"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i> Gold</span><span
+            style="color: var(--text-light); font-size: 0.9rem;">Intermediate, consistently lifting heavy.</span></div>
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge diamond"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i>
+            Diamond</span><span style="color: var(--text-light); font-size: 0.9rem;">Advanced, highly trained
+            lifter.</span></div>
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge netherite"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i>
+            Netherite</span><span style="color: var(--text-light); font-size: 0.9rem;">Elite, exceptional strength
+            relative to bodyweight.</span></div>
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge olympian"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i>
+            Olympian</span><span style="color: var(--text-light); font-size: 0.9rem;">World-class strength
+            levels.</span></div>
+        <div style="display: flex; align-items: center; gap: 1rem;"><span class="tier-badge inhuman"
+            style="margin: 0; min-width: 90px; justify-content: center;"><i class="ri-medal-fill"></i>
+            Inhuman</span><span style="color: var(--text-light); font-size: 0.9rem;">Beyond human limits. Very rarely
+            achieved.</span></div>
       </div>
       <button class="btn-primary" id="btn-close-league-info-modal" style="width: 100%;">Got it</button>
     </div>
@@ -2952,19 +3280,178 @@
 
   <!-- Avatar Crop Modal -->
   <div id="modal-crop-avatar" class="modal hidden" style="z-index:12000;">
-    <div class="modal-content" style="max-width: 450px; text-align: center; padding: 1.5rem; background: var(--card-bg);">
+    <div class="modal-content"
+      style="max-width: 450px; text-align: center; padding: 1.5rem; background: var(--card-bg);">
       <h2 style="margin-bottom: 1rem;">Adjust Profile Photo</h2>
       <div style="width: 100%; max-height: 400px; margin-bottom: 1rem; background: #000; position: relative;">
         <img id="crop-target" src="" style="max-width: 100%; display: block;" />
       </div>
       <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; align-items: center;">
-        <button id="btn-crop-rotate-left" class="btn-secondary" style="padding: 0.5rem 1rem; width: auto;"><i class="ri-anticlockwise-2-line"></i></button>
-        <button id="btn-crop-rotate-right" class="btn-secondary" style="padding: 0.5rem 1rem; width: auto;"><i class="ri-clockwise-2-line"></i></button>
+        <button id="btn-crop-rotate-left" class="btn-secondary" style="padding: 0.5rem 1rem; width: auto;"><i
+            class="ri-anticlockwise-2-line"></i></button>
+        <button id="btn-crop-rotate-right" class="btn-secondary" style="padding: 0.5rem 1rem; width: auto;"><i
+            class="ri-clockwise-2-line"></i></button>
       </div>
-      <div id="crop-error-msg" style="color: var(--delete-color); font-size: 0.9rem; margin-bottom: 1rem; display: none;"></div>
+      <div id="crop-error-msg"
+        style="color: var(--delete-color); font-size: 0.9rem; margin-bottom: 1rem; display: none;"></div>
       <div style="display: flex; gap: 1rem; justify-content: center;">
         <button id="btn-crop-cancel" class="btn-secondary" style="flex: 1;">Cancel</button>
-        <button id="btn-crop-use" class="btn-primary" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">Use Photo</button>
+        <button id="btn-crop-use" class="btn-primary"
+          style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">Use Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Food Database Portion & Confirm Modal -->
+  <div id="modal-food-db-portion" class="food-db-modal-overlay hidden">
+    <div class="food-db-modal-card">
+      <!-- Modal Top Header & Corner Photo Layout -->
+      <div class="food-db-modal-top-section">
+        <div class="food-db-modal-top-info">
+          <div class="food-db-modal-title-row">
+            <h3 id="food-db-modal-title"
+              style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text, #f8fafc); line-height: 1.3;">
+              Food Name</h3>
+            <span id="food-db-modal-state" class="food-state-badge cooked"><i class="ri-fire-fill"></i> Cooked</span>
+          </div>
+          <p id="food-db-modal-subtitle" class="food-db-modal-desc">Detailed food description and portion</p>
+          
+          <!-- Serving Unit Pills -->
+          <div class="food-db-modal-units-wrap">
+            <div id="food-db-modal-units" class="food-units-pills-row">
+              <!-- e.g. [1 Roti (~30g)] [Grams (g)] -->
+            </div>
+          </div>
+        </div>
+
+        <div class="food-db-modal-top-aside">
+          <button type="button" id="btn-close-food-db-modal" class="food-db-modal-close-btn" title="Close"
+            aria-label="Close">
+            <i class="ri-close-line"></i>
+          </button>
+          <div id="food-db-modal-photo-wrap" class="food-db-modal-photo-wrap">
+            <img id="food-db-modal-img" src="" alt="Food photo" class="food-db-modal-img" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Quantity Stepper -->
+      <div>
+        <label class="food-db-section-label"><i class="ri-calculator-line"></i> Quantity / Portion</label>
+        <div class="food-stepper-box">
+          <button type="button" id="btn-food-db-minus" class="food-stepper-btn" title="Decrease">
+            <i class="ri-subtract-line"></i>
+          </button>
+          <input type="number" id="food-db-modal-qty" class="food-stepper-input" value="1" placeholder="1" min="0.1"
+            step="1" aria-label="Portion quantity">
+          <button type="button" id="btn-food-db-plus" class="food-stepper-btn" title="Increase">
+            <i class="ri-add-line"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Gram Shortcuts (shown when unit is grams) -->
+      <div class="food-quick-grams-row hidden" id="food-db-quick-grams" style="display: none;">
+        <button type="button" class="quick-gram-btn" data-set="50">50g</button>
+        <button type="button" class="quick-gram-btn" data-set="100">100g</button>
+        <button type="button" class="quick-gram-btn" data-set="150">150g</button>
+        <button type="button" class="quick-gram-btn" data-set="200">200g</button>
+        <button type="button" class="quick-gram-btn" data-add="25">+25g</button>
+        <button type="button" class="quick-gram-btn" data-add="50">+50g</button>
+      </div>
+
+      <!-- Real-Time Scaled Macro Display -->
+      <div class="food-db-macro-display-wrapper">
+        <div class="food-db-macro-header">
+          <span class="food-db-macro-header-title" id="food-db-macro-header-title">NUTRITION</span>
+          <div class="food-db-macro-header-cal">
+            <span id="food-db-modal-calories-header" class="food-db-cal-num">0</span>
+            <span class="food-db-cal-unit">kcal</span>
+          </div>
+        </div>
+
+        <div class="food-db-macros-grid">
+          <div class="food-db-macro-col protein">
+            <svg class="macro-icon protein" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            <span id="food-db-modal-protein" class="food-db-macro-amount">0g</span>
+            <span class="food-db-macro-lbl">PROTEIN</span>
+          </div>
+
+          <div class="food-db-macro-col carbs">
+            <svg class="macro-icon carbs" viewBox="0 0 24 24" width="22" height="22" fill="#a855f7" stroke="#a855f7"
+              stroke-width="0.5">
+              <path d="M2 22 16 8" />
+              <path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+              <path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+              <path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z" />
+              <path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z" />
+              <path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+              <path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+              <path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z" />
+            </svg>
+            <span id="food-db-modal-carbs" class="food-db-macro-amount">0g</span>
+            <span class="food-db-macro-lbl">CARBS</span>
+          </div>
+
+          <div class="food-db-macro-col fat">
+            <svg class="macro-icon fat" viewBox="0 0 24 24" width="22" height="22" fill="#ec4899">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+            </svg>
+            <span id="food-db-modal-fat" class="food-db-macro-amount">0g</span>
+            <span class="food-db-macro-lbl">FAT</span>
+          </div>
+
+          <div class="food-db-macro-col calories">
+            <svg class="macro-icon calories" viewBox="0 0 24 24" width="22" height="22" fill="#f59e0b">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span id="food-db-modal-calories" class="food-db-macro-amount">0</span>
+            <span class="food-db-macro-lbl">CALORIES</span>
+          </div>
+        </div>
+
+        <div class="food-db-grams-readout">
+          <div class="food-db-grams-left">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" class="food-db-scale-icon">
+              <path d="M3 6h18M6 6l2.5 13h7L18 6M12 11.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+            </svg>
+            <span id="food-db-modal-grams-label">Total weight: ~0g</span>
+          </div>
+          <i class="ri-information-line food-db-info-icon" title="Estimated portion weight"></i>
+        </div>
+      </div>
+
+      <!-- Meal Type Selection -->
+      <div>
+        <label class="food-db-section-label"><i class="ri-time-line"></i> Add To Meal</label>
+        <div class="lm-meal-pills">
+          <button type="button" class="lm-pill active" data-meal="Breakfast">
+            <i class="ri-sun-line"></i> Breakfast
+          </button>
+          <button type="button" class="lm-pill" data-meal="Lunch">
+            <i class="ri-sun-foggy-line"></i> Lunch
+          </button>
+          <button type="button" class="lm-pill" data-meal="Dinner">
+            <i class="ri-moon-line"></i> Dinner
+          </button>
+          <button type="button" class="lm-pill" data-meal="Snack">
+            <i class="ri-cup-line"></i> Snack
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="food-db-modal-actions">
+        <button type="button" id="btn-cancel-food-db-modal" class="btn-food-db-cancel">Cancel</button>
+        <button type="button" id="btn-confirm-food-db-modal" class="btn-food-db-confirm">
+          <i class="ri-check-line"></i>
+          <span>Log Meal</span>
+        </button>
       </div>
     </div>
   </div>
@@ -2977,7 +3464,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=129"></script>
+  <script type="module" src="script.js?v=137"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

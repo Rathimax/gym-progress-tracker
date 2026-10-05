@@ -292,6 +292,14 @@ body.mode-compact .history-date table th {
   font-size: 0.9rem;
 }
 
+body.mode-compact .workout-history-card {
+  padding: 0.65rem 0.85rem;
+}
+
+body.mode-compact .whc-top {
+  margin-bottom: 0.5rem;
+}
+
 /* 3. Settings UI Components */
 .setting-item {
   margin-bottom: 2rem;

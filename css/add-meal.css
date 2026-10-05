@@ -19,7 +19,12 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
   width: 100%;
-  max-width: 400px;
+  max-width: 560px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.add-meal-toggle::-webkit-scrollbar {
+  display: none;
 }
 
 .add-meal-toggle-btn {
@@ -85,6 +90,11 @@
   mask-image: url('../assets/ai-scan-icon.png');
 }
 
+.add-meal-icon.food-db-icon {
+  -webkit-mask-image: url('../assets/food-database-icon.png');
+  mask-image: url('../assets/food-database-icon.png');
+}
+
 .add-meal-heading-icon {
   width: 22px;
   height: 22px;
@@ -114,6 +124,11 @@
 .add-meal-heading-icon.ai-scan-icon {
   -webkit-mask-image: url('../assets/ai-scan-icon.png');
   mask-image: url('../assets/ai-scan-icon.png');
+}
+
+.add-meal-heading-icon.food-db-icon {
+  -webkit-mask-image: url('../assets/food-database-icon.png');
+  mask-image: url('../assets/food-database-icon.png');
 }
 
 /* Label swapping: short labels hidden on desktop */

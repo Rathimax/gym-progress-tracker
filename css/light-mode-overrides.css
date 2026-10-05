@@ -107,19 +107,25 @@ body:not(.dark-mode) .dh-macro-label {
 }
 
 /* Darker accent icons for light mode (avoid neon on white) */
-body:not(.dark-mode) .dh-macro[data-color="blue"] i {
+body:not(.dark-mode) .dh-macro[data-color="blue"] i,
+body:not(.dark-mode) .dh-macro[data-color="blue"] svg {
   color: #2563eb;
+  stroke: #2563eb;
 }
 
-body:not(.dark-mode) .dh-macro[data-color="purple"] i {
+body:not(.dark-mode) .dh-macro[data-color="purple"] i,
+body:not(.dark-mode) .dh-macro[data-color="purple"] svg {
   color: #7c3aed;
+  stroke: #7c3aed;
 }
 
-body:not(.dark-mode) .dh-macro[data-color="pink"] i {
+body:not(.dark-mode) .dh-macro[data-color="pink"] i,
+body:not(.dark-mode) .dh-macro[data-color="pink"] svg {
   color: #db2777;
 }
 
-body:not(.dark-mode) .dh-macro[data-color="cyan"] i {
+body:not(.dark-mode) .dh-macro[data-color="cyan"] i,
+body:not(.dark-mode) .dh-macro[data-color="cyan"] svg {
   color: #0891b2;
 }
 
@@ -138,39 +144,233 @@ body:not(.dark-mode) .dh-meal-empty {
 
 /* Meal Cards */
 body:not(.dark-mode) .dh-meal-card {
-  background: var(--card-bg);
-  border-color: var(--glass-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  border-color: rgba(226, 232, 240, 0.95);
+  box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 body:not(.dark-mode) .dh-meal-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  background: var(--card-bg);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
-body:not(.dark-mode) .dh-meal-name {
-  color: var(--text-primary);
+body:not(.dark-mode) .dh-meal-title {
+  color: #0f172a;
 }
 
-body:not(.dark-mode) .dh-meal-type-badge {
-  background: rgba(99, 102, 241, 0.1);
+body:not(.dark-mode) .dh-meal-portion {
+  color: #64748b;
+}
+
+/* Light Mode Meal Avatars */
+body:not(.dark-mode) .dh-meal-type-breakfast .dh-meal-avatar {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+body:not(.dark-mode) .dh-meal-type-lunch .dh-meal-avatar {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+body:not(.dark-mode) .dh-meal-type-dinner .dh-meal-avatar {
+  background: #eef2ff;
   color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+body:not(.dark-mode) .dh-meal-type-snack .dh-meal-avatar {
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
 }
 
-body:not(.dark-mode) .dh-meal-micro-macros {
-  color: var(--text-muted);
+/* Light Mode Tags */
+body:not(.dark-mode) .dh-meal-tag.breakfast {
+  background: #fef3c7;
+  color: #b45309;
+}
+body:not(.dark-mode) .dh-meal-tag.lunch {
+  background: #d1fae5;
+  color: #047857;
+}
+body:not(.dark-mode) .dh-meal-tag.dinner {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+body:not(.dark-mode) .dh-meal-tag.snack {
+  background: #ffe4e6;
+  color: #be123c;
 }
 
-body:not(.dark-mode) .dh-meal-kcal {
+/* Light Mode Macro Pills */
+body:not(.dark-mode) .dh-macro-pill.pro {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+body:not(.dark-mode) .dh-macro-pill.carb {
+  background: #faf5ff;
+  color: #7e22ce;
+  border-color: #e9d5ff;
+}
+body:not(.dark-mode) .dh-macro-pill.fat {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+/* Light Mode Calories & Delete */
+body:not(.dark-mode) .dh-cals-num {
   color: #ea580c;
 }
-
-body:not(.dark-mode) .dh-meal-kcal-unit {
-  color: var(--text-muted);
+body:not(.dark-mode) .dh-cals-unit {
+  color: #94a3b8;
+}
+body:not(.dark-mode) .dh-btn-delete {
+  background: #fff1f2;
+  color: #f43f5e;
+  border: 1px solid #ffe4e6;
+}
+body:not(.dark-mode) .dh-btn-delete:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: #f43f5e;
 }
 
-body:not(.dark-mode) .dh-btn-delete {
-  background: rgba(244, 63, 94, 0.08);
+/* Light Mode Empty State */
+body:not(.dark-mode) .dh-empty-icon {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+}
+body:not(.dark-mode) .dh-empty-title {
+  color: #1e293b;
+}
+body:not(.dark-mode) .dh-empty-sub {
+  color: #64748b;
+}
+
+/* Workout History Card Light Mode */
+body:not(.dark-mode) .whc-date-title {
+  color: #1e293b;
+}
+
+body:not(.dark-mode) .whc-date-title i {
+  color: #f97316;
+}
+
+body:not(.dark-mode) .whc-date-badge {
+  background: rgba(0, 0, 0, 0.05);
+  color: #64748b;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body:not(.dark-mode) .workout-history-card {
+  background: #ffffff;
+  border-color: rgba(226, 232, 240, 0.95);
+  box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+body:not(.dark-mode) .workout-history-card:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+body:not(.dark-mode) .whc-title {
+  color: #0f172a;
+}
+
+body:not(.dark-mode) .whc-badge-equip {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+body:not(.dark-mode) .whc-badge-muscle {
+  background: #eef2ff;
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+
+body:not(.dark-mode) .whc-btn-delete {
+  background: #fff1f2;
+  color: #f43f5e;
+  border: 1px solid #ffe4e6;
+}
+
+body:not(.dark-mode) .whc-btn-delete:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: #f43f5e;
+}
+
+body:not(.dark-mode) .whc-stats-grid {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+body:not(.dark-mode) .whc-stat-label {
+  color: #64748b;
+}
+
+body:not(.dark-mode) .whc-stat-val {
+  color: #334155;
+}
+
+body:not(.dark-mode) .whc-stat-val strong {
+  color: #0f172a;
+}
+
+body:not(.dark-mode) .whc-unit {
+  color: #64748b;
+}
+
+body:not(.dark-mode) .whc-stat-bw {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+body:not(.dark-mode) .whc-avatar-img {
+  filter: brightness(0.18) contrast(1.1);
+  opacity: 0.85;
+}
+
+body:not(.dark-mode) .whc-avatar-chest {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+body:not(.dark-mode) .whc-avatar-legs {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+body:not(.dark-mode) .whc-avatar-bicep {
+  background: #f0f9ff;
+  color: #0284c7;
+  border-color: #bae6fd;
+}
+
+body:not(.dark-mode) .whc-avatar-yoga {
+  background: #faf5ff;
+  color: #9333ea;
+  border-color: #e9d5ff;
+}
+
+body:not(.dark-mode) .whc-avatar-back {
+  background: #f0fdfa;
+  color: #0d9488;
+  border-color: #99f6e4;
+}
+
+body:not(.dark-mode) .whc-avatar-other {
+  background: #fff1f2;
+  color: #e11d48;
+  border-color: #fecdd3;
 }
 
 /* Weekly View */
@@ -292,10 +492,6 @@ body:not(.dark-mode) .ds-card {
   background: rgba(255, 255, 255, 0.85);
   border-color: rgba(0, 0, 0, 0.06);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
-}
-
-body:not(.dark-mode) .ds-card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 body:not(.dark-mode) .ds-header-title {
