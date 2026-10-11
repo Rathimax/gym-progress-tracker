@@ -53,7 +53,7 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=168">
+  <link rel="stylesheet" href="style.css?v=171">
   <link rel="stylesheet" href="css/food-database.css?v=22">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
@@ -804,6 +804,8 @@
               <input type="hidden" id="wheel-sets-val" />
               <input type="hidden" id="wheel-weight-val" />
               <input type="hidden" id="wheel-duration-val" />
+              <input type="hidden" id="wheel-duration-min-val" />
+              <input type="hidden" id="wheel-duration-sec-val" />
 
               <div id="rm-display-wheel" class="rm-display hidden" style="margin-bottom: 0.5rem;">Est. 1RM: <span>0</span> kg</div>
 
@@ -859,20 +861,36 @@
                   </div>
                 </div>
 
-                <!-- DURATION Ruler (minutes) -->
-                <div class="wheel-row">
+                <!-- DURATION Ruler (minutes & seconds) -->
+                <div class="wheel-row wheel-row-duration">
                   <div class="wheel-label-display">
-                    <span class="wheel-field-name">DURATION</span>
+                    <span class="wheel-field-name">DURATION <span class="label-optional">(optional)</span></span>
                     <div class="wheel-value-display">
-                      <span class="wheel-val-num" id="wheel-duration-num">0</span>
+                      <span class="wheel-val-num" id="wheel-duration-min-num">0</span>
                       <span class="wheel-val-unit">min</span>
+                      <span class="wheel-val-num" id="wheel-duration-sec-num" style="margin-left: 0.5rem;">0</span>
+                      <span class="wheel-val-unit">sec</span>
                     </div>
                   </div>
-                  <div class="wheel-ruler-wrap">
-                    <div class="wheel-ruler-container" id="ruler-duration" data-field="duration" data-min="0" data-max="120" data-step="1" data-value="0">
-                      <div class="wheel-ruler-track"></div>
+                  <!-- Minutes Sub-Ruler -->
+                  <div class="wheel-sub-ruler">
+                    <span class="wheel-sub-label">MIN</span>
+                    <div class="wheel-ruler-wrap">
+                      <div class="wheel-ruler-container" id="ruler-duration-min" data-field="duration-min" data-min="0" data-max="120" data-step="1" data-value="0">
+                        <div class="wheel-ruler-track"></div>
+                      </div>
+                      <div class="wheel-center-line"></div>
                     </div>
-                    <div class="wheel-center-line"></div>
+                  </div>
+                  <!-- Seconds Sub-Ruler -->
+                  <div class="wheel-sub-ruler">
+                    <span class="wheel-sub-label">SEC</span>
+                    <div class="wheel-ruler-wrap">
+                      <div class="wheel-ruler-container" id="ruler-duration-sec" data-field="duration-sec" data-min="0" data-max="59" data-step="1" data-value="0">
+                        <div class="wheel-ruler-track"></div>
+                      </div>
+                      <div class="wheel-center-line"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3564,7 +3582,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=138"></script>
+  <script type="module" src="script.js?v=139"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

@@ -132,6 +132,48 @@ button[type="submit"]:hover {
   opacity: 0.75;
   text-transform: uppercase;
   padding-top: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.wheel-field-name .label-optional {
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--text-light);
+  opacity: 0.5;
+  text-transform: lowercase;
+  letter-spacing: normal;
+  margin-left: 0.35rem;
+}
+
+.wheel-row-duration {
+  padding-bottom: 0.85rem;
+}
+
+.wheel-sub-ruler {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.45rem;
+  position: relative;
+}
+
+.wheel-sub-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  opacity: 0.55;
+  min-width: 26px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.wheel-sub-ruler .wheel-ruler-wrap {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
 }
 
 .wheel-value-display {
@@ -158,6 +200,18 @@ button[type="submit"]:hover {
   color: var(--text-light);
   opacity: 0.7;
   padding-bottom: 0.3rem;
+}
+
+/* Secondary smaller size for seconds in duration display */
+#wheel-duration-sec-num {
+  font-size: 2.15rem;
+  min-width: 2ch;
+  opacity: 0.9;
+}
+
+#wheel-duration-sec-num + .wheel-val-unit {
+  font-size: 0.85rem;
+  opacity: 0.65;
 }
 
 /* Ruler wrapper — clips the scrollable track */
@@ -283,24 +337,118 @@ button[type="submit"]:hover {
 @media (max-width: 768px) {
   input,
   select {
-    padding: 0.9rem 1rem;
-    border-radius: 16px;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
   }
 
   button {
-    padding: 0.9rem;
+    padding: 0.85rem;
   }
 
   button[type="submit"] {
-    margin-top: 1.5rem;
+    margin-top: 0.85rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
+  }
+
+  /* Compact ergonomic mobile wheel layout */
+  .wheel-inputs-grid {
+    border-radius: 16px;
+    margin-top: 0.2rem;
+  }
+
+  .wheel-row {
+    padding: 0.65rem 0.85rem 0.4rem;
+  }
+
+  .wheel-row-duration {
+    padding: 0.6rem 0.85rem 0.55rem;
+  }
+
+  .wheel-label-display {
+    margin-bottom: 0.35rem;
+  }
+
+  .wheel-field-name {
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    padding-top: 0.15rem;
+  }
+
+  .wheel-field-name .label-optional {
+    font-size: 0.6rem;
+    margin-left: 0.25rem;
   }
 
   .wheel-val-num {
-    font-size: 2.4rem;
+    font-size: 2.1rem;
+    min-width: 2.2ch;
+  }
+
+  #wheel-duration-sec-num {
+    font-size: 1.6rem;
+    min-width: 1.8ch;
+  }
+
+  .wheel-val-unit {
+    font-size: 0.85rem;
+    padding-bottom: 0.2rem;
+  }
+
+  #wheel-duration-sec-num + .wheel-val-unit {
+    font-size: 0.75rem;
+    padding-bottom: 0.15rem;
+  }
+
+  .wheel-ruler-wrap {
+    height: 38px;
+  }
+
+  .wheel-sub-ruler {
+    margin-top: 0.35rem;
+    gap: 0.45rem;
+  }
+
+  .wheel-sub-ruler .wheel-ruler-wrap {
+    height: 34px;
+  }
+
+  .wheel-sub-label {
+    font-size: 0.6rem;
+    min-width: 22px;
+    opacity: 0.55;
+  }
+
+  .wheel-center-line {
+    width: 2px;
+    height: 70%;
   }
 
   .wheel-ruler-wrap::before,
   .wheel-ruler-wrap::after {
-    width: 60px;
+    width: 42px;
+  }
+
+  .ruler-tick {
+    padding-bottom: 4px;
+  }
+
+  .ruler-tick-line {
+    height: 9px;
+  }
+
+  .ruler-tick-line.medium {
+    height: 14px;
+  }
+
+  .ruler-tick-line.major {
+    height: 19px;
+  }
+
+  .ruler-tick-label {
+    font-size: 0.52rem;
+    margin-top: 2px;
   }
 }

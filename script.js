@@ -1884,6 +1884,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (l.durationMinutes !== undefined && elements.form['duration-minutes']) {
                 elements.form['duration-minutes'].value = l.durationMinutes;
             }
+            if (l.durationSeconds !== undefined && elements.form['duration-seconds']) {
+                elements.form['duration-seconds'].value = l.durationSeconds;
+            }
             showNotification(`Values loaded.`, "info");
             update1RM();
             if (typeof window.syncWheelsFromFormInputs === 'function') {
@@ -1894,6 +1897,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.form.sets.value = '';
             elements.form.weight.value = '';
             if (elements.form['duration-minutes']) elements.form['duration-minutes'].value = '';
+            if (elements.form['duration-seconds']) elements.form['duration-seconds'].value = '';
             update1RM();
             if (typeof window.syncWheelsFromFormInputs === 'function') {
                 window.syncWheelsFromFormInputs();
@@ -3580,12 +3584,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const wheelWeight = parseFloat(wheelControllers.weight.value) || 0;
                     if (wheelReps <= 0) return showNotification("Please set reps greater than 0.", "error");
                     if (wheelSets <= 0) return showNotification("Please set sets greater than 0.", "error");
-                    if (wheelWeight < 0) return showNotification("Weight cannot be negative.", "error");
                     elements.form.reps.value = wheelReps;
                     elements.form.sets.value = wheelSets;
                     elements.form.weight.value = wheelWeight;
-                    if (wheelControllers.duration && elements.form['duration-minutes']) {
-                        elements.form['duration-minutes'].value = wheelControllers.duration.value;
+                    if (wheelControllers.durationMin && elements.form['duration-minutes']) {
+                        elements.form['duration-minutes'].value = wheelControllers.durationMin.value;
+                    }
+                    if (wheelControllers.durationSec && elements.form['duration-seconds']) {
+                        elements.form['duration-seconds'].value = wheelControllers.durationSec.value;
                     }
                 }
             }
@@ -8072,8 +8078,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (this.field === 'sets') {
                     if (tickVal % 5 === 0) isMajor = true;
                     else isMedium = true;
-                } else if (this.field === 'duration') {
+                } else if (this.field === 'duration' || this.field === 'duration-min') {
                     if (tickVal % 15 === 0) isMajor = true;
+                    else if (tickVal % 5 === 0) isMedium = true;
+                } else if (this.field === 'duration-sec') {
+                    if (tickVal % 10 === 0) isMajor = true;
                     else if (tickVal % 5 === 0) isMedium = true;
                 }
 
@@ -8183,8 +8192,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     update1RMDisplay();
                 } else if (this.field === 'sets' && elements.form.sets) {
                     elements.form.sets.value = displayVal;
-                } else if (this.field === 'duration' && elements.form['duration-minutes']) {
+                } else if ((this.field === 'duration' || this.field === 'duration-min') && elements.form['duration-minutes']) {
                     elements.form['duration-minutes'].value = displayVal;
+                } else if (this.field === 'duration-sec' && elements.form['duration-seconds']) {
+                    elements.form['duration-seconds'].value = displayVal;
                 }
             }
         }
@@ -8343,8 +8354,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (wheelControllers.sets && setsInput) {
                 setsInput.value = wheelControllers.sets.value;
             }
-            if (wheelControllers.duration && elements && elements.form && elements.form['duration-minutes']) {
-                elements.form['duration-minutes'].value = wheelControllers.duration.value;
+            if (wheelControllers.durationMin && elements && elements.form && elements.form['duration-minutes']) {
+                elements.form['duration-minutes'].value = wheelControllers.durationMin.value;
+            }
+            if (wheelControllers.durationSec && elements && elements.form && elements.form['duration-seconds']) {
+                elements.form['duration-seconds'].value = wheelControllers.durationSec.value;
             }
             if (typeof update1RM === 'function') update1RM();
         }
@@ -8406,12 +8420,20 @@ document.addEventListener('DOMContentLoaded', () => {
             unit: 'sets'
         });
 
-        wheelControllers.duration = new RulerController('duration', {
+        wheelControllers.durationMin = new RulerController('duration-min', {
             min: 0,
             max: 120,
             step: 1,
             value: 0,
             unit: 'min'
+        });
+
+        wheelControllers.durationSec = new RulerController('duration-sec', {
+            min: 0,
+            max: 59,
+            step: 1,
+            value: 0,
+            unit: 'sec'
         });
 
         window.addEventListener('resize', () => {
@@ -8439,9 +8461,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             document.getElementById('duration-minutes')?.addEventListener(evt, () => {
-                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.duration) {
+                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.durationMin) {
                     const v = parseInt(document.getElementById('duration-minutes').value);
-                    if (!isNaN(v)) wheelControllers.duration.setValue(v, false);
+                    if (!isNaN(v)) wheelControllers.durationMin.setValue(v, false);
+                }
+            });
+            document.getElementById('duration-seconds')?.addEventListener(evt, () => {
+                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.durationSec) {
+                    const v = parseInt(document.getElementById('duration-seconds').value);
+                    if (!isNaN(v)) wheelControllers.durationSec.setValue(v, false);
                 }
             });
         });
@@ -8457,7 +8485,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const weightInput = document.getElementById('weight');
         const repsInput = document.getElementById('reps');
         const setsInput = document.getElementById('sets');
-        const durationInput = document.getElementById('duration-minutes');
+        const durationMinInput = document.getElementById('duration-minutes');
+        const durationSecInput = document.getElementById('duration-seconds');
 
         if (wheelControllers.weight && weightInput) {
             const wVal = parseFloat(weightInput.value);
@@ -8471,9 +8500,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const sVal = parseInt(setsInput.value);
             wheelControllers.sets.setValue(!isNaN(sVal) ? sVal : 0, true);
         }
-        if (wheelControllers.duration && durationInput) {
-            const dVal = parseInt(durationInput.value);
-            wheelControllers.duration.setValue(!isNaN(dVal) ? dVal : 0, true);
+        if (wheelControllers.durationMin && durationMinInput) {
+            const dVal = parseInt(durationMinInput.value);
+            wheelControllers.durationMin.setValue(!isNaN(dVal) ? dVal : 0, true);
+        }
+        if (wheelControllers.durationSec && durationSecInput) {
+            const dsVal = parseInt(durationSecInput.value);
+            wheelControllers.durationSec.setValue(!isNaN(dsVal) ? dsVal : 0, true);
         }
         update1RMDisplay();
     };
