@@ -53,7 +53,7 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=171">
+  <link rel="stylesheet" href="style.css?v=173">
   <link rel="stylesheet" href="css/food-database.css?v=22">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
@@ -561,7 +561,7 @@
         <!-- Log Workout -->
         <div class="card card-log-workout">
           <div
-            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; border-bottom:2px solid var(--card-border); padding-bottom:0.75rem;">
+            style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; border-bottom:2px solid var(--card-border); padding-bottom:0.65rem;">
             <h2 style="border:none; margin:0; padding:0; min-width:0;"><span class="icon"><i
                   class="ri-edit-circle-fill"></i></span>
               Log Workout</h2>
@@ -789,7 +789,7 @@
               <label for="weight">Weight (kg):</label><input type="number" id="weight" step="0.1" required
                 placeholder="e.g., 20.5" />
 
-              <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
+              <div id="rm-display" class="rm-display">Est. 1RM: <span>-</span> <span class="rm-unit">kg</span></div>
 
               <label for="duration-minutes">Estimated Duration: <span class="label-optional">(optional)</span></label>
               <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
@@ -807,7 +807,7 @@
               <input type="hidden" id="wheel-duration-min-val" />
               <input type="hidden" id="wheel-duration-sec-val" />
 
-              <div id="rm-display-wheel" class="rm-display hidden" style="margin-bottom: 0.5rem;">Est. 1RM: <span>0</span> kg</div>
+              <div id="rm-display-wheel" class="rm-display" style="margin-top: 0.2rem; margin-bottom: 0.35rem; font-size: 0.85rem;">Est. 1RM: <span>-</span> <span class="rm-unit">kg</span></div>
 
               <div class="wheel-inputs-grid">
                 <!-- WEIGHT Ruler -->
@@ -3582,7 +3582,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=139"></script>
+  <script type="module" src="script.js?v=140"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

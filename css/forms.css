@@ -94,10 +94,18 @@ button[type="submit"]:hover {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--card-border);
   background: var(--input-bg);
+}
+
+.card-log-workout {
+  padding: 1.5rem 1.6rem 1.4rem;
+}
+
+.card-log-workout form button[type="submit"] {
+  margin-top: 0.75rem;
 }
 
 /* Each ruler row */
@@ -105,7 +113,7 @@ button[type="submit"]:hover {
   display: flex;
   flex-direction: column;
   background: var(--input-bg);
-  padding: 1.1rem 1.2rem 0.7rem;
+  padding: 0.65rem 1.1rem 0.4rem;
   border-bottom: 1px solid var(--card-border);
   position: relative;
   user-select: none;
@@ -121,50 +129,50 @@ button[type="submit"]:hover {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.35rem;
 }
 
 .wheel-field-name {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--text-light);
   opacity: 0.75;
   text-transform: uppercase;
-  padding-top: 0.3rem;
+  padding-top: 0.15rem;
   display: inline-flex;
   align-items: center;
 }
 
 .wheel-field-name .label-optional {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 400;
   color: var(--text-light);
   opacity: 0.5;
   text-transform: lowercase;
   letter-spacing: normal;
-  margin-left: 0.35rem;
+  margin-left: 0.3rem;
 }
 
 .wheel-row-duration {
-  padding-bottom: 0.85rem;
+  padding-bottom: 0.6rem;
 }
 
 .wheel-sub-ruler {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  margin-top: 0.45rem;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
   position: relative;
 }
 
 .wheel-sub-label {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--text-light);
   opacity: 0.55;
-  min-width: 26px;
+  min-width: 24px;
   text-transform: uppercase;
   flex-shrink: 0;
   user-select: none;
@@ -173,7 +181,7 @@ button[type="submit"]:hover {
 .wheel-sub-ruler .wheel-ruler-wrap {
   flex: 1;
   min-width: 0;
-  height: 44px;
+  height: 35px;
 }
 
 .wheel-value-display {
@@ -184,40 +192,41 @@ button[type="submit"]:hover {
 }
 
 .wheel-val-num {
-  font-size: 2.8rem;
+  font-size: 2.15rem;
   font-weight: 800;
   color: var(--text);
   line-height: 1;
   transition: color 0.12s ease;
   font-variant-numeric: tabular-nums;
-  min-width: 3ch;
+  min-width: 2.4ch;
   text-align: right;
 }
 
 .wheel-val-unit {
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-light);
   opacity: 0.7;
-  padding-bottom: 0.3rem;
+  padding-bottom: 0.2rem;
 }
 
 /* Secondary smaller size for seconds in duration display */
 #wheel-duration-sec-num {
-  font-size: 2.15rem;
-  min-width: 2ch;
+  font-size: 1.65rem;
+  min-width: 1.8ch;
   opacity: 0.9;
 }
 
 #wheel-duration-sec-num + .wheel-val-unit {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   opacity: 0.65;
+  padding-bottom: 0.15rem;
 }
 
 /* Ruler wrapper — clips the scrollable track */
 .wheel-ruler-wrap {
   position: relative;
-  height: 52px;
+  height: 40px;
   overflow: hidden;
   cursor: grab;
 }
@@ -253,7 +262,7 @@ button[type="submit"]:hover {
   justify-content: flex-end;
   flex-shrink: 0;
   width: 14px;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
 }
 
 .ruler-tick-line {
@@ -261,26 +270,26 @@ button[type="submit"]:hover {
   opacity: 0.22;
   border-radius: 1px;
   width: 1.5px;
-  height: 12px;
+  height: 9px;
 }
 
 .ruler-tick-line.medium {
   opacity: 0.45;
   width: 1.5px;
-  height: 18px;
+  height: 14px;
 }
 
 .ruler-tick-line.major {
   opacity: 0.85;
   width: 2px;
-  height: 25px;
+  height: 19px;
 }
 
 .ruler-tick-label {
-  font-size: 0.58rem;
+  font-size: 0.52rem;
   color: var(--text-light);
   opacity: 0.7;
-  margin-top: 4px;
+  margin-top: 2px;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -292,8 +301,8 @@ button[type="submit"]:hover {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 2.5px;
-  height: 72%;
+  width: 2px;
+  height: 70%;
   background: var(--accent-start, #7c5cff);
   pointer-events: none;
   border-radius: 2px;
@@ -306,7 +315,7 @@ button[type="submit"]:hover {
   content: '';
   position: absolute;
   top: 0;
-  width: 90px;
+  width: 50px;
   height: 100%;
   z-index: 3;
   pointer-events: none;

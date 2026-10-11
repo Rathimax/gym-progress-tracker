@@ -1908,17 +1908,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const update1RM = () => {
         let w = parseFloat(elements.form.weight.value);
         const r = parseInt(elements.form.reps.value);
+        const unit = (userPreferences && userPreferences.units === 'lbs') ? 'lbs' : 'kg';
 
-        // If in LBS mode, we need to convert INPUT (lbs) back to KG for calculation?
-        // Wait, 1RM formula works on any unit. The result will be in the same unit.
-        // But if we want to store standard KG, we must convert input back.
-        // Let's say we just calculate 1RM in CURRENT unit for display.
-
-        if (w && r) {
-            const rm = calculate1RM(w, r);
-            elements.rmDisplay.querySelector('span').textContent = rm;
+        if (elements.rmDisplay) {
             elements.rmDisplay.classList.remove('hidden');
-        } else elements.rmDisplay.classList.add('hidden');
+            const span = elements.rmDisplay.querySelector('span');
+            const unitEl = elements.rmDisplay.querySelector('.rm-unit');
+            if (unitEl) unitEl.textContent = unit;
+
+            if (!isNaN(w) && !isNaN(r) && w > 0 && r > 0 && typeof calculate1RM === 'function') {
+                const rm = calculate1RM(w, r);
+                if (span) span.textContent = rm;
+            } else {
+                if (span) span.textContent = '-';
+            }
+        }
     };
     const startTimer = (seconds) => { clearInterval(timerInterval); elements.timerDisplay.classList.remove('hidden'); elements.timerCancel.classList.remove('hidden'); elements.timerWidget.classList.add('timer-active'); let t = seconds; const tick = () => elements.timerDisplay.textContent = `${Math.floor(t / 60).toString().padStart(2, '0')}:${(t % 60).toString().padStart(2, '0')}`; tick(); timerInterval = setInterval(() => { t--; if (t < 0) { clearInterval(timerInterval); playBeep(); elements.timerWidget.classList.remove('timer-active'); showNotification("Time's up!", "info"); } else tick(); }, 1000); };
 
@@ -7999,15 +8003,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const rmEl = document.getElementById('rm-display-wheel');
         if (rmEl && elements && elements.form) {
-            const w = parseFloat(elements.form.weight.value);
-            const r = parseInt(elements.form.reps.value);
-            if (w && r && typeof calculate1RM === 'function') {
+            rmEl.classList.remove('hidden');
+            let w = parseFloat(elements.form.weight.value);
+            let r = parseInt(elements.form.reps.value);
+            if (isNaN(w) && wheelControllers && wheelControllers.weight) {
+                w = parseFloat(wheelControllers.weight.value);
+            }
+            if (isNaN(r) && wheelControllers && wheelControllers.reps) {
+                r = parseInt(wheelControllers.reps.value);
+            }
+
+            const unit = (userPreferences && userPreferences.units === 'lbs') ? 'lbs' : 'kg';
+            const span = rmEl.querySelector('span');
+            const unitEl = rmEl.querySelector('.rm-unit');
+            if (unitEl) unitEl.textContent = unit;
+
+            if (!isNaN(w) && !isNaN(r) && w > 0 && r > 0 && typeof calculate1RM === 'function') {
                 const rm = calculate1RM(w, r);
-                const span = rmEl.querySelector('span');
                 if (span) span.textContent = rm;
-                rmEl.classList.remove('hidden');
             } else {
-                rmEl.classList.add('hidden');
+                if (span) span.textContent = '-';
             }
         }
     }
@@ -8389,6 +8404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             wheelControllers.weight.buildTicks();
             wheelControllers.weight.setValue(newVal, false);
         }
+        update1RMDisplay();
     };
 
     function initWorkoutWheel() {
