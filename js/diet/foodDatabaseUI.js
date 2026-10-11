@@ -34,6 +34,17 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
     const modalGramsLabel = document.getElementById('food-db-modal-grams-label');
     const modalMealPills = document.querySelectorAll('#modal-food-db-portion .lm-pill');
 
+    // Delegated click listener on food grid (one efficient listener instead of 77 individual listeners)
+    if (foodListContainer) {
+        foodListContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.food-db-card:not(.food-db-skeleton)');
+            if (!card) return;
+            const foodId = card.dataset.foodId;
+            const food = findFoodById(foodId);
+            if (food) openPortionModal(food);
+        });
+    }
+
     // Local Storage Cache for Global Database Items
     function loadCachedGlobalFoods() {
         try {
@@ -193,9 +204,91 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
         return Array(count).fill(cardHtml).join('');
     }
 
-    // Render Food Cards
-    function renderFoodList() {
+    // Cached macro SVGs for performance
+    const ICON_CALORIES = '<svg viewBox="0 0 24 24" width="12" height="12" fill="#f59e0b" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+    const ICON_PROTEIN = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+    const ICON_CARBS = '<svg viewBox="0 0 24 24" width="12" height="12" fill="#a855f7" stroke="#a855f7" stroke-width="0.5" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg>';
+    const ICON_FAT = '<svg viewBox="0 0 24 24" width="12" height="12" fill="#ec4899" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
+
+    // Batch chunking configuration for smooth 60fps mobile rendering
+    const PAGE_CHUNK = 24;
+    let visibleLimit = PAGE_CHUNK;
+    let gridObserver = null;
+
+    function renderFoodCardHtml(food) {
+        const defaultUnit = food.servingUnits.find(u => u.isDefault) || food.servingUnits[0];
+        const defaultNutrients = calculateFoodNutrients(food, defaultUnit.defaultQty || 1, defaultUnit.id);
+
+        let stateClass = 'cooked';
+        let stateIcon = 'ri-fire-fill';
+        if (food.state === 'Raw') {
+            stateClass = 'raw';
+            stateIcon = 'ri-leaf-line';
+        } else if (food.state === 'Packaged' || food.source === 'Open Food Facts') {
+            stateClass = 'packaged';
+            stateIcon = 'ri-barcode-line';
+        } else if (food.state === 'Whole Food' || food.source === 'USDA') {
+            stateClass = 'whole-food';
+            stateIcon = 'ri-seedling-line';
+        } else if (food.category === 'global') {
+            stateClass = 'global';
+            stateIcon = 'ri-global-line';
+        }
+
+        const stateLabel = food.brand || food.source || food.state || 'Item';
+
+        return `
+            <div class="food-db-card" data-food-id="${food.id}">
+                <div class="food-card-top-section">
+                    <div class="food-card-header">
+                        <h4 class="food-card-name" title="${food.name}">${food.name}</h4>
+                        <span class="food-state-badge ${stateClass}" data-state="${food.state}">
+                            <i class="${stateIcon}"></i> ${stateLabel}
+                        </span>
+                    </div>
+                    <div class="food-card-weight">(${defaultNutrients.servingLabel})</div>
+                </div>
+
+                <div class="food-card-macros">
+                    <div class="food-macro-item">
+                        <span class="food-macro-val" style="color: #f59e0b;">${ICON_CALORIES}${defaultNutrients.calories}</span>
+                        <span class="food-macro-lbl">kcal</span>
+                    </div>
+                    <div class="food-macro-item">
+                        <span class="food-macro-val" style="color: #2563eb;">${ICON_PROTEIN}${defaultNutrients.protein}g</span>
+                        <span class="food-macro-lbl">Protein</span>
+                    </div>
+                    <div class="food-macro-item">
+                        <span class="food-macro-val" style="color: #a855f7;">${ICON_CARBS}${defaultNutrients.carbs}g</span>
+                        <span class="food-macro-lbl">Carbs</span>
+                    </div>
+                    <div class="food-macro-item">
+                        <span class="food-macro-val" style="color: #ec4899;">${ICON_FAT}${defaultNutrients.fat}g</span>
+                        <span class="food-macro-lbl">Fat</span>
+                    </div>
+                </div>
+
+                <div class="food-card-action">
+                    <button type="button" class="btn-primary btn-select-food" data-food-id="${food.id}">
+                        <i class="ri-add-circle-line"></i> Select & Adjust
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Render Food Cards with Progressive Batching
+    function renderFoodList(resetLimit = true) {
         if (!foodListContainer) return;
+
+        if (resetLimit) {
+            visibleLimit = PAGE_CHUNK;
+        }
+
+        if (gridObserver) {
+            gridObserver.disconnect();
+            gridObserver = null;
+        }
 
         const filtered = getFilteredFoods();
 
@@ -244,83 +337,39 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
             }
         }
 
-        let cardsHtml = filtered.map(food => {
-            const defaultUnit = food.servingUnits.find(u => u.isDefault) || food.servingUnits[0];
-            const defaultNutrients = calculateFoodNutrients(food, defaultUnit.defaultQty || 1, defaultUnit.id);
-
-            let stateClass = 'cooked';
-            let stateIcon = 'ri-fire-fill';
-            if (food.state === 'Raw') {
-                stateClass = 'raw';
-                stateIcon = 'ri-leaf-line';
-            } else if (food.state === 'Packaged' || food.source === 'Open Food Facts') {
-                stateClass = 'packaged';
-                stateIcon = 'ri-barcode-line';
-            } else if (food.state === 'Whole Food' || food.source === 'USDA') {
-                stateClass = 'whole-food';
-                stateIcon = 'ri-seedling-line';
-            } else if (food.category === 'global') {
-                stateClass = 'global';
-                stateIcon = 'ri-global-line';
-            }
-
-            const stateLabel = food.brand || food.source || food.state || 'Item';
-
-            return `
-                <div class="food-db-card" data-food-id="${food.id}">
-                    <div class="food-card-top-section">
-                        <div class="food-card-header">
-                            <h4 class="food-card-name" title="${food.name}">${food.name}</h4>
-                            <span class="food-state-badge ${stateClass}" data-state="${food.state}">
-                                <i class="${stateIcon}"></i> ${stateLabel}
-                            </span>
-                        </div>
-                        <div class="food-card-weight">(${defaultNutrients.servingLabel})</div>
-                    </div>
-
-                    <div class="food-card-macros">
-                        <div class="food-macro-item">
-                            <span class="food-macro-val" style="color: #f59e0b;"><svg viewBox="0 0 24 24" width="12" height="12" fill="#f59e0b" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${defaultNutrients.calories}</span>
-                            <span class="food-macro-lbl">kcal</span>
-                        </div>
-                        <div class="food-macro-item">
-                            <span class="food-macro-val" style="color: #2563eb;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>${defaultNutrients.protein}g</span>
-                            <span class="food-macro-lbl">Protein</span>
-                        </div>
-                        <div class="food-macro-item">
-                            <span class="food-macro-val" style="color: #a855f7;"><svg viewBox="0 0 24 24" width="12" height="12" fill="#a855f7" stroke="#a855f7" stroke-width="0.5" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg>${defaultNutrients.carbs}g</span>
-                            <span class="food-macro-lbl">Carbs</span>
-                        </div>
-                        <div class="food-macro-item">
-                            <span class="food-macro-val" style="color: #ec4899;"><svg viewBox="0 0 24 24" width="12" height="12" fill="#ec4899" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>${defaultNutrients.fat}g</span>
-                            <span class="food-macro-lbl">Fat</span>
-                        </div>
-                    </div>
-
-                    <div class="food-card-action">
-                        <button type="button" class="btn-primary btn-select-food" data-food-id="${food.id}">
-                            <i class="ri-add-circle-line"></i> Select & Adjust
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+        const visibleItems = filtered.slice(0, visibleLimit);
+        let cardsHtml = visibleItems.map(renderFoodCardHtml).join('');
 
         // If actively fetching more global items while some local items exist, append subtle skeletons at end
         if (isFetchingGlobal) {
             cardsHtml += renderSkeletonCards(2);
         }
 
+        const hasMore = visibleLimit < filtered.length;
+        if (hasMore) {
+            cardsHtml += `
+                <div id="food-db-sentinel" style="grid-column: 1 / -1; height: 38px; display: flex; align-items: center; justify-content: center; opacity: 0.65; font-size: 0.78rem;">
+                    <i class="ri-loader-4-line ri-spin" style="margin-right: 6px;"></i> Loading more foods...
+                </div>
+            `;
+        }
+
         foodListContainer.innerHTML = cardsHtml;
 
-        // Attach Click Listeners
-        foodListContainer.querySelectorAll('.food-db-card:not(.food-db-skeleton)').forEach(card => {
-            card.addEventListener('click', () => {
-                const foodId = card.dataset.foodId;
-                const food = findFoodById(foodId);
-                if (food) openPortionModal(food);
-            });
-        });
+        // Auto-observe sentinel for progressive lazy-loading next batch without frame drops
+        if (hasMore) {
+            const sentinel = document.getElementById('food-db-sentinel');
+            if (sentinel && 'IntersectionObserver' in window) {
+                gridObserver = new IntersectionObserver((entries) => {
+                    if (entries[0] && entries[0].isIntersecting) {
+                        gridObserver.disconnect();
+                        visibleLimit += PAGE_CHUNK;
+                        renderFoodList(false);
+                    }
+                }, { rootMargin: '250px' });
+                gridObserver.observe(sentinel);
+            }
+        }
     }
 
     // Async Search function for Public Global Foods
@@ -385,6 +434,7 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
             modalStateBadge.innerHTML = `<i class="${isCooked ? 'ri-fire-fill' : 'ri-leaf-line'}"></i> ${food.state}`;
         }
 
+        if (modalQuickGrams) modalQuickGrams.dataset.mode = '';
         renderServingUnits();
         updateModalCalculation();
         syncMealTypePills();
@@ -462,12 +512,8 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
             modalQtyInput.min = minVal;
         }
 
-        // Show quick-gram buttons only if unit is grams
-        if (modalQuickGrams) {
-            const isGramMode = (unitObj.id === 'g' || unitObj.id === 'ml');
-            modalQuickGrams.style.setProperty('display', isGramMode ? 'flex' : 'none', 'important');
-            modalQuickGrams.classList.toggle('hidden', !isGramMode);
-        }
+        // Render quick suggestion shortcuts consistently for both grams and whole units (prevents UI shift)
+        renderQuickShortcuts(unitObj);
 
         const calculated = calculateFoodNutrients(selectedFood, currentQuantity, selectedUnitId);
 
@@ -491,6 +537,49 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
                 <span>Log Meal</span>
             `;
         }
+    }
+
+    // Render Quick Shortcuts for both Grams and Whole Items
+    function renderQuickShortcuts(unitObj) {
+        if (!modalQuickGrams) return;
+        const isGramMode = (unitObj.id === 'g' || unitObj.id === 'ml');
+        const modeKey = isGramMode ? 'gram' : 'whole';
+
+        if (modalQuickGrams.dataset.mode !== modeKey) {
+            modalQuickGrams.dataset.mode = modeKey;
+            modalQuickGrams.style.display = 'flex';
+            modalQuickGrams.classList.remove('hidden');
+
+            if (isGramMode) {
+                modalQuickGrams.innerHTML = `
+                    <button type="button" class="quick-gram-btn" data-set="50">50g</button>
+                    <button type="button" class="quick-gram-btn" data-set="100">100g</button>
+                    <button type="button" class="quick-gram-btn" data-set="150">150g</button>
+                    <button type="button" class="quick-gram-btn" data-set="200">200g</button>
+                    <button type="button" class="quick-gram-btn" data-add="25">+25g</button>
+                    <button type="button" class="quick-gram-btn" data-add="50">+50g</button>
+                `;
+            } else {
+                modalQuickGrams.innerHTML = `
+                    <button type="button" class="quick-gram-btn" data-set="1">1</button>
+                    <button type="button" class="quick-gram-btn" data-set="2">2</button>
+                    <button type="button" class="quick-gram-btn" data-set="3">3</button>
+                    <button type="button" class="quick-gram-btn" data-set="4">4</button>
+                    <button type="button" class="quick-gram-btn" data-add="1">+1</button>
+                    <button type="button" class="quick-gram-btn" data-add="2">+2</button>
+                `;
+            }
+        }
+
+        // Highlight active preset button if quantity matches exactly
+        modalQuickGrams.querySelectorAll('.quick-gram-btn').forEach(btn => {
+            if (btn.dataset.set) {
+                const val = parseFloat(btn.dataset.set);
+                btn.classList.toggle('active', val === currentQuantity);
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     }
 
     // Setup Stepper Buttons
@@ -525,18 +614,19 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
         });
     }
 
-    // Quick Gram Buttons (+50g, +100g, etc.)
+    // Quick Portion Buttons (Delegated listener supporting both whole items and grams)
     if (modalQuickGrams) {
-        modalQuickGrams.querySelectorAll('.quick-gram-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const addAmount = parseInt(btn.dataset.add, 10);
-                if (btn.dataset.set) {
-                    currentQuantity = parseInt(btn.dataset.set, 10);
-                } else if (!isNaN(addAmount)) {
-                    currentQuantity = (currentQuantity || 0) + addAmount;
-                }
-                updateModalCalculation();
-            });
+        modalQuickGrams.addEventListener('click', (e) => {
+            const btn = e.target.closest('.quick-gram-btn');
+            if (!btn) return;
+            const setAmount = parseFloat(btn.dataset.set);
+            const addAmount = parseFloat(btn.dataset.add);
+            if (!isNaN(setAmount)) {
+                currentQuantity = setAmount;
+            } else if (!isNaN(addAmount)) {
+                currentQuantity = Math.round(((currentQuantity || 0) + addAmount) * 10) / 10;
+            }
+            updateModalCalculation();
         });
     }
 
@@ -632,54 +722,59 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
         });
     }
 
-    // Search Input Listener with Instant Local + Debounced Global Query
-    let searchTimeout = null;
+    // Search Input Listener with Instant Local + Debounced Global Query (Lag-free on Mobile)
+    let searchDebounceTimer = null;
+    let localSearchRaf = null;
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             currentSearchQuery = e.target.value;
             if (clearSearchBtn) {
                 clearSearchBtn.style.display = currentSearchQuery.length > 0 ? 'flex' : 'none';
             }
-            // Immediate local render for instant 0ms feedback
-            renderFoodList();
 
-            // Debounced global query for millions of public foods
-            clearTimeout(searchTimeout);
-            const q = currentSearchQuery.trim();
-            if (q.length >= 2) {
-                // If query is not in the local 77 foods, immediately display skeleton cards!
-                const localMatches = FOOD_DATABASE.filter(f => {
-                    const nameMatch = (f.name || '').toLowerCase().includes(q.toLowerCase());
-                    const termsMatch = (f.searchTerms || '').toLowerCase().includes(q.toLowerCase());
-                    return nameMatch || termsMatch;
-                });
+            clearTimeout(searchDebounceTimer);
+            if (localSearchRaf) cancelAnimationFrame(localSearchRaf);
 
-                if (localMatches.length === 0) {
-                    isFetchingGlobal = true;
-                    if (liveIndicatorEl) {
-                        liveIndicatorEl.style.display = 'flex';
-                        liveIndicatorEl.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> <span>Searching global database for "${q}"...</span>`;
+            localSearchRaf = requestAnimationFrame(() => {
+                const q = currentSearchQuery.trim();
+                if (q.length >= 2) {
+                    const localMatches = FOOD_DATABASE.filter(f => {
+                        const nameMatch = (f.name || '').toLowerCase().includes(q.toLowerCase());
+                        const termsMatch = (f.searchTerms || '').toLowerCase().includes(q.toLowerCase());
+                        return nameMatch || termsMatch;
+                    });
+
+                    if (localMatches.length === 0) {
+                        isFetchingGlobal = true;
+                        if (liveIndicatorEl) {
+                            liveIndicatorEl.style.display = 'flex';
+                            liveIndicatorEl.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> <span>Searching global database for "${q}"...</span>`;
+                        }
+                    } else {
+                        isFetchingGlobal = false;
+                        if (liveIndicatorEl) liveIndicatorEl.style.display = 'none';
                     }
+
+                    renderFoodList(true);
+
+                    searchDebounceTimer = setTimeout(() => {
+                        performGlobalFoodSearch(q);
+                    }, 300);
+                } else {
+                    isFetchingGlobal = false;
+                    liveGlobalFoods = [];
+                    if (liveIndicatorEl) liveIndicatorEl.style.display = 'none';
+                    renderFoodList(true);
                 }
-
-                renderFoodList();
-
-                searchTimeout = setTimeout(() => {
-                    performGlobalFoodSearch(q);
-                }, 300);
-            } else {
-                isFetchingGlobal = false;
-                liveGlobalFoods = [];
-                if (liveIndicatorEl) liveIndicatorEl.style.display = 'none';
-                renderFoodList();
-            }
+            });
         });
 
         // Instant trigger on Enter key
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                clearTimeout(searchTimeout);
+                clearTimeout(searchDebounceTimer);
+                if (localSearchRaf) cancelAnimationFrame(localSearchRaf);
                 const q = currentSearchQuery.trim();
                 if (q.length >= 2) {
                     performGlobalFoodSearch(q);

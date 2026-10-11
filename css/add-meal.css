@@ -245,20 +245,18 @@
 .add-meal-subview.active {
   display: block;
   width: 100%;
-  animation: subviewFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: opacity, transform, filter;
+  animation: subviewFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
 }
 
 @keyframes subviewFadeIn {
   0% {
     opacity: 0;
-    transform: scale(1.015) translateY(8px);
-    filter: blur(6px);
+    transform: translateY(6px);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
@@ -334,14 +332,16 @@ body:not(.dark-mode) .add-meal-toggle-btn {
   margin: 0;
 }
 
-/* Recipe Card styling */
+/* Recipe Card styling (Optimized) */
 .recipe-card {
-  background: var(--card-bg, rgba(30, 41, 59, 0.45));
+  background: var(--card-bg, rgba(30, 41, 59, 0.65));
   border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   padding: 1.25rem;
   position: relative;
-  backdrop-filter: blur(10px);
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 170px;
 }
 
 .recipe-card-header {
