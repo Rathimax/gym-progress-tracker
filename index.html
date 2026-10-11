@@ -53,7 +53,7 @@
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=166">
+  <link rel="stylesheet" href="style.css?v=168">
   <link rel="stylesheet" href="css/food-database.css?v=22">
   <link rel="stylesheet" href="css/strength-league.css?v=6">
   <link rel="stylesheet" href="css/ai-speedometer.css?v=5">
@@ -774,28 +774,113 @@
                   class="ri-add-line"></i></button>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
-              <div>
-                <label for="reps" style="margin-top: 1.25rem;">Reps:</label>
-                <input type="number" id="reps" step="1" required placeholder="e.g., 10" />
+            <!-- ── STANDARD INPUTS (default) ── -->
+            <div id="workout-inputs-standard">
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem;">
+                <div>
+                  <label for="reps" style="margin-top: 1.25rem;">Reps:</label>
+                  <input type="number" id="reps" step="1" required placeholder="e.g., 10" />
+                </div>
+                <div>
+                  <label for="sets" style="margin-top: 1.25rem;">Sets:</label>
+                  <input type="number" id="sets" step="1" required placeholder="e.g., 3" />
+                </div>
               </div>
-              <div>
-                <label for="sets" style="margin-top: 1.25rem;">Sets:</label>
-                <input type="number" id="sets" step="1" required placeholder="e.g., 3" />
+              <label for="weight">Weight (kg):</label><input type="number" id="weight" step="0.1" required
+                placeholder="e.g., 20.5" />
+
+              <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
+
+              <label for="duration-minutes">Estimated Duration: <span class="label-optional">(optional)</span></label>
+              <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
+                  placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59"
+                  placeholder="Secs" /></div>
+            </div>
+
+            <!-- ── WHEEL INPUTS (alternative style) ── -->
+            <div id="workout-inputs-wheel" class="hidden">
+              <!-- Hidden inputs keep values for form submission -->
+              <input type="hidden" id="wheel-reps-val" />
+              <input type="hidden" id="wheel-sets-val" />
+              <input type="hidden" id="wheel-weight-val" />
+              <input type="hidden" id="wheel-duration-val" />
+
+              <div id="rm-display-wheel" class="rm-display hidden" style="margin-bottom: 0.5rem;">Est. 1RM: <span>0</span> kg</div>
+
+              <div class="wheel-inputs-grid">
+                <!-- WEIGHT Ruler -->
+                <div class="wheel-row">
+                  <div class="wheel-label-display">
+                    <span class="wheel-field-name">WEIGHT</span>
+                    <div class="wheel-value-display">
+                      <span class="wheel-val-num" id="wheel-weight-num">0</span>
+                      <span class="wheel-val-unit" id="wheel-weight-unit">kg</span>
+                    </div>
+                  </div>
+                  <div class="wheel-ruler-wrap">
+                    <div class="wheel-ruler-container" id="ruler-weight" data-field="weight" data-min="0" data-max="300" data-step="0.5" data-value="60">
+                      <div class="wheel-ruler-track"></div>
+                    </div>
+                    <div class="wheel-center-line"></div>
+                  </div>
+                </div>
+
+                <!-- REPS Ruler -->
+                <div class="wheel-row">
+                  <div class="wheel-label-display">
+                    <span class="wheel-field-name">REPS</span>
+                    <div class="wheel-value-display">
+                      <span class="wheel-val-num" id="wheel-reps-num">0</span>
+                      <span class="wheel-val-unit">reps</span>
+                    </div>
+                  </div>
+                  <div class="wheel-ruler-wrap">
+                    <div class="wheel-ruler-container" id="ruler-reps" data-field="reps" data-min="0" data-max="100" data-step="1" data-value="10">
+                      <div class="wheel-ruler-track"></div>
+                    </div>
+                    <div class="wheel-center-line"></div>
+                  </div>
+                </div>
+
+                <!-- SETS Ruler -->
+                <div class="wheel-row">
+                  <div class="wheel-label-display">
+                    <span class="wheel-field-name">SETS</span>
+                    <div class="wheel-value-display">
+                      <span class="wheel-val-num" id="wheel-sets-num">0</span>
+                      <span class="wheel-val-unit">sets</span>
+                    </div>
+                  </div>
+                  <div class="wheel-ruler-wrap">
+                    <div class="wheel-ruler-container" id="ruler-sets" data-field="sets" data-min="0" data-max="20" data-step="1" data-value="3">
+                      <div class="wheel-ruler-track"></div>
+                    </div>
+                    <div class="wheel-center-line"></div>
+                  </div>
+                </div>
+
+                <!-- DURATION Ruler (minutes) -->
+                <div class="wheel-row">
+                  <div class="wheel-label-display">
+                    <span class="wheel-field-name">DURATION</span>
+                    <div class="wheel-value-display">
+                      <span class="wheel-val-num" id="wheel-duration-num">0</span>
+                      <span class="wheel-val-unit">min</span>
+                    </div>
+                  </div>
+                  <div class="wheel-ruler-wrap">
+                    <div class="wheel-ruler-container" id="ruler-duration" data-field="duration" data-min="0" data-max="120" data-step="1" data-value="0">
+                      <div class="wheel-ruler-track"></div>
+                    </div>
+                    <div class="wheel-center-line"></div>
+                  </div>
+                </div>
               </div>
             </div>
-            <label for="weight">Weight (kg):</label><input type="number" id="weight" step="0.1" required
-              placeholder="e.g., 20.5" />
-
-            <div id="rm-display" class="rm-display hidden">Est. 1RM: <span>0</span> kg</div>
-
-            <label for="duration-minutes">Estimated Duration: <span class="label-optional">(optional)</span></label>
-            <div class="duration-input"><input type="number" id="duration-minutes" step="1" min="0" max="59"
-                placeholder="Mins" /><input type="number" id="duration-seconds" step="1" min="0" max="59"
-                placeholder="Secs" /></div>
 
             <button type="submit">Add Workout</button>
           </form>
+
         </div>
 
         <!-- Body Weight -->
@@ -1579,6 +1664,19 @@
           <p class="setting-desc">Dataset for League rankings.</p>
         </div>
 
+        <div class="setting-item">
+          <label class="setting-label">Workout Input Style</label>
+          <p class="setting-desc">Choose how you prefer to log your exercises.</p>
+          <div class="segmented-control" style="margin-top: 0.75rem;">
+            <button class="segment-btn active" data-input-style="standard">
+              <i class="ri-list-check-2"></i> Standard
+            </button>
+            <button class="segment-btn" data-input-style="wheel">
+              <i class="ri-sound-module-line"></i> Rotator Wheel
+            </button>
+          </div>
+        </div>
+
         <div class="setting-item"
           style="border-top: 1px solid var(--card-border); padding-top: 1.5rem; margin-top: 1rem;">
           <label class="setting-label"
@@ -1731,7 +1829,9 @@
         </form>
       </div>
 
+
       <!-- Section 3: Data Management -->
+
       <div class="card settings-card">
         <h2><span class="icon"><i class="ri-database-2-fill"></i></span> Data Management</h2>
         <div class="data-info-columns">
@@ -3464,7 +3564,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script type="module" src="script.js?v=137"></script>
+  <script type="module" src="script.js?v=138"></script>
   <script>
     // EMERGENCY FIX: Unregister Service Worker to clear cache issues
     if ('serviceWorker' in navigator) {

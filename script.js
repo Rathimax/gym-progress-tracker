@@ -372,7 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Display
         macroDisplayMode: 'absolute',
         // Strength League
-        strengthStandard: 'average'
+        strengthStandard: 'average',
+        // Workout Input Style
+        workoutInputStyle: 'standard'
     };
 
     // Helper: Convert Weight
@@ -1879,13 +1881,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userPreferences.units === 'lbs') displayWeight = (l.weight * 2.20462).toFixed(1);
 
             elements.form.weight.value = displayWeight;
+            if (l.durationMinutes !== undefined && elements.form['duration-minutes']) {
+                elements.form['duration-minutes'].value = l.durationMinutes;
+            }
             showNotification(`Values loaded.`, "info");
             update1RM();
+            if (typeof window.syncWheelsFromFormInputs === 'function') {
+                window.syncWheelsFromFormInputs();
+            }
         } else {
             elements.form.reps.value = '';
             elements.form.sets.value = '';
             elements.form.weight.value = '';
+            if (elements.form['duration-minutes']) elements.form['duration-minutes'].value = '';
             update1RM();
+            if (typeof window.syncWheelsFromFormInputs === 'function') {
+                window.syncWheelsFromFormInputs();
+            }
         }
     };
     window.handleAutoFill = handleAutoFill;
@@ -3560,6 +3572,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isCustomInput && ex) ex = ex.charAt(0).toUpperCase() + ex.slice(1);
             if (!ex) return showNotification("Select exercise.", "error");
 
+            // Wheel input sync & validation
+            if (userPreferences.workoutInputStyle === 'wheel' && typeof wheelControllers !== 'undefined') {
+                if (wheelControllers.reps && wheelControllers.sets && wheelControllers.weight) {
+                    const wheelReps = parseInt(wheelControllers.reps.value) || 0;
+                    const wheelSets = parseInt(wheelControllers.sets.value) || 0;
+                    const wheelWeight = parseFloat(wheelControllers.weight.value) || 0;
+                    if (wheelReps <= 0) return showNotification("Please set reps greater than 0.", "error");
+                    if (wheelSets <= 0) return showNotification("Please set sets greater than 0.", "error");
+                    if (wheelWeight < 0) return showNotification("Weight cannot be negative.", "error");
+                    elements.form.reps.value = wheelReps;
+                    elements.form.sets.value = wheelSets;
+                    elements.form.weight.value = wheelWeight;
+                    if (wheelControllers.duration && elements.form['duration-minutes']) {
+                        elements.form['duration-minutes'].value = wheelControllers.duration.value;
+                    }
+                }
+            }
+
             // CONVERT INPUT WEIGHT TO KG IF IN LBS MODE
             let inputWeight = parseFloat(elements.form.weight.value);
             if (userPreferences.units === 'lbs') {
@@ -3993,6 +4023,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Workout Input Style
+        document.querySelectorAll('.segment-btn[data-input-style]').forEach(btn => {
+            // Mark the active button based on saved preference
+            if (btn.dataset.inputStyle === (userPreferences.workoutInputStyle || 'standard')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.segment-btn[data-input-style]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                userPreferences.workoutInputStyle = btn.dataset.inputStyle;
+                savePreferences();
+                // Notify log workout section of style change
+                if (typeof applyWorkoutInputStyle === 'function') applyWorkoutInputStyle(userPreferences.workoutInputStyle);
+            });
+        });
+
         // Avatar Upload with Cropper.js
         const fileInput = document.getElementById('avatar-upload');
         const uploadBtn = document.getElementById('btn-upload-avatar');
@@ -4205,6 +4253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Refresh UI
         updateAllUI();
+        if (typeof updateWheelUnitDisplay === 'function') updateWheelUnitDisplay(unit);
     };
 
     const applyAvatar = (content, type) => {
@@ -7930,5 +7979,506 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // =========================================================================
+    // WORKOUT ROTATOR WHEEL / RULER INPUT CONTROLLER WITH HAPTIC FEEDBACK
+    // =========================================================================
+    const TICK_WIDTH = 14; // Width in px for each tick step
+    const wheelControllers = {};
+    window.wheelControllers = wheelControllers;
+
+    function update1RMDisplay() {
+        if (typeof update1RM === 'function') {
+            update1RM();
+        }
+        const rmEl = document.getElementById('rm-display-wheel');
+        if (rmEl && elements && elements.form) {
+            const w = parseFloat(elements.form.weight.value);
+            const r = parseInt(elements.form.reps.value);
+            if (w && r && typeof calculate1RM === 'function') {
+                const rm = calculate1RM(w, r);
+                const span = rmEl.querySelector('span');
+                if (span) span.textContent = rm;
+                rmEl.classList.remove('hidden');
+            } else {
+                rmEl.classList.add('hidden');
+            }
+        }
+    }
+
+    class RulerController {
+        constructor(field, config) {
+            this.field = field;
+            this.min = config.min;
+            this.max = config.max;
+            this.step = config.step;
+            this.unit = config.unit || '';
+            this.value = config.value !== undefined ? config.value : config.min;
+            this.decimals = this.step < 1 ? 1 : 0;
+            this.totalSteps = Math.round((this.max - this.min) / this.step);
+
+            this.wrapEl = document.querySelector(`#ruler-${field}`)?.closest('.wheel-ruler-wrap');
+            this.containerEl = document.getElementById(`ruler-${field}`);
+            this.trackEl = this.containerEl ? this.containerEl.querySelector('.wheel-ruler-track') : null;
+            this.numEl = document.getElementById(`wheel-${field}-num`);
+            this.unitEl = document.getElementById(`wheel-${field}-unit`);
+            this.valInputEl = document.getElementById(`wheel-${field}-val`);
+
+            this.currentX = 0;
+            this.isDragging = false;
+            this.startX = 0;
+            this.startTranslateX = 0;
+            this.lastPointerX = 0;
+            this.lastPointerTime = 0;
+            this.velocity = 0;
+            this.lastVibratedIndex = -1;
+
+            if (this.containerEl && this.trackEl) {
+                this.init();
+            }
+        }
+
+        init() {
+            this.buildTicks();
+            this.bindEvents();
+            this.setValue(this.value, false);
+        }
+
+        buildTicks() {
+            if (!this.trackEl) return;
+            this.trackEl.innerHTML = '';
+            const frag = document.createDocumentFragment();
+
+            for (let i = 0; i <= this.totalSteps; i++) {
+                const tickVal = this.min + i * this.step;
+                const tickDiv = document.createElement('div');
+                tickDiv.className = 'ruler-tick';
+                tickDiv.style.width = `${TICK_WIDTH}px`;
+
+                const line = document.createElement('div');
+                line.className = 'ruler-tick-line';
+
+                let isMajor = false;
+                let isMedium = false;
+
+                if (this.field === 'weight') {
+                    const isTen = Math.abs(tickVal % 10) < 0.001;
+                    const isFive = Math.abs(tickVal % 5) < 0.001;
+                    if (isTen) isMajor = true;
+                    else if (isFive) isMedium = true;
+                } else if (this.field === 'reps') {
+                    if (tickVal % 10 === 0) isMajor = true;
+                    else if (tickVal % 5 === 0) isMedium = true;
+                } else if (this.field === 'sets') {
+                    if (tickVal % 5 === 0) isMajor = true;
+                    else isMedium = true;
+                } else if (this.field === 'duration') {
+                    if (tickVal % 15 === 0) isMajor = true;
+                    else if (tickVal % 5 === 0) isMedium = true;
+                }
+
+                if (isMajor) {
+                    line.classList.add('major');
+                } else if (isMedium) {
+                    line.classList.add('medium');
+                }
+                tickDiv.appendChild(line);
+
+                if (isMajor) {
+                    const label = document.createElement('span');
+                    label.className = 'ruler-tick-label';
+                    label.textContent = this.decimals > 0 ? tickVal.toFixed(this.decimals) : Math.round(tickVal);
+                    tickDiv.appendChild(label);
+                }
+
+                frag.appendChild(tickDiv);
+            }
+
+            this.trackEl.appendChild(frag);
+        }
+
+        getWrapCenter() {
+            const wrapWidth = this.wrapEl ? this.wrapEl.clientWidth : 320;
+            return wrapWidth / 2;
+        }
+
+        indexToTranslateX(index) {
+            const center = this.getWrapCenter();
+            return center - (index * TICK_WIDTH) - (TICK_WIDTH / 2);
+        }
+
+        translateXToIndex(translateX) {
+            const center = this.getWrapCenter();
+            const index = Math.round((center - (TICK_WIDTH / 2) - translateX) / TICK_WIDTH);
+            return Math.max(0, Math.min(this.totalSteps, index));
+        }
+
+        translateXToContinuousValue(translateX) {
+            const center = this.getWrapCenter();
+            const rawIndex = (center - (TICK_WIDTH / 2) - translateX) / TICK_WIDTH;
+            const clampedIndex = Math.max(0, Math.min(this.totalSteps, rawIndex));
+            return this.min + clampedIndex * this.step;
+        }
+
+        setValue(val, animate = true) {
+            const numVal = (val === '' || val === null || val === undefined || isNaN(parseFloat(val))) ? this.min : parseFloat(val);
+            const clamped = Math.max(this.min, Math.min(this.max, numVal));
+            const index = Math.round((clamped - this.min) / this.step);
+            this.value = this.min + index * this.step;
+            this.currentX = this.indexToTranslateX(index);
+
+            if (this.trackEl) {
+                if (animate) {
+                    this.trackEl.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1)';
+                    setTimeout(() => {
+                        if (this.trackEl) this.trackEl.style.transition = 'none';
+                    }, 360);
+                } else {
+                    this.trackEl.style.transition = 'none';
+                }
+                this.trackEl.style.transform = `translateX(${this.currentX}px)`;
+            }
+
+            this.updateDisplay(this.value, false);
+            this.syncWithForm(this.value);
+            this.lastVibratedIndex = index;
+        }
+
+        updateDisplay(val, vibrate = true) {
+            const displayVal = this.decimals > 0 ? val.toFixed(this.decimals) : Math.round(val);
+            if (this.numEl) {
+                this.numEl.textContent = displayVal;
+            }
+            if (this.valInputEl) {
+                this.valInputEl.value = displayVal;
+            }
+
+            if (vibrate) {
+                const index = Math.round((val - this.min) / this.step);
+                if (index !== this.lastVibratedIndex) {
+                    this.lastVibratedIndex = index;
+                    // Tactile haptic feedback on mobile devices
+                    if (navigator.vibrate) {
+                        try {
+                            navigator.vibrate(8);
+                        } catch (err) {}
+                    }
+                    if (this.numEl) {
+                        this.numEl.classList.remove('tick-bump');
+                        void this.numEl.offsetWidth; // Force reflow
+                        this.numEl.classList.add('tick-bump');
+                    }
+                }
+            }
+        }
+
+        syncWithForm(val) {
+            const displayVal = this.decimals > 0 ? val.toFixed(this.decimals) : Math.round(val);
+            if (elements && elements.form) {
+                if (this.field === 'weight' && elements.form.weight) {
+                    elements.form.weight.value = displayVal;
+                    update1RMDisplay();
+                } else if (this.field === 'reps' && elements.form.reps) {
+                    elements.form.reps.value = displayVal;
+                    update1RMDisplay();
+                } else if (this.field === 'sets' && elements.form.sets) {
+                    elements.form.sets.value = displayVal;
+                } else if (this.field === 'duration' && elements.form['duration-minutes']) {
+                    elements.form['duration-minutes'].value = displayVal;
+                }
+            }
+        }
+
+        realign() {
+            if (!this.trackEl) return;
+            const index = Math.round((this.value - this.min) / this.step);
+            this.currentX = this.indexToTranslateX(index);
+            this.trackEl.style.transition = 'none';
+            this.trackEl.style.transform = `translateX(${this.currentX}px)`;
+        }
+
+        bindEvents() {
+            const wrap = this.wrapEl;
+            if (!wrap) return;
+
+            wrap.addEventListener('pointerdown', (e) => {
+                if (e.button !== undefined && e.button !== 0) return;
+                this.isDragging = true;
+                this.startX = e.clientX;
+                this.startTranslateX = this.currentX;
+                this.lastPointerX = e.clientX;
+                this.lastPointerTime = performance.now();
+                this.velocity = 0;
+
+                if (this.trackEl) this.trackEl.style.transition = 'none';
+                try {
+                    wrap.setPointerCapture(e.pointerId);
+                } catch (err) {}
+            });
+
+            wrap.addEventListener('pointermove', (e) => {
+                if (!this.isDragging) return;
+                const now = performance.now();
+                const dt = now - this.lastPointerTime;
+                const dx = e.clientX - this.lastPointerX;
+                if (dt > 0) {
+                    this.velocity = dx / dt;
+                }
+                this.lastPointerX = e.clientX;
+                this.lastPointerTime = now;
+
+                const totalDx = e.clientX - this.startX;
+                let newX = this.startTranslateX + totalDx;
+
+                const minX = this.indexToTranslateX(this.totalSteps);
+                const maxX = this.indexToTranslateX(0);
+                if (newX > maxX) {
+                    newX = maxX + (newX - maxX) * 0.3;
+                } else if (newX < minX) {
+                    newX = minX + (newX - minX) * 0.3;
+                }
+
+                this.currentX = newX;
+                if (this.trackEl) {
+                    this.trackEl.style.transform = `translateX(${this.currentX}px)`;
+                }
+
+                const curVal = this.translateXToContinuousValue(this.currentX);
+                const stepVal = Math.round((curVal - this.min) / this.step) * this.step + this.min;
+                this.value = Math.max(this.min, Math.min(this.max, stepVal));
+                this.updateDisplay(this.value, true);
+                this.syncWithForm(this.value);
+            });
+
+            const onPointerEnd = (e) => {
+                if (!this.isDragging) return;
+                this.isDragging = false;
+                try {
+                    wrap.releasePointerCapture(e.pointerId);
+                } catch (err) {}
+
+                let targetX = this.currentX;
+                if (Math.abs(this.velocity) > 0.3) {
+                    targetX += this.velocity * 120;
+                }
+
+                const targetIndex = this.translateXToIndex(targetX);
+                const snapVal = this.min + targetIndex * this.step;
+                this.setValue(snapVal, true);
+            };
+
+            wrap.addEventListener('pointerup', onPointerEnd);
+            wrap.addEventListener('pointercancel', onPointerEnd);
+
+            wrap.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+                const direction = delta > 0 ? 1 : -1;
+                const nextVal = Math.max(this.min, Math.min(this.max, this.value + direction * this.step));
+                this.setValue(nextVal, true);
+            }, { passive: false });
+
+            // Quick manual input on number tap
+            if (this.numEl) {
+                this.numEl.style.cursor = 'pointer';
+                this.numEl.title = 'Tap to enter exact value';
+                this.numEl.addEventListener('click', () => {
+                    const entered = prompt(`Enter ${this.field.toUpperCase()} (${this.min} - ${this.max}):`, this.value);
+                    if (entered !== null && !isNaN(parseFloat(entered))) {
+                        this.setValue(parseFloat(entered), true);
+                    }
+                });
+            }
+        }
+    }
+
+    window.applyWorkoutInputStyle = function(style) {
+        userPreferences.workoutInputStyle = style;
+        const standardContainer = document.getElementById('workout-inputs-standard');
+        const wheelContainer = document.getElementById('workout-inputs-wheel');
+        const repsInput = document.getElementById('reps');
+        const setsInput = document.getElementById('sets');
+        const weightInput = document.getElementById('weight');
+
+        document.querySelectorAll('.segment-btn[data-input-style]').forEach(b => {
+            b.classList.toggle('active', b.dataset.inputStyle === style);
+        });
+
+        if (style === 'wheel') {
+            if (standardContainer) standardContainer.classList.add('hidden');
+            if (wheelContainer) wheelContainer.classList.remove('hidden');
+
+            if (repsInput) repsInput.removeAttribute('required');
+            if (setsInput) setsInput.removeAttribute('required');
+            if (weightInput) weightInput.removeAttribute('required');
+
+            if (weightInput && parseFloat(weightInput.value) > 0 && wheelControllers.weight) {
+                wheelControllers.weight.setValue(parseFloat(weightInput.value), false);
+            }
+            if (repsInput && parseInt(repsInput.value) > 0 && wheelControllers.reps) {
+                wheelControllers.reps.setValue(parseInt(repsInput.value), false);
+            }
+            if (setsInput && parseInt(setsInput.value) > 0 && wheelControllers.sets) {
+                wheelControllers.sets.setValue(parseInt(setsInput.value), false);
+            }
+
+            requestAnimationFrame(() => {
+                Object.values(wheelControllers).forEach(ctrl => ctrl.realign());
+            });
+            update1RMDisplay();
+        } else {
+            if (wheelContainer) wheelContainer.classList.add('hidden');
+            if (standardContainer) standardContainer.classList.remove('hidden');
+
+            if (repsInput) repsInput.setAttribute('required', '');
+            if (setsInput) setsInput.setAttribute('required', '');
+            if (weightInput) weightInput.setAttribute('required', '');
+
+            if (wheelControllers.weight && weightInput) {
+                weightInput.value = wheelControllers.weight.value;
+            }
+            if (wheelControllers.reps && repsInput) {
+                repsInput.value = wheelControllers.reps.value;
+            }
+            if (wheelControllers.sets && setsInput) {
+                setsInput.value = wheelControllers.sets.value;
+            }
+            if (wheelControllers.duration && elements && elements.form && elements.form['duration-minutes']) {
+                elements.form['duration-minutes'].value = wheelControllers.duration.value;
+            }
+            if (typeof update1RM === 'function') update1RM();
+        }
+    };
+
+    window.updateWheelUnitDisplay = function(unit) {
+        const isLbs = unit === 'lbs';
+        const weightUnitEl = document.getElementById('wheel-weight-unit');
+        if (weightUnitEl) weightUnitEl.textContent = unit;
+
+        if (wheelControllers.weight) {
+            const oldVal = wheelControllers.weight.value;
+            let newVal;
+            if (isLbs) {
+                newVal = Math.round(oldVal * 2.20462);
+                wheelControllers.weight.min = 0;
+                wheelControllers.weight.max = 660;
+                wheelControllers.weight.step = 1;
+                wheelControllers.weight.decimals = 0;
+            } else {
+                newVal = parseFloat((oldVal / 2.20462).toFixed(1));
+                wheelControllers.weight.min = 0;
+                wheelControllers.weight.max = 300;
+                wheelControllers.weight.step = 0.5;
+                wheelControllers.weight.decimals = 1;
+            }
+            wheelControllers.weight.totalSteps = Math.round((wheelControllers.weight.max - wheelControllers.weight.min) / wheelControllers.weight.step);
+            wheelControllers.weight.buildTicks();
+            wheelControllers.weight.setValue(newVal, false);
+        }
+    };
+
+    function initWorkoutWheel() {
+        const isLbs = (userPreferences.units || 'kg') === 'lbs';
+        const weightUnitEl = document.getElementById('wheel-weight-unit');
+        if (weightUnitEl) weightUnitEl.textContent = isLbs ? 'lbs' : 'kg';
+
+        wheelControllers.weight = new RulerController('weight', {
+            min: 0,
+            max: isLbs ? 660 : 300,
+            step: isLbs ? 1 : 0.5,
+            value: isLbs ? 135 : 60,
+            unit: isLbs ? 'lbs' : 'kg'
+        });
+
+        wheelControllers.reps = new RulerController('reps', {
+            min: 0,
+            max: 100,
+            step: 1,
+            value: 10,
+            unit: 'reps'
+        });
+
+        wheelControllers.sets = new RulerController('sets', {
+            min: 0,
+            max: 20,
+            step: 1,
+            value: 3,
+            unit: 'sets'
+        });
+
+        wheelControllers.duration = new RulerController('duration', {
+            min: 0,
+            max: 120,
+            step: 1,
+            value: 0,
+            unit: 'min'
+        });
+
+        window.addEventListener('resize', () => {
+            Object.values(wheelControllers).forEach(ctrl => ctrl.realign());
+        });
+
+        // Wire up input sync if standard inputs change
+        ['input', 'change'].forEach(evt => {
+            document.getElementById('weight')?.addEventListener(evt, () => {
+                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.weight) {
+                    const v = parseFloat(document.getElementById('weight').value);
+                    if (!isNaN(v)) wheelControllers.weight.setValue(v, false);
+                }
+            });
+            document.getElementById('reps')?.addEventListener(evt, () => {
+                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.reps) {
+                    const v = parseInt(document.getElementById('reps').value);
+                    if (!isNaN(v)) wheelControllers.reps.setValue(v, false);
+                }
+            });
+            document.getElementById('sets')?.addEventListener(evt, () => {
+                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.sets) {
+                    const v = parseInt(document.getElementById('sets').value);
+                    if (!isNaN(v)) wheelControllers.sets.setValue(v, false);
+                }
+            });
+            document.getElementById('duration-minutes')?.addEventListener(evt, () => {
+                if (userPreferences.workoutInputStyle !== 'wheel' && wheelControllers.duration) {
+                    const v = parseInt(document.getElementById('duration-minutes').value);
+                    if (!isNaN(v)) wheelControllers.duration.setValue(v, false);
+                }
+            });
+        });
+
+        window.applyWorkoutInputStyle(userPreferences.workoutInputStyle || 'standard');
+
+        // Sync initial values if already populated
+        window.syncWheelsFromFormInputs();
+    }
+
+    window.syncWheelsFromFormInputs = function() {
+        if (!wheelControllers) return;
+        const weightInput = document.getElementById('weight');
+        const repsInput = document.getElementById('reps');
+        const setsInput = document.getElementById('sets');
+        const durationInput = document.getElementById('duration-minutes');
+
+        if (wheelControllers.weight && weightInput) {
+            const wVal = parseFloat(weightInput.value);
+            wheelControllers.weight.setValue(!isNaN(wVal) ? wVal : 0, true);
+        }
+        if (wheelControllers.reps && repsInput) {
+            const rVal = parseInt(repsInput.value);
+            wheelControllers.reps.setValue(!isNaN(rVal) ? rVal : 0, true);
+        }
+        if (wheelControllers.sets && setsInput) {
+            const sVal = parseInt(setsInput.value);
+            wheelControllers.sets.setValue(!isNaN(sVal) ? sVal : 0, true);
+        }
+        if (wheelControllers.duration && durationInput) {
+            const dVal = parseInt(durationInput.value);
+            wheelControllers.duration.setValue(!isNaN(dVal) ? dVal : 0, true);
+        }
+        update1RMDisplay();
+    };
+
+    // Initialize the wheel controllers
+    initWorkoutWheel();
 
 });
