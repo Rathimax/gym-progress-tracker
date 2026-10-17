@@ -34,9 +34,16 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
     const modalGramsLabel = document.getElementById('food-db-modal-grams-label');
     const modalMealPills = document.querySelectorAll('#modal-food-db-portion .lm-pill');
 
-    // Delegated click listener on food grid (one efficient listener instead of 77 individual listeners)
+    // Delegated click listener on food grid (handles cards and load more button)
     if (foodListContainer) {
         foodListContainer.addEventListener('click', (e) => {
+            const loadMoreBtn = e.target.closest('#btn-food-db-load-more');
+            if (loadMoreBtn) {
+                visibleLimit += PAGE_CHUNK;
+                renderFoodList(false);
+                return;
+            }
+
             const card = e.target.closest('.food-db-card:not(.food-db-skeleton)');
             if (!card) return;
             const foodId = card.dataset.foodId;
@@ -210,10 +217,9 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
     const ICON_CARBS = '<svg viewBox="0 0 24 24" width="12" height="12" fill="#a855f7" stroke="#a855f7" stroke-width="0.5" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1 4.94 0Z"/></svg>';
     const ICON_FAT = '<svg viewBox="0 0 24 24" width="12" height="12" fill="#ec4899" style="display:inline-block;vertical-align:-1px;margin-right:2px;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
 
-    // Batch chunking configuration for smooth 60fps mobile rendering
-    const PAGE_CHUNK = 24;
+    // Batch chunking configuration: 12 items loaded at a time
+    const PAGE_CHUNK = 12;
     let visibleLimit = PAGE_CHUNK;
-    let gridObserver = null;
 
     function renderFoodCardHtml(food) {
         const defaultUnit = food.servingUnits.find(u => u.isDefault) || food.servingUnits[0];
@@ -285,11 +291,6 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
             visibleLimit = PAGE_CHUNK;
         }
 
-        if (gridObserver) {
-            gridObserver.disconnect();
-            gridObserver = null;
-        }
-
         const filtered = getFilteredFoods();
 
         // Case 1: Actively fetching from global database and no local results available yet -> SHOW SKELETON SCREEN
@@ -347,29 +348,32 @@ export function initFoodDatabase({ db, auth, dietService, gamificationModule, sh
 
         const hasMore = visibleLimit < filtered.length;
         if (hasMore) {
+            const remaining = filtered.length - visibleLimit;
+            const nextBatchSize = Math.min(PAGE_CHUNK, remaining);
             cardsHtml += `
-                <div id="food-db-sentinel" style="grid-column: 1 / -1; height: 38px; display: flex; align-items: center; justify-content: center; opacity: 0.65; font-size: 0.78rem;">
-                    <i class="ri-loader-4-line ri-spin" style="margin-right: 6px;"></i> Loading more foods...
+                <div class="food-db-load-more-wrap">
+                    <button type="button" id="btn-food-db-load-more" class="btn-food-db-load-more">
+                        <i class="ri-arrow-down-line"></i>
+                        <span>Load More Foods</span>
+                        <span class="load-more-badge">+${nextBatchSize}</span>
+                    </button>
+                    <span class="food-db-progress-text">
+                        Showing ${visibleItems.length} of ${filtered.length} foods
+                    </span>
+                </div>
+            `;
+        } else if (filtered.length > PAGE_CHUNK) {
+            cardsHtml += `
+                <div class="food-db-load-more-wrap">
+                    <span class="food-db-all-loaded">
+                        <i class="ri-checkbox-circle-fill" style="color: var(--accent-end, #38bdf8);"></i>
+                        All ${filtered.length} foods loaded
+                    </span>
                 </div>
             `;
         }
 
         foodListContainer.innerHTML = cardsHtml;
-
-        // Auto-observe sentinel for progressive lazy-loading next batch without frame drops
-        if (hasMore) {
-            const sentinel = document.getElementById('food-db-sentinel');
-            if (sentinel && 'IntersectionObserver' in window) {
-                gridObserver = new IntersectionObserver((entries) => {
-                    if (entries[0] && entries[0].isIntersecting) {
-                        gridObserver.disconnect();
-                        visibleLimit += PAGE_CHUNK;
-                        renderFoodList(false);
-                    }
-                }, { rootMargin: '250px' });
-                gridObserver.observe(sentinel);
-            }
-        }
     }
 
     // Async Search function for Public Global Foods

@@ -456,6 +456,82 @@ body:not(.dark-mode) .food-db-skel {
   transform: scale(0.98);
 }
 
+/* Load More Button & Pagination Row */
+.food-db-load-more-wrap {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.5rem 0 1rem 0;
+  width: 100%;
+}
+
+.btn-food-db-load-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.75rem 1.75rem;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  background: var(--card-bg, rgba(30, 41, 59, 0.7));
+  border: 1.5px solid var(--card-border, rgba(255, 255, 255, 0.12));
+  color: var(--text, #f8fafc);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  box-shadow: none;
+}
+
+.btn-food-db-load-more:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.btn-food-db-load-more:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-food-db-load-more i {
+  font-size: 1.15rem;
+  color: var(--accent-end, #38bdf8);
+}
+
+.btn-food-db-load-more .load-more-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--accent-end) 25%, transparent);
+  color: var(--accent-end, #38bdf8);
+  border: 1px solid color-mix(in srgb, var(--accent-end) 40%, transparent);
+  margin-left: 2px;
+}
+
+.food-db-progress-text {
+  font-size: 0.8rem;
+  color: var(--text-light, #94a3b8);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.food-db-all-loaded {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-light, #94a3b8);
+  padding: 0.6rem 1.2rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 /* Empty State */
 .food-db-empty-state {
   display: flex;
@@ -1534,5 +1610,12 @@ body:not(.dark-mode) .quick-gram-btn {
     padding: 0.75rem 1.15rem !important;
     font-size: 0.9rem !important;
     min-height: 46px !important;
+  }
+
+  .btn-food-db-load-more {
+    width: 100% !important;
+    max-width: 320px !important;
+    padding: 0.72rem 1.4rem !important;
+    font-size: 0.88rem !important;
   }
 }

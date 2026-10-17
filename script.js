@@ -9,7 +9,7 @@ import { initRoutines } from "./routines.js";
 import { initGamification } from "./gamification.js";
 import * as dietService from "./dietService.js"; // New Diet Service
 import { getLiftTier } from './js/services/strengthLeague.js';
-import { initFoodDatabase } from './js/diet/foodDatabaseUI.js';
+import { initFoodDatabase } from './js/diet/foodDatabaseUI.js?v=2';
 
 const firebaseConfig = {
     apiKey: "AIzaSyD0hdb9-NZ3Et3owriYW5d6iEl6JIdqvV4",
